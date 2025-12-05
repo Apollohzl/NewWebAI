@@ -1,7 +1,12 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const rateLimit = require('express-rate-limit');
+// Vercel兼容的服务器配置
+import express from 'express';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -181,19 +186,21 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: '服务器内部错误' });
 });
 
-// 启动服务器
-app.listen(PORT, () => {
-  console.log(`\n🚀 NewWebAI 服务器运行在端口 ${PORT}`);
-  console.log(`\n📊 API 端点:`);
-  console.log(`   GET    /api/models          - 获取AI模型列表`);
-  console.log(`   GET    /api/models/:id      - 获取特定AI模型`);
-  console.log(`   POST   /api/contact         - 提交联系表单`);
-  console.log(`   POST   /api/auth/login      - 用户登录`);
-  console.log(`   POST   /api/auth/register   - 用户注册`);
-  console.log(`   GET    /api/user/:id        - 获取用户信息`);
-  console.log(`   POST   /api/ai/generate     - AI内容生成`);
-  console.log(`   GET    /api/stats           - 获取统计数据`);
-  console.log(`\n🌐 访问 http://localhost:${PORT} 查看网站\n`);
-});
+// 启动服务器（仅在非Vercel环境使用）
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 NewWebAI 服务器运行在端口 ${PORT}`);
+    console.log(`\n📊 API 端点:`);
+    console.log(`   GET    /api/models          - 获取AI模型列表`);
+    console.log(`   GET    /api/models/:id      - 获取特定AI模型`);
+    console.log(`   POST   /api/contact         - 提交联系表单`);
+    console.log(`   POST   /api/auth/login      - 用户登录`);
+    console.log(`   POST   /api/auth/register   - 用户注册`);
+    console.log(`   GET    /api/user/:id        - 获取用户信息`);
+    console.log(`   POST   /api/ai/generate     - AI内容生成`);
+    console.log(`   GET    /api/stats           - 获取统计数据`);
+    console.log(`\n🌐 访问 http://localhost:${PORT} 查看网站\n`);
+  });
+}
 
-module.exports = app;
+export default app;

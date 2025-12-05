@@ -2,31 +2,33 @@
   "name": "newwebai",
   "version": "1.0.0",
   "description": "NewWebAI - 智能网站解决方案",
-  "main": "api/server.js",
   "scripts": {
-    "start": "node api/server.js",
-    "dev": "nodemon api/server.js",
-    "vercel-build": "echo 'Build completed'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "keywords": [
     "ai",
     "website",
-    "express",
+    "nextjs",
     "react",
     "javascript"
   ],
   "author": "NewWebAI",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "cors": "^2.8.5",
     "express-rate-limit": "^6.7.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "eslint": "^8.52.0",
+    "eslint-config-next": "^14.0.0"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
   }
 }

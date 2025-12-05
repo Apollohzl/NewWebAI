@@ -1,40 +1,21 @@
 {
   "version": 2,
   "name": "newwebai",
+  "framework": "nextjs",
   "builds": [
     {
-      "src": "api/server.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["api/**", "public/**", "assets/**"]
-      }
+      "src": "package.json",
+      "use": "@vercel/next"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/server.js"
-    },
-    {
-      "src": "/dashboard.html",
-      "dest": "/public/dashboard.html"
-    },
-    {
-      "src": "/ai-chat.html",
-      "dest": "/public/ai-chat.html"
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/",
-      "dest": "/public/index.html"
+      "dest": "/api/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/public/$1",
-      "status": 200
+      "dest": "/$1"
     }
   ],
   "github": {

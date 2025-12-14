@@ -85,7 +85,7 @@ export default function AIToolsPage() {
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
             智能 <span className="text-blue-600">AI工具箱</span>
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-800">
             NewWebAI提供一整套AI驱动的专业工具，助力您的工作与创作
           </p>
         </div>
@@ -95,7 +95,7 @@ export default function AIToolsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold text-gray-800 mb-6">强大的AI能力</h2>
-              <p className="text-gray-600 mb-8">
+              <p className="text-gray-800 mb-8">
                 我们的AI工具集成了最新的机器学习模型，能够处理各种复杂的任务，从内容生成到数据分析，全面提升工作效率。
               </p>
               <div className="grid grid-cols-2 gap-4">
@@ -165,7 +165,7 @@ export default function AIToolsPage() {
                         {tool.icon}
                       </div>
                     </div>
-                    <p className="text-gray-600 mb-6">{tool.description}</p>
+                    <p className="text-gray-800 mb-6">{tool.description}</p>
                     <button className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition">
                       立即使用
                     </button>
@@ -185,7 +185,7 @@ export default function AIToolsPage() {
                 <FaComments className="text-blue-600 text-2xl" />
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-3">客户服务</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-800">
                 使用智能客服工具，提供24/7全天候客户服务，提升客户满意度
               </p>
             </div>
@@ -194,7 +194,7 @@ export default function AIToolsPage() {
                 <FaChartPie className="text-green-600 text-2xl" />
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-3">数据分析</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-800">
                 利用AI分析工具处理复杂数据，生成可视化报告，辅助决策
               </p>
             </div>
@@ -203,7 +203,7 @@ export default function AIToolsPage() {
                 <FaMagic className="text-purple-600 text-2xl" />
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-3">内容创作</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-800">
                 借助AI内容生成工具，快速创建高质量文章、博客和营销内容
               </p>
             </div>

@@ -206,7 +206,7 @@ const CheckoutPage = () => {
                           <p className="mt-2 text-sm text-gray-600">¥{orderTotal.toFixed(2)}</p>
                           <p className="text-sm text-gray-800">收款人：NewWebAI</p>
                         </div>
-                        <p className="text-gray-600 text-sm mt-3">请使用微信扫码支付</p>
+                        <p className="text-gray-800">请使用微信扫码支付</p>
                       </div>
                     </div>
                   </div>

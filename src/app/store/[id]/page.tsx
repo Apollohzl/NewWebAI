@@ -100,7 +100,7 @@ const ProductDetailPage = ({ params }: ProductDetailPageProps) => {
                 )}
               </div>
               
-              <p className="text-gray-600 mb-6">{product.description}</p>
+              <p className="text-gray-800 mb-6">{product.description}</p>
               
               <div className="mb-6">
                 <div className="flex items-center mb-2">

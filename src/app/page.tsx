@@ -30,7 +30,7 @@ export default function Home() {
           <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
             智能AI驱动的 <span className="text-blue-600">数字宇宙</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-10">
+          <p className="text-xl text-gray-800 max-w-2xl mx-auto mb-10">
             NewWebAI 是由小黄の数字宇宙工作室打造的智能平台，为您提供AI驱动的博客、产品和服务
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -52,21 +52,21 @@ export default function Home() {
             <div className="bg-gray-50 p-8 rounded-xl text-center hover:shadow-lg transition">
               <FaBlog className="text-blue-600 text-4xl mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-3">AI智能博客</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-800">
                 由AI驱动的内容创作平台，自动生成高质量文章，个性化推荐内容
               </p>
             </div>
             <div className="bg-gray-50 p-8 rounded-xl text-center hover:shadow-lg transition">
               <FaShoppingCart className="text-blue-600 text-4xl mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-3">智能电商平台</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-800">
                 个性化商品推荐，AI客服，智能库存管理，提升购物体验
               </p>
             </div>
             <div className="bg-gray-50 p-8 rounded-xl text-center hover:shadow-lg transition">
               <FaChartLine className="text-blue-600 text-4xl mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-3">数据智能分析</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-800">
                 实时数据分析，预测趋势，为业务决策提供智能支持
               </p>
             </div>
@@ -86,7 +86,7 @@ export default function Home() {
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-semibold mb-2">AI产品 {item}</h3>
-                  <p className="text-gray-600 mb-4">智能AI解决方案，助力业务增长</p>
+                  <p className="text-gray-800 mb-4">智能AI解决方案，助力业务增长</p>
                   <button className="text-blue-600 font-medium hover:underline">了解更多 →</button>
                 </div>
               </div>

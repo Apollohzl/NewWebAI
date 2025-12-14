@@ -67,7 +67,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
         </div>
         
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+        <p className="text-gray-800 text-sm mb-3 line-clamp-2">{product.description}</p>
         
         <div className="flex items-center mb-3">
           {renderRating(product.rating)}
@@ -136,7 +136,7 @@ const ProductPage = () => {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">AI智能产品</h1>
-            <p className="text-gray-600">探索我们强大的AI驱动产品</p>
+            <p className="text-gray-800">探索我们强大的AI驱动产品</p>
           </div>
           <div className="flex space-x-2">
             <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">最新上架</button>

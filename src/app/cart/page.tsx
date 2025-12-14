@@ -43,7 +43,7 @@ const CartPage = () => {
           <div className="bg-white rounded-xl shadow-md p-12 text-center">
             <FaShoppingCart className="text-gray-300 text-5xl mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">购物车为空</h3>
-            <p className="text-gray-500 mb-6">您还没有添加任何商品到购物车</p>
+            <p className="text-gray-700 mb-6">您还没有添加任何商品到购物车</p>
             <Link href="/store" className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
               浏览商品
             </Link>

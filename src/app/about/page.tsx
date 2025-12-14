@@ -26,7 +26,7 @@ export default function AboutPage() {
           <div className="space-y-8">
             <div>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">小黄の数字宇宙工作室</h2>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-800 leading-relaxed">
                 小黄の数字宇宙工作室致力于构建智能化的数字产品和服务。我们专注于人工智能、Web开发和创新技术，
                 为企业和个人提供高效、智能的解决方案。
               </p>
@@ -34,7 +34,7 @@ export default function AboutPage() {
             
             <div>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">NewWebAI 项目</h2>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-800 leading-relaxed">
                 NewWebAI 是我们基于 Next.js 14 框架构建的智能网站平台，集成了先进的 AI 功能，
                 包括智能内容生成、数据分析、个性化推荐等。我们致力于为用户提供最佳的智能体验。
               </p>
@@ -42,7 +42,7 @@ export default function AboutPage() {
             
             <div>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">我们的使命</h2>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-800 leading-relaxed">
                 通过人工智能技术，简化复杂的工作流程，提升个人和企业的生产力。
                 我们相信技术应该让生活更简单、更高效、更智能。
               </p>
@@ -50,7 +50,7 @@ export default function AboutPage() {
             
             <div>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">联系我们</h2>
-              <p className="text-gray-600">
+              <p className="text-gray-800">
                 邮箱: contact@newwebai.com<br />
                 公司: 小黄の数字宇宙工作室
               </p>

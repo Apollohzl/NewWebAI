@@ -38,10 +38,10 @@ export default async function StaticDemoPage() {
             <span className="text-xl font-bold text-blue-600">NewWebAI</span>
           </Link>
           <div className="hidden md:flex space-x-6">
-            <Link href="/" className="text-gray-600 hover:text-blue-600">首页</Link>
-            <Link href="/blog" className="text-gray-600 hover:text-blue-600">博客</Link>
-            <Link href="/products" className="text-blue-600 font-medium">产品</Link>
-            <Link href="/ai-tools" className="text-gray-600 hover:text-blue-600">AI工具</Link>
+            <Link href="/" className="text-gray-900 hover:text-blue-600">首页</Link>
+            <Link href="/blog" className="text-gray-900 hover:text-blue-600">博客</Link>
+            <Link href="/products" className="text-gray-900 font-medium">产品</Link>
+            <Link href="/ai-tools" className="text-gray-900 hover:text-blue-600">AI工具</Link>
           </div>
         </div>
       </nav>
@@ -53,10 +53,10 @@ export default async function StaticDemoPage() {
           </h1>
           
           <div className="mb-8 p-6 bg-blue-50 rounded-lg">
-            <p className="text-gray-700 mb-2">
+            <p className="text-gray-900 mb-2">
               <span className="font-semibold">最后构建时间:</span> {lastUpdated}
             </p>
-            <p className="text-gray-700">
+            <p className="text-gray-900">
               此页面使用静态生成 (SSG)，在构建时预渲染，提供最佳性能和SEO。
             </p>
           </div>
@@ -72,7 +72,7 @@ export default async function StaticDemoPage() {
                 <svg className="w-6 h-6 text-green-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                <span className="text-gray-700">{feature}</span>
+                <span className="text-gray-900">{feature}</span>
               </div>
             ))}
           </div>

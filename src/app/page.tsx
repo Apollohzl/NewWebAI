@@ -131,13 +131,13 @@ export default function Home() {
                 <FaRobot className="text-blue-400 text-2xl" />
                 <span className="text-xl font-bold">NewWebAI</span>
               </div>
-              <p className="text-gray-600">
+              <p className="text-gray-800">
                 由小黄の数字宇宙工作室打造的智能AI平台，为您的业务提供智能化解决方案。
               </p>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">产品</h4>
-              <ul className="space-y-2 text-gray-600">
+              <ul className="space-y-2 text-gray-800">
                 <li><a href="#" className="hover:text-gray-800 transition">AI博客</a></li>
                 <li><a href="#" className="hover:text-gray-800 transition">智能电商</a></li>
                 <li><a href="#" className="hover:text-gray-800 transition">数据分析</a></li>
@@ -146,7 +146,7 @@ export default function Home() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">公司</h4>
-              <ul className="space-y-2 text-gray-600">
+              <ul className="space-y-2 text-gray-800">
                 <li><a href="#" className="hover:text-gray-800 transition">关于我们</a></li>
                 <li><a href="#" className="hover:text-gray-800 transition">团队</a></li>
                 <li><a href="#" className="hover:text-gray-800 transition">新闻</a></li>
@@ -155,7 +155,7 @@ export default function Home() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">联系我们</h4>
-              <ul className="space-y-2 text-gray-600">
+              <ul className="space-y-2 text-gray-800">
                 <li>邮箱: contact@newwebai.com</li>
                 <li>网址: https://hzliflow.ken520.top/</li>
                 <li>公司: 小黄の数字宇宙工作室</li>

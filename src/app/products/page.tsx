@@ -60,10 +60,10 @@ export default function ProductsPage() {
             <span className="text-xl font-bold text-blue-600">NewWebAI</span>
           </Link>
           <div className="hidden md:flex space-x-6">
-            <Link href="/" className="text-gray-600 hover:text-blue-600">首页</Link>
-            <Link href="/blog" className="text-gray-600 hover:text-blue-600">博客</Link>
-            <Link href="/products" className="text-blue-600 font-medium">产品</Link>
-            <Link href="/ai-tools" className="text-gray-600 hover:text-blue-600">AI工具</Link>
+            <Link href="/" className="text-gray-900 hover:text-blue-600">首页</Link>
+            <Link href="/blog" className="text-gray-900 hover:text-blue-600">博客</Link>
+            <Link href="/products" className="text-gray-900 font-medium">产品</Link>
+            <Link href="/ai-tools" className="text-gray-900 hover:text-blue-600">AI工具</Link>
           </div>
         </div>
       </nav>
@@ -73,7 +73,7 @@ export default function ProductsPage() {
         <h1 className="text-4xl md:text-5xl font-bold text-center text-gray-800 mb-6">
           我们的 <span className="text-blue-600">AI产品</span>
         </h1>
-        <p className="text-xl text-center text-gray-600 max-w-3xl mx-auto mb-16">
+        <p className="text-xl text-center text-gray-900 max-w-3xl mx-auto mb-16">
           NewWebAI提供一系列智能化解决方案，帮助您的业务实现数字化转型
         </p>
 
@@ -87,7 +87,7 @@ export default function ProductsPage() {
                 </div>
               </div>
               <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
+              <p className="text-gray-900">{feature.description}</p>
             </div>
           ))}
         </div>
@@ -99,7 +99,7 @@ export default function ProductsPage() {
               <div className="p-8 flex flex-col justify-center">
                 <div className="mb-4">{product.icon}</div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">{product.title}</h3>
-                <p className="text-gray-600 mb-6">{product.description}</p>
+                <p className="text-gray-900 mb-6">{product.description}</p>
                 <ul className="space-y-2 mb-6">
                   {product.features.map((feature, idx) => (
                     <li key={idx} className="flex items-center">

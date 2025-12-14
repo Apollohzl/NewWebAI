@@ -22,7 +22,7 @@ const CartPage = () => {
             <Link href="/ai-tools" className="text-gray-800 hover:text-blue-600">AI工具</Link>
           </div>
           <div className="flex items-center space-x-4">
-            <Link href="/cart" className="relative text-gray-600 hover:text-blue-600">
+            <Link href="/cart" className="relative text-gray-800 hover:text-blue-600">
               <FaShoppingCart className="text-xl" />
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 {items.length}
@@ -42,8 +42,8 @@ const CartPage = () => {
         {items.length === 0 ? (
           <div className="bg-white rounded-xl shadow-md p-12 text-center">
             <FaShoppingCart className="text-gray-300 text-5xl mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">购物车为空</h3>
-            <p className="text-gray-700 mb-6">您还没有添加任何商品到购物车</p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">购物车为空</h3>
+            <p className="text-gray-900 mb-6">您还没有添加任何商品到购物车</p>
             <Link href="/store" className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
               浏览商品
             </Link>
@@ -72,14 +72,14 @@ const CartPage = () => {
                           <div className="flex items-center border border-gray-300 rounded-lg">
                             <button 
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-l-lg"
+                              className="px-3 py-2 text-gray-800 hover:bg-gray-100 rounded-l-lg"
                             >
                               <FaMinus className="text-sm" />
                             </button>
                             <span className="px-4 py-2 text-gray-800">{item.quantity}</span>
                             <button 
                               onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-r-lg"
+                              className="px-3 py-2 text-gray-800 hover:bg-gray-100 rounded-r-lg"
                             >
                               <FaPlus className="text-sm" />
                             </button>
@@ -108,15 +108,15 @@ const CartPage = () => {
                 
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">商品小计</span>
+                    <span className="text-gray-800">商品小计</span>
                     <span className="font-medium">¥{getTotal().toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">配送费</span>
+                    <span className="text-gray-800">配送费</span>
                     <span className="font-medium">¥0.00</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">税费</span>
+                    <span className="text-gray-800">税费</span>
                     <span className="font-medium">¥{(getTotal() * 0.1).toFixed(2)}</span>
                   </div>
                   <div className="border-t border-gray-200 pt-4 mt-4">
@@ -131,7 +131,7 @@ const CartPage = () => {
                   去结算
                 </Link>
                 
-                <Link href="/store" className="w-full mt-4 flex items-center justify-center text-gray-600 hover:text-blue-600 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                <Link href="/store" className="w-full mt-4 flex items-center justify-center text-gray-800 hover:text-blue-600 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                   <FaArrowLeft className="mr-2" />
                   继续购物
                 </Link>
@@ -178,7 +178,7 @@ const CartPage = () => {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
+          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-gray-600">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

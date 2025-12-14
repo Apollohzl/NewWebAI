@@ -76,7 +76,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         
         <div className="flex flex-wrap gap-1 mb-4">
           {product.tags?.slice(0, 2).map((tag, index) => (
-            <span key={index} className="inline-flex items-center bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
+            <span key={index} className="inline-flex items-center bg-gray-100 text-gray-900 text-xs px-2 py-1 rounded-full">
               <FaTag className="mr-1" />
               {tag}
             </span>
@@ -115,13 +115,13 @@ const ProductPage = () => {
             <span className="text-xl font-bold text-blue-600">NewWebAI</span>
           </div>
           <div className="hidden md:flex space-x-6">
-            <Link href="/" className="text-gray-800 hover:text-blue-600">首页</Link>
-            <Link href="/blog" className="text-gray-800 hover:text-blue-600">博客</Link>
-            <Link href="/store" className="text-blue-600 font-medium">产品</Link>
-            <Link href="/ai-tools" className="text-gray-800 hover:text-blue-600">AI工具</Link>
+            <Link href="/" className="text-gray-900 hover:text-blue-600">首页</Link>
+            <Link href="/blog" className="text-gray-900 hover:text-blue-600">博客</Link>
+            <Link href="/store" className="text-gray-900 font-medium">产品</Link>
+            <Link href="/ai-tools" className="text-gray-900 hover:text-blue-600">AI工具</Link>
           </div>
           <div className="flex items-center space-x-4">
-            <Link href="/cart" className="relative text-gray-600 hover:text-blue-600">
+            <Link href="/cart" className="relative text-gray-900 hover:text-blue-600">
               <FaShoppingCart className="text-xl" />
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 {getItemCount()}
@@ -149,7 +149,7 @@ const ProductPage = () => {
         <div className="mb-8 p-4 bg-white rounded-lg shadow-sm">
           <div className="flex flex-wrap gap-4">
             <div>
-              <h3 className="font-medium text-gray-700 mb-2">分类</h3>
+              <h3 className="font-medium text-gray-900 mb-2">分类</h3>
               <div className="flex flex-wrap gap-2">
                 <button className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">全部</button>
                 <button className="px-3 py-1 border border-gray-300 rounded-full text-sm hover:bg-gray-100">软件工具</button>

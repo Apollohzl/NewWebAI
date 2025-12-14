@@ -38,10 +38,9 @@ export default async function BlogPostPage() {
             <span className="text-xl font-bold text-blue-600">NewWebAI</span>
           </Link>
           <div className="hidden md:flex space-x-6">
-            <Link href="/" className="text-gray-600 hover:text-blue-600">首页</Link>
-            <Link href="/blog" className="text-blue-600 font-medium">博客</Link>
-            <Link href="/products" className="text-gray-600 hover:text-blue-600">产品</Link>
-            <Link href="/ai-tools" className="text-gray-600 hover:text-blue-600">AI工具</Link>
+            <Link href="/" className="text-gray-800 hover:text-blue-600">首页</Link>
+            <Link href="/store" className="text-gray-800 hover:text-blue-600">产品</Link>
+            <Link href="/ai-tools" className="text-gray-800 hover:text-blue-600">AI工具</Link>
           </div>
         </div>
       </nav>
@@ -54,12 +53,12 @@ export default async function BlogPostPage() {
             </span>
           </div>
           <h1 className="text-3xl font-bold text-gray-800 mb-4">{blogPost.title}</h1>
-          <div className="flex items-center text-gray-600 mb-8">
+          <div className="flex items-center text-gray-800 mb-8">
             <span>作者: {blogPost.author}</span>
             <span className="mx-3">•</span>
             <span>服务器时间: {serverTime}</span>
           </div>
-          <div className="prose max-w-none text-gray-700">
+          <div className="prose max-w-none text-gray-900">
             <p>{blogPost.content}</p>
             <p>SSR (Server-Side Rendering) 使此页面在服务器上渲染，为搜索引擎优化和初始加载性能提供最佳体验。</p>
             <h2>Next.js 14 的优势</h2>
@@ -112,7 +111,7 @@ export default async function BlogPostPage() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
+          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-gray-600">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

@@ -242,9 +242,9 @@ export default function DataVisualizationPage() {
             <span className="text-xl font-bold text-gray-800">NewWebAI</span>
           </div>
           <div className="hidden md:flex space-x-6">
-            <a href="/" className="text-gray-600 hover:text-blue-600">首页</a>
-            <a href="/blog" className="text-gray-600 hover:text-blue-600">博客</a>
-            <a href="/products" className="text-gray-600 hover:text-blue-600">产品</a>
+            <a href="/" className="text-gray-800 hover:text-blue-600">首页</a>
+            <a href="/blog" className="text-gray-800 hover:text-blue-600">博客</a>
+            <a href="/store" className="text-gray-800 hover:text-blue-600">产品</a>
             <a href="/ai-tools" className="text-blue-600 font-medium">AI工具</a>
           </div>
         </div>
@@ -253,7 +253,7 @@ export default function DataVisualizationPage() {
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">AI 数据可视化</h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-800">
             NewWebAI 提供智能数据分析和可视化功能，帮助您洞察业务趋势
           </p>
         </div>
@@ -262,7 +262,7 @@ export default function DataVisualizationPage() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-800">数据概览</h2>
-              <p className="text-gray-600">NewWebAI 用户活动数据</p>
+              <p className="text-gray-800">NewWebAI 用户活动数据</p>
             </div>
             
             <div className="flex flex-wrap gap-3">
@@ -274,7 +274,7 @@ export default function DataVisualizationPage() {
                     className={`px-4 py-2 rounded-md text-sm font-medium transition ${
                       timeRange === range
                         ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-800'
+                        : 'text-gray-800 hover:text-gray-900'
                     }`}
                   >
                     {range === 'week' ? '本周' : range === 'month' ? '本月' : '本季度'}
@@ -315,12 +315,12 @@ export default function DataVisualizationPage() {
             {loading ? (
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-gray-600">加载数据中...</p>
+                <p className="text-gray-800">加载数据中...</p>
               </div>
             ) : data ? (
               renderChart()
             ) : (
-              <p className="text-gray-600">暂无数据</p>
+              <p className="text-gray-800">暂无数据</p>
             )}
           </div>
         </div>
@@ -328,7 +328,7 @@ export default function DataVisualizationPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-xl shadow-md">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">智能分析</h3>
-            <p className="text-gray-600">
+            <p className="text-gray-800">
               NewWebAI 使用AI算法自动识别数据中的模式和趋势，提供深入洞察。
             </p>
           </div>
@@ -400,7 +400,7 @@ export default function DataVisualizationPage() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
+          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-gray-600">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

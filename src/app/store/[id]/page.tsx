@@ -47,13 +47,13 @@ const ProductDetailPage = ({ params }: ProductDetailPageProps) => {
             <span className="text-xl font-bold text-blue-600">NewWebAI</span>
           </div>
           <div className="hidden md:flex space-x-6">
-            <a href="/" className="text-gray-600 hover:text-blue-600">首页</a>
-            <a href="/blog" className="text-gray-600 hover:text-blue-600">博客</a>
-            <a href="/store" className="text-blue-600 font-medium">产品</a>
-            <a href="/ai-tools" className="text-gray-600 hover:text-blue-600">AI工具</a>
+            <a href="/" className="text-gray-900 hover:text-blue-600">首页</a>
+            <a href="/blog" className="text-gray-900 hover:text-blue-600">博客</a>
+            <a href="/store" className="text-gray-900 font-medium hover:text-blue-600">产品</a>
+            <a href="/ai-tools" className="text-gray-900 hover:text-blue-600">AI工具</a>
           </div>
           <div className="flex items-center space-x-4">
-            <a href="/cart" className="relative text-gray-600 hover:text-blue-600">
+            <a href="/cart" className="relative text-gray-900 hover:text-blue-600">
               <FaShoppingCart className="text-xl" />
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 {useCart().getItemCount()}
@@ -117,7 +117,7 @@ const ProductDetailPage = ({ params }: ProductDetailPageProps) => {
                   {product.features?.map((feature, index) => (
                     <li key={index} className="flex items-center">
                       <FaCheck className="text-green-500 mr-2" />
-                      <span className="text-gray-700">{feature}</span>
+                      <span className="text-gray-900">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -127,7 +127,7 @@ const ProductDetailPage = ({ params }: ProductDetailPageProps) => {
                 <h3 className="font-semibold text-gray-800 mb-2">标签</h3>
                 <div className="flex flex-wrap gap-2">
                   {product.tags?.map((tag, index) => (
-                    <span key={index} className="inline-flex items-center bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full">
+                    <span key={index} className="inline-flex items-center bg-gray-100 text-gray-900 text-sm px-3 py-1 rounded-full">
                       <FaTag className="mr-1" />
                       {tag}
                     </span>
@@ -179,12 +179,12 @@ const ProductDetailPage = ({ params }: ProductDetailPageProps) => {
           <h2 className="text-2xl font-bold text-gray-800 mb-6">产品详情</h2>
           <div className="prose max-w-none">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">AI智能写作助手</h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-900 mb-4">
               我们的AI智能写作助手是您内容创作的最佳伙伴。通过先进的自然语言处理技术，
               它能够理解您的需求并生成高质量的文章、博客、营销文案等内容。
             </p>
             <h3 className="text-lg font-semibold text-gray-800 mb-3">主要功能</h3>
-            <ul className="list-disc pl-5 text-gray-600 mb-4">
+            <ul className="list-disc pl-5 text-gray-900 mb-4">
               <li>智能内容生成：基于上下文生成连贯、有逻辑的内容</li>
               <li>多语言支持：支持中文、英文等多种语言</li>
               <li>一键导出：支持多种格式导出，方便使用</li>
@@ -192,7 +192,7 @@ const ProductDetailPage = ({ params }: ProductDetailPageProps) => {
               <li>语法检查：自动检测并修正语法错误</li>
             </ul>
             <h3 className="text-lg font-semibold text-gray-800 mb-3">适用场景</h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-900 mb-4">
               适用于内容创作者、营销人员、学生、教师等各种需要大量文字创作的场景。
               无论是博客撰写、社交媒体内容、商业计划书还是学术论文，AI写作助手都能提供有力支持。
             </p>

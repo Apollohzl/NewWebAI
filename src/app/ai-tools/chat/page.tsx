@@ -139,9 +139,9 @@ export default function AIChatPage() {
             <span className="text-xl font-bold text-gray-800">NewWebAI</span>
           </div>
           <div className="hidden md:flex space-x-6">
-            <a href="/" className="text-gray-600 hover:text-blue-600">首页</a>
-            <a href="/blog" className="text-gray-600 hover:text-blue-600">博客</a>
-            <a href="/products" className="text-gray-600 hover:text-blue-600">产品</a>
+            <a href="/" className="text-gray-800 hover:text-blue-600">首页</a>
+            <a href="/blog" className="text-gray-800 hover:text-blue-600">博客</a>
+            <a href="/store" className="text-gray-800 hover:text-blue-600">产品</a>
             <a href="/ai-tools" className="text-blue-600 font-medium">AI工具</a>
           </div>
         </div>
@@ -150,7 +150,7 @@ export default function AIChatPage() {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">AI 智能助手</h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-800">
             体验 NewWebAI 的智能对话功能，获取实时帮助和信息
           </p>
         </div>
@@ -233,7 +233,7 @@ export default function AIChatPage() {
                   className={`absolute right-3 bottom-3 p-2 rounded-full ${
                     isListening 
                       ? 'bg-red-500 text-white' 
-                      : 'text-gray-500 hover:bg-gray-100'
+                      : 'text-gray-800 hover:bg-gray-100'
                   }`}
                 >
                   {isListening ? <FaStop /> : <FaMicrophone />}
@@ -244,14 +244,14 @@ export default function AIChatPage() {
                 disabled={isLoading || inputValue.trim() === ''}
                 className={`flex items-center justify-center w-14 h-14 rounded-full ${
                   isLoading || inputValue.trim() === ''
-                    ? 'bg-gray-300 text-gray-500'
+                    ? 'bg-gray-300 text-gray-800'
                     : 'bg-blue-500 text-white hover:bg-blue-600'
                 } transition`}
               >
                 <FaPaperPlane />
               </button>
             </div>
-            <div className="mt-3 text-sm text-gray-500 text-center">
+            <div className="mt-3 text-sm text-gray-700 text-center">
               NewWebAI 智能助手可以回答关于产品、技术和服务的问题
             </div>
           </div>
@@ -260,7 +260,7 @@ export default function AIChatPage() {
         <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-xl shadow-md">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">智能问答</h3>
-            <p className="text-gray-600">
+            <p className="text-gray-800">
               基于先进的AI模型，NewWebAI助手可以理解自然语言并提供准确的回答。
             </p>
           </div>
@@ -315,7 +315,7 @@ export default function AIChatPage() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
+          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-gray-600">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

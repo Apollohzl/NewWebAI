@@ -46,10 +46,10 @@ export default function BlogPage() {
             <span className="text-xl font-bold text-blue-600">NewWebAI</span>
           </Link>
           <div className="hidden md:flex space-x-6">
-            <Link href="/" className="text-gray-600 hover:text-blue-600">首页</Link>
+            <Link href="/" className="text-gray-800 hover:text-blue-600">首页</Link>
             <Link href="/blog" className="text-blue-600 font-medium">博客</Link>
-            <Link href="/products" className="text-gray-600 hover:text-blue-600">产品</Link>
-            <Link href="/ai-tools" className="text-gray-600 hover:text-blue-600">AI工具</Link>
+            <Link href="/store" className="text-gray-800 hover:text-blue-600">产品</Link>
+            <Link href="/ai-tools" className="text-gray-800 hover:text-blue-600">AI工具</Link>
           </div>
         </div>
       </nav>
@@ -57,7 +57,7 @@ export default function BlogPage() {
       {/* 博客标题 */}
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-4">AI & Tech 博客</h1>
-        <p className="text-xl text-center text-gray-600 max-w-2xl mx-auto mb-12">
+        <p className="text-xl text-center text-gray-800 max-w-2xl mx-auto mb-12">
           探索人工智能、Web开发和技术创新的最新动态
         </p>
 
@@ -71,12 +71,12 @@ export default function BlogPage() {
               <div className="p-8">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm text-blue-600 font-medium">{post.date}</span>
-                  <span className="text-sm text-gray-500">{post.readTime}</span>
+                  <span className="text-sm text-gray-700">{post.readTime}</span>
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-3">{post.title}</h2>
-                <p className="text-gray-600 mb-4">{post.excerpt}</p>
+                <p className="text-gray-800 mb-4">{post.excerpt}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-700">作者: {post.author}</span>
+                  <span className="text-gray-900">作者: {post.author}</span>
                   <Link 
                     href={`/blog/${post.id}`} 
                     className="text-blue-600 hover:text-blue-800 font-medium"
@@ -92,9 +92,9 @@ export default function BlogPage() {
         {/* 分页 */}
         <div className="flex justify-center mt-12 space-x-2">
           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">1</button>
-          <button className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">2</button>
-          <button className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">3</button>
-          <button className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">下一页 →</button>
+          <button className="px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-lg">2</button>
+          <button className="px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-lg">3</button>
+          <button className="px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-lg">下一页 →</button>
         </div>
       </div>
 
@@ -135,7 +135,7 @@ export default function BlogPage() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
+          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-gray-600">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

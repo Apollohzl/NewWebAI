@@ -104,10 +104,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
 };
 
 const ProductPage = () => {
-  const { getItemCount } = useCart();
+  const { items, getTotal, getItemCount } = useCart();
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-24"> {/* 添加底部边距，为固定栏留出空间 */}
       {/* 导航栏 */}
       <nav className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -168,6 +168,29 @@ const ProductPage = () => {
           ))}
         </div>
       </div>
+
+      {/* 底部固定购物车栏 */}
+      {items.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-4">
+          <div className="container mx-auto px-4">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <FaShoppingCart className="text-xl text-blue-600 mr-2" />
+                <span className="font-medium">
+                  {getItemCount()} 件商品，总计: 
+                  <span className="text-lg font-bold text-blue-600"> ¥{getTotal().toFixed(2)}</span>
+                </span>
+              </div>
+              <Link 
+                href="/cart" 
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition"
+              >
+                去结算
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 页脚 */}
       <footer className="bg-gray-900 text-white py-12 mt-16">

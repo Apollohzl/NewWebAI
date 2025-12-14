@@ -196,15 +196,15 @@ const CheckoutPage = () => {
                       <div className="bg-gray-100 rounded-lg p-6 inline-block">
                         <h3 className="font-semibold text-gray-800 mb-3">推荐使用微信支付</h3>
                         <div className="bg-white p-4 rounded-lg inline-block">
-                          <div className="bg-gray-200 border-2 border-dashed rounded-xl w-48 h-48 flex items-center justify-center">
-                            <div className="text-center">
-                              <div className="bg-gray-200 border-2 border-dashed rounded-xl w-40 h-40 mx-auto flex items-center justify-center">
-                                <span className="text-gray-500">微信支付二维码</span>
-                              </div>
-                              <p className="mt-2 text-sm text-gray-600">¥{orderTotal.toFixed(2)}</p>
-                              <p className="text-sm text-gray-800">收款人：NewWebAI</p>
-                            </div>
-                          </div>
+                          <img 
+                            src="/微信收款码.jpg" 
+                            alt="微信支付二维码" 
+                            className="w-48 h-48 mx-auto"
+                            width={192}
+                            height={192}
+                          />
+                          <p className="mt-2 text-sm text-gray-600">¥{orderTotal.toFixed(2)}</p>
+                          <p className="text-sm text-gray-800">收款人：NewWebAI</p>
                         </div>
                         <p className="text-gray-600 text-sm mt-3">请使用微信扫码支付</p>
                       </div>

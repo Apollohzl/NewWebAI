@@ -1,81 +1,44 @@
 // src/utils/logUtils.ts
-import fs from 'fs';
-import path from 'path';
-import { writeFile } from 'fs/promises';
+// 简化版日志工具，避免使用 Node.js 特定 API
 
 export class LogUtils {
   async updateChangelog(entry: string): Promise<void> {
-    try {
-      // 仅在服务端环境下尝试写入文件
-      if (typeof window === 'undefined') {
-        const logsDir = path.join(process.cwd(), 'logs');
-        if (!fs.existsSync(logsDir)) {
-          fs.mkdirSync(logsDir, { recursive: true });
-        }
-        
-        const changelogPath = path.join(process.cwd(), 'changelog.log');
-        const logEntry = `${entry}\n`;
-        
-        await writeFile(changelogPath, logEntry, { flag: 'a' });
+    // 在实际部署环境中，可以调用 API 端点来记录日志
+    // 或者只记录在控制台中
+    console.log(`[CHANGELOG] ${entry}`);
+    
+    // 如果需要持久化记录，在服务端通过 API 调用来实现
+    if (typeof window === 'undefined') {
+      try {
+        // 发送到日志 API
+        await fetch('/api/log', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: entry,
+            level: 'info',
+            meta: { type: 'changelog' }
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to send changelog to API:', error);
       }
-    } catch (error) {
-      console.error('Error writing to changelog:', error);
-      // 如果文件写入失败，至少记录到控制台
-      console.log(`[FALLBACK LOG] ${entry}`);
     }
   }
 
   async saveLastPrompt(prompt: string): Promise<void> {
-    try {
-      if (typeof window === 'undefined') {
-        const logsDir = path.join(process.cwd(), 'logs');
-        if (!fs.existsSync(logsDir)) {
-          fs.mkdirSync(logsDir, { recursive: true });
-        }
-        
-        const lastqPath = path.join(process.cwd(), 'lastq.log');
-        const timestamp = new Date().toISOString();
-        const content = `[${timestamp}] Last user prompt: ${prompt}\n`;
-        
-        await writeFile(lastqPath, content);
-      }
-    } catch (error) {
-      console.error('Error saving last prompt:', error);
-    }
+    console.log(`[LAST_PROMPT] ${prompt}`);
   }
 
   async saveProjectSnapshot(snapshot: string): Promise<void> {
-    try {
-      if (typeof window === 'undefined') {
-        const logsDir = path.join(process.cwd(), 'logs');
-        if (!fs.existsSync(logsDir)) {
-          fs.mkdirSync(logsDir, { recursive: true });
-        }
-        
-        const snapshotPath = path.join(process.cwd(), 'project_snapshot.txt');
-        await writeFile(snapshotPath, snapshot);
-      }
-    } catch (error) {
-      console.error('Error saving project snapshot:', error);
-    }
+    console.log(`[PROJECT_SNAPSHOT] ${snapshot.substring(0, 100)}...`);
   }
 
-  // 初始化日志系统
   async initializeLogging(): Promise<void> {
-    if (typeof window === 'undefined') {
-      const requiredFiles = [
-        'changelog.log',
-        'lastq.log',
-        'project_snapshot.txt'
-      ];
-      
-      for (const file of requiredFiles) {
-        const filePath = path.join(process.cwd(), file);
-        if (!fs.existsSync(filePath)) {
-          await writeFile(filePath, '');
-        }
-      }
-    }
+    // 不需要特殊初始化
+    console.log('[LOGGING] Logging initialized');
   }
 }
 

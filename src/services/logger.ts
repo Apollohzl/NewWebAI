@@ -14,7 +14,6 @@ export interface LogEntry {
 export class Logger {
   async writeLog(entry: LogEntry): Promise<void> {
     // 在服务端环境中记录日志
-    // 使用环境变量或外部服务来记录日志，而不是文件系统
     console.log(`[${entry.level.toUpperCase()}] ${entry.timestamp} - ${entry.message}`, {
       meta: entry.meta,
       userAgent: entry.userAgent,

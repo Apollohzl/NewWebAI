@@ -1,0 +1,35 @@
+﻿NewWebAI 智能网站项目快照
+========================
+
+项目概述:
+- 项目名称: NewWebAI
+- 技术栈: Next.js 14, TypeScript, Tailwind CSS
+- 架构: 服务端渲染(SSR) + 静态生成(SSG)
+- 部署: Vercel托管，通过域名 https://hzliflow.ken520.top/ 访问
+- 公司: 小黄の数字宇宙工作室
+
+核心功能:
+1. AI驱动的博客系统
+2. 智能产品展示平台
+3. AI工具箱 (聊天机器人、数据可视化)
+4. 数据分析和可视化仪表板
+5. SSR/SSG实现高性能渲染
+
+文件结构:
+- src/app/ - 页面路由和组件
+- src/services/ - 服务层 (如日志服务)
+- src/utils/ - 工具函数
+- src/middleware.ts - 请求日志中间件
+- public/ - 静态资源
+
+特殊功能:
+- AI聊天机器人
+- 数据可视化图表
+- 请求日志记录
+- 自动化 changelog 和 prompt 记录
+- GitHub集成部署
+
+环境:
+- 开发环境: Windows 11
+- 项目路径: F:\py\NewWebAI\newwebai
+- 工具链: Next.js App Router, TypeScript, Tailwind CSS

@@ -32,8 +32,9 @@ export class Logger {
   }
   
   async info(message: string, meta?: Record<string, any>): Promise<void> {
-    const userAgent = headers().get('user-agent') || 'unknown';
-    const ip = headers().get('x-forwarded-for') || 'unknown';
+    const headersList = await headers();
+    const userAgent = headersList.get('user-agent') || 'unknown';
+    const ip = headersList.get('x-forwarded-for') || 'unknown';
     
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
@@ -48,8 +49,9 @@ export class Logger {
   }
   
   async warn(message: string, meta?: Record<string, any>): Promise<void> {
-    const userAgent = headers().get('user-agent') || 'unknown';
-    const ip = headers().get('x-forwarded-for') || 'unknown';
+    const headersList = await headers();
+    const userAgent = headersList.get('user-agent') || 'unknown';
+    const ip = headersList.get('x-forwarded-for') || 'unknown';
     
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
@@ -64,8 +66,9 @@ export class Logger {
   }
   
   async error(message: string, meta?: Record<string, any>): Promise<void> {
-    const userAgent = headers().get('user-agent') || 'unknown';
-    const ip = headers().get('x-forwarded-for') || 'unknown';
+    const headersList = await headers();
+    const userAgent = headersList.get('user-agent') || 'unknown';
+    const ip = headersList.get('x-forwarded-for') || 'unknown';
     
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
@@ -81,8 +84,9 @@ export class Logger {
   
   async debug(message: string, meta?: Record<string, any>): Promise<void> {
     if (process.env.NODE_ENV === 'development') {
-      const userAgent = headers().get('user-agent') || 'unknown';
-      const ip = headers().get('x-forwarded-for') || 'unknown';
+      const headersList = await headers();
+      const userAgent = headersList.get('user-agent') || 'unknown';
+      const ip = headersList.get('x-forwarded-for') || 'unknown';
       
       const entry: LogEntry = {
         timestamp: new Date().toISOString(),

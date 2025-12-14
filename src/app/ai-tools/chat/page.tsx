@@ -136,13 +136,13 @@ export default function AIChatPage() {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <FaRobot className="text-blue-600 text-2xl" />
-            <span className="text-xl font-bold text-gray-800">NewWebAI</span>
+            <span className="text-xl font-bold text-black">NewWebAI</span>
           </div>
           <div className="hidden md:flex space-x-6">
-            <a href="/" className="text-gray-800 hover:text-blue-600">首页</a>
-            <a href="/blog" className="text-gray-800 hover:text-blue-600">博客</a>
-            <a href="/store" className="text-gray-800 hover:text-blue-600">产品</a>
-            <a href="/ai-tools" className="text-blue-600 font-medium">AI工具</a>
+            <a href="/" className="text-black hover:text-blue-600">首页</a>
+            <a href="/blog" className="text-black hover:text-blue-600">博客</a>
+            <a href="/store" className="text-black hover:text-blue-600">产品</a>
+            <a href="/ai-tools" className="text-black font-medium">AI工具</a>
           </div>
         </div>
       </nav>

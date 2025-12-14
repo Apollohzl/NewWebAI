@@ -1,0 +1,76 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "AI智能写作助手",
+      "description": "基于最新AI技术的智能写作工具，帮助您快速生成高质量内容",
+      "price": 99.99,
+      "originalPrice": 199.99,
+      "image": "/api/placeholder/300/300",
+      "category": "软件工具",
+      "rating": 4.8,
+      "tags": ["AI", "写作", "效率"],
+      "features": ["智能生成", "多语言支持", "一键导出"]
+    },
+    {
+      "id": 2,
+      "name": "数据可视化仪表板",
+      "description": "强大的数据分析和可视化工具，让数据一目了然",
+      "price": 149.99,
+      "originalPrice": 299.99,
+      "image": "/api/placeholder/300/300",
+      "category": "数据分析",
+      "rating": 4.9,
+      "tags": ["数据", "图表", "分析"],
+      "features": ["实时更新", "多种图表", "自定义面板"]
+    },
+    {
+      "id": 3,
+      "name": "智能客服系统",
+      "description": "24/7全自动化客服，提升客户满意度",
+      "price": 199.99,
+      "originalPrice": 399.99,
+      "image": "/api/placeholder/300/300",
+      "category": "客户服务",
+      "rating": 4.7,
+      "tags": ["客服", "自动化", "AI"],
+      "features": ["智能对话", "多渠道支持", "数据分析"]
+    },
+    {
+      "id": 4,
+      "name": "AI图像生成器",
+      "description": "根据文本描述生成高质量图像，激发创意灵感",
+      "price": 79.99,
+      "originalPrice": 159.99,
+      "image": "/api/placeholder/300/300",
+      "category": "创意设计",
+      "rating": 4.6,
+      "tags": ["图像", "AI", "创意"],
+      "features": ["文本转图像", "多种风格", "高分辨率"]
+    },
+    {
+      "id": 5,
+      "name": "代码智能助手",
+      "description": "帮助开发者编写、审查和优化代码",
+      "price": 129.99,
+      "originalPrice": 249.99,
+      "image": "/api/placeholder/300/300",
+      "category": "开发工具",
+      "rating": 4.8,
+      "tags": ["代码", "AI", "开发"],
+      "features": ["代码生成", "错误检测", "优化建议"]
+    },
+    {
+      "id": 6,
+      "name": "智能营销工具包",
+      "description": "一站式营销解决方案，提升转化率",
+      "price": 249.99,
+      "originalPrice": 499.99,
+      "image": "/api/placeholder/300/300",
+      "category": "营销工具",
+      "rating": 4.7,
+      "tags": ["营销", "自动化", "分析"],
+      "features": ["智能投放", "A/B测试", "数据分析"]
+    }
+  ]
+}

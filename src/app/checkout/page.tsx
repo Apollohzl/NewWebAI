@@ -65,10 +65,10 @@ const CheckoutPage = () => {
             <span className="text-xl font-bold text-blue-600">NewWebAI</span>
           </Link>
           <div className="hidden md:flex space-x-6">
-            <Link href="/" className="text-gray-600 hover:text-blue-600">首页</Link>
-            <Link href="/blog" className="text-gray-600 hover:text-blue-600">博客</Link>
-            <Link href="/products" className="text-blue-600 font-medium">产品</Link>
-            <Link href="/ai-tools" className="text-gray-600 hover:text-blue-600">AI工具</Link>
+            <Link href="/" className="text-gray-800 hover:text-blue-600">首页</Link>
+            <Link href="/blog" className="text-gray-800 hover:text-blue-600">博客</Link>
+            <Link href="/store" className="text-gray-800 font-medium">产品</Link>
+            <Link href="/ai-tools" className="text-gray-800 hover:text-blue-600">AI工具</Link>
           </div>
         </div>
       </nav>

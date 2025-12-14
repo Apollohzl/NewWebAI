@@ -13,10 +13,10 @@ export default function Home() {
           </div>
           <div className="hidden md:flex space-x-8">
             <Link href="/" className="text-blue-600 font-medium">首页</Link>
-            <Link href="/blog" className="text-gray-600 hover:text-blue-600 transition">博客</Link>
-            <Link href="/store" className="text-gray-600 hover:text-blue-600 transition">产品</Link>
-            <Link href="/ai-tools" className="text-gray-600 hover:text-blue-600 transition">AI工具</Link>
-            <Link href="/about" className="text-gray-600 hover:text-blue-600 transition">关于</Link>
+            <Link href="/blog" className="text-gray-800 hover:text-blue-600 transition">博客</Link>
+            <Link href="/store" className="text-gray-800 hover:text-blue-600 transition">产品</Link>
+            <Link href="/ai-tools" className="text-gray-800 hover:text-blue-600 transition">AI工具</Link>
+            <Link href="/about" className="text-gray-800 hover:text-blue-600 transition">关于</Link>
           </div>
           <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
             免费试用
@@ -113,7 +113,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <p className="text-gray-600 italic">
+                <p className="text-gray-800 italic">
                   "NewWebAI的AI功能大大提升了我们的工作效率，智能推荐系统准确率很高，用户体验极佳！"
                 </p>
               </div>
@@ -131,38 +131,38 @@ export default function Home() {
                 <FaRobot className="text-blue-400 text-2xl" />
                 <span className="text-xl font-bold">NewWebAI</span>
               </div>
-              <p className="text-gray-400">
+              <p className="text-gray-600">
                 由小黄の数字宇宙工作室打造的智能AI平台，为您的业务提供智能化解决方案。
               </p>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">产品</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition">AI博客</a></li>
-                <li><a href="#" className="hover:text-white transition">智能电商</a></li>
-                <li><a href="#" className="hover:text-white transition">数据分析</a></li>
-                <li><a href="#" className="hover:text-white transition">API服务</a></li>
+              <ul className="space-y-2 text-gray-600">
+                <li><a href="#" className="hover:text-gray-800 transition">AI博客</a></li>
+                <li><a href="#" className="hover:text-gray-800 transition">智能电商</a></li>
+                <li><a href="#" className="hover:text-gray-800 transition">数据分析</a></li>
+                <li><a href="#" className="hover:text-gray-800 transition">API服务</a></li>
               </ul>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">公司</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition">关于我们</a></li>
-                <li><a href="#" className="hover:text-white transition">团队</a></li>
-                <li><a href="#" className="hover:text-white transition">新闻</a></li>
-                <li><a href="#" className="hover:text-white transition">合作伙伴</a></li>
+              <ul className="space-y-2 text-gray-600">
+                <li><a href="#" className="hover:text-gray-800 transition">关于我们</a></li>
+                <li><a href="#" className="hover:text-gray-800 transition">团队</a></li>
+                <li><a href="#" className="hover:text-gray-800 transition">新闻</a></li>
+                <li><a href="#" className="hover:text-gray-800 transition">合作伙伴</a></li>
               </ul>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">联系我们</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-gray-600">
                 <li>邮箱: contact@newwebai.com</li>
                 <li>网址: https://hzliflow.ken520.top/</li>
                 <li>公司: 小黄の数字宇宙工作室</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
+          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-gray-600">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

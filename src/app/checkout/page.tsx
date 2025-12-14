@@ -199,7 +199,7 @@ const CheckoutPage = () => {
                           <img 
                             src="/微信收款码.jpg" 
                             alt="微信支付二维码" 
-                            className="w-48 h-48 mx-auto"
+                            className="w-48 h-48 mx-auto object-cover"
                             width={192}
                             height={192}
                           />

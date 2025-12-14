@@ -1,12 +1,26 @@
+'use client';
+
 import { Product, products } from '@/lib/products';
 import { FaStar, FaRegStar, FaStarHalfAlt, FaTag, FaShoppingCart } from 'react-icons/fa';
 import Link from 'next/link';
+import { useCart } from '@/context/CartContext';
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
+  const { addItem } = useCart();
+  
+  const handleAddToCart = () => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image
+    });
+  };
+
   const renderRating = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -71,12 +85,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
         
         <div className="flex justify-between">
           <Link 
-            href={`/products/${product.id}`}
+            href={`/store/${product.id}`}
             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
           >
             查看详情
           </Link>
-          <button className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition">
+          <button 
+            onClick={handleAddToCart}
+            className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition"
+          >
             <FaShoppingCart className="mr-1" />
             <span>加入购物车</span>
           </button>
@@ -87,6 +104,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
 };
 
 const ProductPage = () => {
+  const { getItemCount } = useCart();
+  
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 导航栏 */}
@@ -98,13 +117,15 @@ const ProductPage = () => {
           <div className="hidden md:flex space-x-6">
             <Link href="/" className="text-gray-600 hover:text-blue-600">首页</Link>
             <Link href="/blog" className="text-gray-600 hover:text-blue-600">博客</Link>
-            <Link href="/products" className="text-blue-600 font-medium">产品</Link>
+            <Link href="/store" className="text-blue-600 font-medium">产品</Link>
             <Link href="/ai-tools" className="text-gray-600 hover:text-blue-600">AI工具</Link>
           </div>
           <div className="flex items-center space-x-4">
             <Link href="/cart" className="relative text-gray-600 hover:text-blue-600">
               <FaShoppingCart className="text-xl" />
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {getItemCount()}
+              </span>
             </Link>
           </div>
         </div>

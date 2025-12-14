@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { FaWeixin, FaCheck, FaTimes, FaArrowLeft } from 'react-icons/fa';
+import { FaWeixin, FaCheck, FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
+import { useCart } from '@/context/CartContext';
 
 const CheckoutPage = () => {
+  const { items, getTotal, clearCart } = useCart();
   const [paymentMethod, setPaymentMethod] = useState('wechat');
   const [isPaying, setIsPaying] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -16,11 +18,15 @@ const CheckoutPage = () => {
     setTimeout(() => {
       setIsPaying(false);
       setPaymentSuccess(true);
+      // 支付成功后清空购物车
+      clearCart();
     }, 2000);
   };
 
-  // 模拟订单信息
-  const orderTotal = 363.97; // (99.99*1 + 149.99*2) * 1.1 (with tax)
+  // 计算订单总额（含税）
+  const subtotal = getTotal();
+  const tax = subtotal * 0.1;
+  const orderTotal = subtotal + tax;
 
   if (paymentSuccess) {
     return (
@@ -135,27 +141,21 @@ const CheckoutPage = () => {
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">订单摘要</h2>
                 
                 <div className="space-y-4 mb-6">
-                  {/* 模拟购物车项目 */}
-                  <div className="flex justify-between">
-                    <div>
-                      <p className="font-medium">AI智能写作助手 × 1</p>
-                      <p className="text-sm text-gray-500">单价: ¥99.99</p>
+                  {items.map((item) => (
+                    <div key={item.id} className="flex justify-between">
+                      <div>
+                        <p className="font-medium">{item.name} × {item.quantity}</p>
+                        <p className="text-sm text-gray-500">单价: ¥{item.price.toFixed(2)}</p>
+                      </div>
+                      <p className="font-medium">¥{(item.price * item.quantity).toFixed(2)}</p>
                     </div>
-                    <p className="font-medium">¥99.99</p>
-                  </div>
-                  <div className="flex justify-between">
-                    <div>
-                      <p className="font-medium">数据可视化仪表板 × 2</p>
-                      <p className="text-sm text-gray-500">单价: ¥149.99</p>
-                    </div>
-                    <p className="font-medium">¥299.98</p>
-                  </div>
+                  ))}
                 </div>
                 
                 <div className="border-t border-gray-200 pt-4 space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">商品小计</span>
-                    <span>¥399.97</span>
+                    <span>¥{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">配送费</span>
@@ -163,7 +163,7 @@ const CheckoutPage = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">税费</span>
-                    <span>¥39.99</span>
+                    <span>¥{tax.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
                     <span>总计</span>

@@ -1,6 +1,9 @@
+'use client';
+
 import { notFound } from 'next/navigation';
 import { Product, products } from '@/lib/products';
 import { FaStar, FaRegStar, FaStarHalfAlt, FaTag, FaShoppingCart, FaCheck } from 'react-icons/fa';
+import { useCart } from '@/context/CartContext';
 
 interface ProductDetailPageProps {
   params: {
@@ -9,6 +12,7 @@ interface ProductDetailPageProps {
 }
 
 const ProductDetailPage = ({ params }: ProductDetailPageProps) => {
+  const { addItem } = useCart();
   const productId = parseInt(params.id);
   const product = products.find(p => p.id === productId);
 
@@ -45,13 +49,15 @@ const ProductDetailPage = ({ params }: ProductDetailPageProps) => {
           <div className="hidden md:flex space-x-6">
             <a href="/" className="text-gray-600 hover:text-blue-600">首页</a>
             <a href="/blog" className="text-gray-600 hover:text-blue-600">博客</a>
-            <a href="/products" className="text-blue-600 font-medium">产品</a>
+            <a href="/store" className="text-blue-600 font-medium">产品</a>
             <a href="/ai-tools" className="text-gray-600 hover:text-blue-600">AI工具</a>
           </div>
           <div className="flex items-center space-x-4">
             <a href="/cart" className="relative text-gray-600 hover:text-blue-600">
               <FaShoppingCart className="text-xl" />
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {useCart().getItemCount()}
+              </span>
             </a>
           </div>
         </div>
@@ -130,11 +136,37 @@ const ProductDetailPage = ({ params }: ProductDetailPageProps) => {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="flex-1 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg transition font-medium">
+                <button 
+                  onClick={() => {
+                    if (product) {
+                      addItem({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        image: product.image
+                      });
+                    }
+                  }}
+                  className="flex-1 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg transition font-medium"
+                >
                   <FaShoppingCart className="mr-2" />
                   加入购物车
                 </button>
-                <button className="flex-1 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg transition font-medium">
+                <button 
+                  onClick={() => {
+                    if (product) {
+                      addItem({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        image: product.image
+                      });
+                      // 立即购买则跳转到购物车
+                      window.location.href = '/cart';
+                    }
+                  }}
+                  className="flex-1 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg transition font-medium"
+                >
                   立即购买
                 </button>
               </div>

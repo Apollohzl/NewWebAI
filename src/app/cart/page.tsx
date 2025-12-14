@@ -1,76 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { FaTrash, FaPlus, FaMinus, FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
-
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+import { useCart } from '@/context/CartContext';
 
 const CartPage = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // 模拟从localStorage加载购物车数据
-  useEffect(() => {
-    const loadCart = () => {
-      // 模拟API调用或从localStorage加载
-      const mockCart: CartItem[] = [
-        {
-          id: 1,
-          name: 'AI智能写作助手',
-          price: 99.99,
-          quantity: 1,
-          image: '/api/placeholder/100/100'
-        },
-        {
-          id: 2,
-          name: '数据可视化仪表板',
-          price: 149.99,
-          quantity: 2,
-          image: '/api/placeholder/100/100'
-        }
-      ];
-      setCartItems(mockCart);
-      setIsLoading(false);
-    };
-
-    loadCart();
-  }, []);
-
-  const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-
-  const removeItem = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
-
-  const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">加载购物车...</p>
-        </div>
-      </div>
-    );
-  }
+  const { items, updateQuantity, removeItem, getTotal } = useCart();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -83,14 +18,14 @@ const CartPage = () => {
           <div className="hidden md:flex space-x-6">
             <Link href="/" className="text-gray-600 hover:text-blue-600">首页</Link>
             <Link href="/blog" className="text-gray-600 hover:text-blue-600">博客</Link>
-            <Link href="/products" className="text-blue-600 font-medium">产品</Link>
+            <Link href="/store" className="text-blue-600 font-medium">产品</Link>
             <Link href="/ai-tools" className="text-gray-600 hover:text-blue-600">AI工具</Link>
           </div>
           <div className="flex items-center space-x-4">
             <Link href="/cart" className="relative text-gray-600 hover:text-blue-600">
               <FaShoppingCart className="text-xl" />
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {cartItems.length}
+                {items.length}
               </span>
             </Link>
           </div>
@@ -104,7 +39,7 @@ const CartPage = () => {
           我的购物车
         </h1>
 
-        {cartItems.length === 0 ? (
+        {items.length === 0 ? (
           <div className="bg-white rounded-xl shadow-md p-12 text-center">
             <FaShoppingCart className="text-gray-300 text-5xl mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">购物车为空</h3>
@@ -119,7 +54,7 @@ const CartPage = () => {
             <div className="lg:col-span-2">
               <div className="bg-white rounded-xl shadow-md overflow-hidden">
                 <ul className="divide-y divide-gray-200">
-                  {cartItems.map((item) => (
+                  {items.map((item) => (
                     <li key={item.id} className="p-6">
                       <div className="flex items-center">
                         <img 
@@ -174,7 +109,7 @@ const CartPage = () => {
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between">
                     <span className="text-gray-600">商品小计</span>
-                    <span className="font-medium">¥{calculateTotal().toFixed(2)}</span>
+                    <span className="font-medium">¥{getTotal().toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">配送费</span>
@@ -182,12 +117,12 @@ const CartPage = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">税费</span>
-                    <span className="font-medium">¥{(calculateTotal() * 0.1).toFixed(2)}</span>
+                    <span className="font-medium">¥{(getTotal() * 0.1).toFixed(2)}</span>
                   </div>
                   <div className="border-t border-gray-200 pt-4 mt-4">
                     <div className="flex justify-between text-lg font-bold">
                       <span>总计</span>
-                      <span>¥{(calculateTotal() * 1.1).toFixed(2)}</span>
+                      <span>¥{(getTotal() * 1.1).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

@@ -1,4 +1,3 @@
-import { GetStaticProps } from 'next';
 import Link from 'next/link';
 
 interface StaticData {
@@ -6,12 +5,31 @@ interface StaticData {
   lastUpdated: string;
 }
 
-interface Props {
-  features: string[];
-  lastUpdated: string;
+async function getStaticData(): Promise<StaticData> {
+  // 模拟静态数据
+  const features = [
+    'AI驱动的内容生成',
+    '智能数据分析',
+    '个性化用户体验',
+    '实时内容更新',
+    '多平台兼容性',
+    '高级安全保护',
+    '可扩展架构',
+    'SEO优化'
+  ];
+
+  // 获取构建时间
+  const lastUpdated = new Date().toISOString();
+
+  return {
+    features,
+    lastUpdated
+  };
 }
 
-export default function StaticDemoPage({ features, lastUpdated }: Props) {
+export default async function StaticDemoPage() {
+  const { features, lastUpdated } = await getStaticData();
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <nav className="bg-white shadow-sm">
@@ -129,29 +147,3 @@ export default function StaticDemoPage({ features, lastUpdated }: Props) {
     </div>
   );
 }
-
-// 实现 SSG 功能
-export const getStaticProps: GetStaticProps = async () => {
-  // 模拟静态数据
-  const features = [
-    'AI驱动的内容生成',
-    '智能数据分析',
-    '个性化用户体验',
-    '实时内容更新',
-    '多平台兼容性',
-    '高级安全保护',
-    '可扩展架构',
-    'SEO优化'
-  ];
-
-  // 获取构建时间
-  const lastUpdated = new Date().toISOString();
-
-  return {
-    props: {
-      features,
-      lastUpdated
-    },
-    // revalidate: 3600, // 每小时重新生成
-  };
-};

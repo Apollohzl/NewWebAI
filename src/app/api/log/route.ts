@@ -9,23 +9,23 @@ export async function POST(request: NextRequest) {
     // 根据级别记录日志
     switch (level) {
       case 'error':
-        logger.error(message, meta);
+        await logger.error(message, meta);
         break;
       case 'warn':
-        logger.warn(message, meta);
+        await logger.warn(message, meta);
         break;
       case 'debug':
-        logger.debug(message, meta);
+        await logger.debug(message, meta);
         break;
       case 'info':
       default:
-        logger.info(message, meta);
+        await logger.info(message, meta);
         break;
     }
     
     return NextResponse.json({ success: true, message: 'Log recorded successfully' });
   } catch (error) {
-    logger.error('Error in log API', { error: (error as Error).message });
+    await logger.error('Error in log API', { error: (error as Error).message });
     return NextResponse.json({ success: false, error: 'Failed to record log' }, { status: 500 });
   }
 }

@@ -1,4 +1,3 @@
-import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 
 interface BlogPost {
@@ -9,12 +8,28 @@ interface BlogPost {
   author: string;
 }
 
-interface Props {
-  blogPost: BlogPost;
-  serverTime: string;
+async function getBlogPost(): Promise<{ blogPost: BlogPost; serverTime: string }> {
+  // 模拟从数据库或API获取博客文章
+  const blogPost: BlogPost = {
+    id: 1,
+    title: 'Next.js 14 与 AI 技术的完美结合',
+    content: 'Next.js 14 引入了众多新特性，包括App Router、流式渲染和React Server Components。这些特性使得构建现代化Web应用变得更加高效。结合AI技术，我们可以创建更加智能和个性化的用户体验。',
+    date: '2025-01-15',
+    author: '小黄AI团队'
+  };
+
+  // 获取服务器时间
+  const serverTime = new Date().toISOString();
+
+  return {
+    blogPost,
+    serverTime
+  };
 }
 
-export default function BlogPostPage({ blogPost, serverTime }: Props) {
+export default async function BlogPostPage() {
+  const { blogPost, serverTime } = await getBlogPost();
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
@@ -105,25 +120,3 @@ export default function BlogPostPage({ blogPost, serverTime }: Props) {
     </div>
   );
 }
-
-// 实现 SSR 功能
-export const getServerSideProps: GetServerSideProps = async () => {
-  // 模拟从数据库或API获取博客文章
-  const blogPost: BlogPost = {
-    id: 1,
-    title: 'Next.js 14 与 AI 技术的完美结合',
-    content: 'Next.js 14 引入了众多新特性，包括App Router、流式渲染和React Server Components。这些特性使得构建现代化Web应用变得更加高效。结合AI技术，我们可以创建更加智能和个性化的用户体验。',
-    date: '2025-01-15',
-    author: '小黄AI团队'
-  };
-
-  // 获取服务器时间
-  const serverTime = new Date().toISOString();
-
-  return {
-    props: {
-      blogPost,
-      serverTime
-    }
-  };
-};

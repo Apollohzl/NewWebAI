@@ -2,21 +2,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from './services/logger';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   // 记录请求信息
-  logger.info('Incoming request', {
+  await logger.info('Incoming request', {
     url: request.url,
     method: request.method,
-    userAgent: request.headers.get('user-agent'),
-    ip: request.ip || request.headers.get('x-forwarded-for'),
+    userAgent: request.headers.get('user-agent') || 'unknown',
+    ip: request.ip || request.headers.get('x-forwarded-for') || 'unknown',
     timestamp: new Date().toISOString()
   });
 
   // 继续处理请求
-  const response = NextResponse.next();
-  
-  // 可以在这里添加响应日志（在实际应用中可能需要更复杂的处理）
-  return response;
+  return NextResponse.next();
 }
 
 // 配置中间件应用的路径

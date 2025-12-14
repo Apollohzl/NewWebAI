@@ -149,29 +149,29 @@ export default function AIToolsPage() {
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">我们的AI工具</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {tools.map((tool) => (
-              <div 
-                key={tool.id} 
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer"
-                onClick={() => {/* 在实际应用中，这会导航到工具页面 */}}
-              >
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-2">
-                        {tool.category}
-                      </span>
-                      <h3 className="text-xl font-bold text-gray-800">{tool.title}</h3>
+              <Link href={tool.link} key={tool.id}>
+                <div 
+                  className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer"
+                >
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-2">
+                          {tool.category}
+                        </span>
+                        <h3 className="text-xl font-bold text-gray-800">{tool.title}</h3>
+                      </div>
+                      <div className="p-3 bg-gray-100 rounded-lg">
+                        {tool.icon}
+                      </div>
                     </div>
-                    <div className="p-3 bg-gray-100 rounded-lg">
-                      {tool.icon}
-                    </div>
+                    <p className="text-gray-600 mb-6">{tool.description}</p>
+                    <button className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition">
+                      立即使用
+                    </button>
                   </div>
-                  <p className="text-gray-600 mb-6">{tool.description}</p>
-                  <button className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition">
-                    立即使用
-                  </button>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

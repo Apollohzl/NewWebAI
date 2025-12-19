@@ -14,6 +14,7 @@ export default function AboutPage() {
             <Link href="/blog" className="text-black hover:text-blue-600">博客</Link>
             <Link href="/store" className="text-black hover:text-blue-600">产品</Link>
             <Link href="/ai-tools" className="text-black hover:text-blue-600">AI工具</Link>
+            <Link href="/api-docs" className="text-black hover:text-blue-600">API</Link>
             <Link href="/about" className="text-blue-600 font-medium">关于</Link>
           </div>
         </div>

@@ -71,10 +71,11 @@ export default function AIToolsPage() {
             <span className="text-xl font-bold text-blue-600">NewWebAI</span>
           </Link>
           <div className="hidden md:flex space-x-6">
-            <Link href="/" className="text-gray-800 hover:text-blue-600">首页</Link>
-            <Link href="/blog" className="text-gray-800 hover:text-blue-600">博客</Link>
-            <Link href="/store" className="text-gray-800 hover:text-blue-600">产品</Link>
+            <Link href="/" className="text-black hover:text-blue-600">首页</Link>
+            <Link href="/blog" className="text-black hover:text-blue-600">博客</Link>
+            <Link href="/store" className="text-black hover:text-blue-600">产品</Link>
             <Link href="/ai-tools" className="text-blue-600 font-medium">AI工具</Link>
+            <Link href="/api-docs" className="text-black hover:text-blue-600">API</Link>
           </div>
         </div>
       </nav>
@@ -82,10 +83,10 @@ export default function AIToolsPage() {
       {/* 标题区域 */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+          <h1 className="text-4xl md:text-5xl font-bold text-black mb-6">
             智能 <span className="text-blue-600">AI工具箱</span>
           </h1>
-          <p className="text-xl text-gray-800">
+          <p className="text-xl text-black">
             NewWebAI提供一整套AI驱动的专业工具，助力您的工作与创作
           </p>
         </div>
@@ -94,8 +95,8 @@ export default function AIToolsPage() {
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-6">强大的AI能力</h2>
-              <p className="text-gray-800 mb-8">
+              <h2 className="text-3xl font-bold text-black mb-6">强大的AI能力</h2>
+              <p className="text-black mb-8">
                 我们的AI工具集成了最新的机器学习模型，能够处理各种复杂的任务，从内容生成到数据分析，全面提升工作效率。
               </p>
               <div className="grid grid-cols-2 gap-4">
@@ -146,8 +147,7 @@ export default function AIToolsPage() {
 
         {/* 工具列表 */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">我们的AI工具</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <h2 className="text-3xl font-bold text-center text-black mb-12">我们的AI工具</h2>          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {tools.map((tool) => (
               <Link href={tool.link} key={tool.id}>
                 <div 
@@ -159,13 +159,13 @@ export default function AIToolsPage() {
                         <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-2">
                           {tool.category}
                         </span>
-                        <h3 className="text-xl font-bold text-gray-800">{tool.title}</h3>
+                        <h3 className="text-xl font-bold text-black">{tool.title}</h3>
                       </div>
                       <div className="p-3 bg-gray-100 rounded-lg">
                         {tool.icon}
                       </div>
                     </div>
-                    <p className="text-gray-800 mb-6">{tool.description}</p>
+                    <p className="text-black mb-6">{tool.description}</p>
                     <button className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition">
                       立即使用
                     </button>
@@ -178,14 +178,13 @@ export default function AIToolsPage() {
 
         {/* 应用场景 */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">应用场景</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <h2 className="text-3xl font-bold text-center text-black mb-12">应用场景</h2>          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center p-6">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FaComments className="text-blue-600 text-2xl" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">客户服务</h3>
-              <p className="text-gray-800">
+              <h3 className="text-xl font-bold text-black mb-3">客户服务</h3>
+              <p className="text-black">
                 使用智能客服工具，提供24/7全天候客户服务，提升客户满意度
               </p>
             </div>
@@ -193,8 +192,8 @@ export default function AIToolsPage() {
               <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FaChartPie className="text-green-600 text-2xl" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">数据分析</h3>
-              <p className="text-gray-800">
+              <h3 className="text-xl font-bold text-black mb-3">数据分析</h3>
+              <p className="text-black">
                 利用AI分析工具处理复杂数据，生成可视化报告，辅助决策
               </p>
             </div>
@@ -202,8 +201,8 @@ export default function AIToolsPage() {
               <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FaMagic className="text-purple-600 text-2xl" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">内容创作</h3>
-              <p className="text-gray-800">
+              <h3 className="text-xl font-bold text-black mb-3">内容创作</h3>
+              <p className="text-black">
                 借助AI内容生成工具，快速创建高质量文章、博客和营销内容
               </p>
             </div>
@@ -217,13 +216,13 @@ export default function AIToolsPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h4 className="text-lg font-semibold mb-4">NewWebAI</h4>
-              <p className="text-gray-400">
+              <p className="text-black">
                 由小黄の数字宇宙工作室打造的智能AI平台，为您的业务提供智能化解决方案。
               </p>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">产品</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">AI博客</a></li>
                 <li><a href="#" className="hover:text-white transition">智能电商</a></li>
                 <li><a href="#" className="hover:text-white transition">数据分析</a></li>
@@ -232,7 +231,7 @@ export default function AIToolsPage() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">公司</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">关于我们</a></li>
                 <li><a href="#" className="hover:text-white transition">团队</a></li>
                 <li><a href="#" className="hover:text-white transition">新闻</a></li>
@@ -241,14 +240,14 @@ export default function AIToolsPage() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">联系我们</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li>邮箱: contact@newwebai.com</li>
                 <li>网址: https://hzliflow.ken520.top/</li>
                 <li>公司: 小黄の数字宇宙工作室</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-gray-600">
+          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-black">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

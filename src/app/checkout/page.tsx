@@ -68,6 +68,7 @@ const CheckoutPage = () => {
             <Link href="/blog" className="text-black hover:text-blue-600">博客</Link>
             <Link href="/store" className="text-black font-medium">产品</Link>
             <Link href="/ai-tools" className="text-black hover:text-blue-600">AI工具</Link>
+            <Link href="/api-docs" className="text-black hover:text-blue-600">API</Link>
           </div>
         </div>
       </nav>

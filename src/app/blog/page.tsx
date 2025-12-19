@@ -46,18 +46,19 @@ export default function BlogPage() {
             <span className="text-xl font-bold text-blue-600">NewWebAI</span>
           </Link>
           <div className="hidden md:flex space-x-6">
-            <Link href="/" className="text-gray-800 hover:text-blue-600">首页</Link>
+            <Link href="/" className="text-black hover:text-blue-600">首页</Link>
             <Link href="/blog" className="text-blue-600 font-medium">博客</Link>
-            <Link href="/store" className="text-gray-800 hover:text-blue-600">产品</Link>
-            <Link href="/ai-tools" className="text-gray-800 hover:text-blue-600">AI工具</Link>
+            <Link href="/store" className="text-black hover:text-blue-600">产品</Link>
+            <Link href="/ai-tools" className="text-black hover:text-blue-600">AI工具</Link>
+            <Link href="/api-docs" className="text-black hover:text-blue-600">API</Link>
           </div>
         </div>
       </nav>
 
       {/* 博客标题 */}
       <div className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold text-center text-gray-800 mb-4">AI & Tech 博客</h1>
-        <p className="text-xl text-center text-gray-800 max-w-2xl mx-auto mb-12">
+        <h1 className="text-4xl font-bold text-center text-black mb-4">AI & Tech 博客</h1>
+        <p className="text-xl text-center text-black max-w-2xl mx-auto mb-12">
           探索人工智能、Web开发和技术创新的最新动态
         </p>
 
@@ -71,12 +72,12 @@ export default function BlogPage() {
               <div className="p-8">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm text-blue-600 font-medium">{post.date}</span>
-                  <span className="text-sm text-gray-700">{post.readTime}</span>
+                  <span className="text-sm text-black">{post.readTime}</span>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-3">{post.title}</h2>
-                <p className="text-gray-800 mb-4">{post.excerpt}</p>
+                <h2 className="text-2xl font-bold text-black mb-3">{post.title}</h2>
+                <p className="text-black mb-4">{post.excerpt}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-900">作者: {post.author}</span>
+                  <span className="text-black">作者: {post.author}</span>
                   <Link 
                     href={`/blog/${post.id}`} 
                     className="text-blue-600 hover:text-blue-800 font-medium"
@@ -92,9 +93,9 @@ export default function BlogPage() {
         {/* 分页 */}
         <div className="flex justify-center mt-12 space-x-2">
           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">1</button>
-          <button className="px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-lg">2</button>
-          <button className="px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-lg">3</button>
-          <button className="px-4 py-2 text-gray-800 hover:bg-gray-200 rounded-lg">下一页 →</button>
+          <button className="px-4 py-2 text-black hover:bg-gray-200 rounded-lg">2</button>
+          <button className="px-4 py-2 text-black hover:bg-gray-200 rounded-lg">3</button>
+          <button className="px-4 py-2 text-black hover:bg-gray-200 rounded-lg">下一页 →</button>
         </div>
       </div>
 
@@ -104,13 +105,13 @@ export default function BlogPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h4 className="text-lg font-semibold mb-4">NewWebAI</h4>
-              <p className="text-gray-400">
+              <p className="text-black">
                 由小黄の数字宇宙工作室打造的智能AI平台，为您的业务提供智能化解决方案。
               </p>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">产品</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">AI博客</a></li>
                 <li><a href="#" className="hover:text-white transition">智能电商</a></li>
                 <li><a href="#" className="hover:text-white transition">数据分析</a></li>
@@ -119,7 +120,7 @@ export default function BlogPage() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">公司</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">关于我们</a></li>
                 <li><a href="#" className="hover:text-white transition">团队</a></li>
                 <li><a href="#" className="hover:text-white transition">新闻</a></li>
@@ -128,14 +129,14 @@ export default function BlogPage() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">联系我们</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li>邮箱: contact@newwebai.com</li>
                 <li>网址: https://hzliflow.ken520.top/</li>
                 <li>公司: 小黄の数字宇宙工作室</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-gray-600">
+          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-black">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

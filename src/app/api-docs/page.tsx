@@ -307,23 +307,22 @@ const ApiDocsPage = () => {
       <nav className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <a href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-blue-600">NewWebAI</span>
-          </a>
+                            <span className="text-xl font-bold text-black">NewWebAI</span>          </a>
           <div className="hidden md:flex space-x-6">
-            <a href="/" className="text-gray-900 hover:text-blue-600">首页</a>
-            <a href="/blog" className="text-gray-900 hover:text-blue-600">博客</a>
-            <a href="/store" className="text-gray-900 hover:text-blue-600">产品</a>
-            <a href="/ai-tools" className="text-gray-900 hover:text-blue-600">AI工具</a>
+            <a href="/" className="text-black hover:text-blue-600">首页</a>
+            <a href="/blog" className="text-black hover:text-blue-600">博客</a>
+            <a href="/store" className="text-black hover:text-blue-600">产品</a>
+            <a href="/ai-tools" className="text-black hover:text-blue-600">AI工具</a>
             <a href="/api-docs" className="text-blue-600 font-medium">API</a>
-            <a href="/about" className="text-gray-900 hover:text-blue-600">关于</a>
+            <a href="/about" className="text-black hover:text-blue-600">关于</a>
           </div>
         </div>
       </nav>
 
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">API 文档中心</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h1 className="text-4xl font-bold text-black mb-4">API 文档中心</h1>
+          <p className="text-xl text-black max-w-3xl mx-auto">
             NewWebAI 提供丰富的API接口，助力您的开发和集成
           </p>
         </div>
@@ -354,7 +353,7 @@ const ApiDocsPage = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <span className="mr-3">{currentApi.icon}</span>
-                <h2 className="text-2xl font-bold text-gray-800">{currentApi.name}</h2>
+                <h2 className="text-2xl font-bold text-black">{currentApi.name}</h2>
               </div>
               <div className="flex space-x-2">
                 <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
@@ -369,13 +368,13 @@ const ApiDocsPage = () => {
                 </div>
               </div>
             </div>
-            <p className="mt-2 text-gray-600">{currentApi.description}</p>
+            <p className="mt-2 text-black">{currentApi.description}</p>
           </div>
 
           <div className="p-6">
             {/* 请求URL */}
             <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">请求地址</h3>
+              <h3 className="text-lg font-semibold text-black mb-3">请求地址</h3>
               <div className="bg-gray-100 rounded-lg p-4 font-mono text-sm break-all">
                 {currentApi.requestUrl}
               </div>
@@ -383,7 +382,7 @@ const ApiDocsPage = () => {
 
             {/* 请求方法切换 */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">请求方法</h3>
+              <h3 className="text-lg font-semibold text-black mb-3">请求方法</h3>
               <div className="flex space-x-2">
                 {['GET', 'POST', 'PUT', 'DELETE'].map(method => (
                   <button
@@ -403,7 +402,7 @@ const ApiDocsPage = () => {
 
             {/* 请求参数表格 */}
             <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">请求参数</h3>
+              <h3 className="text-lg font-semibold text-black mb-3">请求参数</h3>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white border border-gray-200 rounded-lg">
                   <thead>
@@ -424,7 +423,7 @@ const ApiDocsPage = () => {
                           {param.required ? (
                             <span className="text-red-600">是</span>
                           ) : (
-                            <span className="text-gray-600">否</span>
+                            <span className="text-black">否</span>
                           )}
                         </td>
                         <td className="py-2 px-4">{param.description}</td>
@@ -438,7 +437,7 @@ const ApiDocsPage = () => {
 
             {/* 返回参数表格 */}
             <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">返回参数</h3>
+              <h3 className="text-lg font-semibold text-black mb-3">返回参数</h3>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white border border-gray-200 rounded-lg">
                   <thead>
@@ -500,14 +499,14 @@ const ApiDocsPage = () => {
 
             {/* 代码示例 */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">代码示例</h3>
+              <h3 className="text-lg font-semibold text-black mb-3">代码示例</h3>
               <div className="flex space-x-2 mb-3">
                 <button
                   onClick={() => setActiveExample('javascript')}
                   className={`px-4 py-2 rounded-lg ${
                     activeExample === 'javascript'
                       ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                      : 'bg-gray-200 text-black hover:bg-gray-300'
                   }`}
                 >
                   JavaScript
@@ -517,7 +516,7 @@ const ApiDocsPage = () => {
                   className={`px-4 py-2 rounded-lg ${
                     activeExample === 'python'
                       ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                      : 'bg-gray-200 text-black hover:bg-gray-300'
                   }`}
                 >
                   Python
@@ -539,13 +538,13 @@ const ApiDocsPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h4 className="text-lg font-semibold mb-4">NewWebAI</h4>
-              <p className="text-gray-400">
+              <p className="text-black">
                 由小黄の数字宇宙工作室打造的智能AI平台，为您的业务提供智能化解决方案。
               </p>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">产品</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">AI博客</a></li>
                 <li><a href="#" className="hover:text-white transition">智能电商</a></li>
                 <li><a href="#" className="hover:text-white transition">数据分析</a></li>
@@ -554,7 +553,7 @@ const ApiDocsPage = () => {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">公司</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">关于我们</a></li>
                 <li><a href="#" className="hover:text-white transition">团队</a></li>
                 <li><a href="#" className="hover:text-white transition">新闻</a></li>
@@ -563,14 +562,14 @@ const ApiDocsPage = () => {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">联系我们</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li>邮箱: contact@newwebai.com</li>
                 <li>网址: https://hzliflow.ken520.top/</li>
                 <li>公司: 小黄の数字宇宙工作室</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-black">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

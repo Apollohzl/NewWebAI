@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     results.products = products.filter(product => 
       product.name.toLowerCase().includes(query.toLowerCase()) || 
       product.description.toLowerCase().includes(query.toLowerCase()) ||
-      product.tags.some((tag: string) => tag.toLowerCase().includes(query.toLowerCase()))
+      (product.tags && product.tags.some((tag: string) => tag.toLowerCase().includes(query.toLowerCase())))
     ).slice(0, limit);
   }
   
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       results.products = products.filter(product => {
         const matchesQuery = product.name.toLowerCase().includes(query.toLowerCase()) || 
                            product.description.toLowerCase().includes(query.toLowerCase()) ||
-                           product.tags.some((tag: string) => tag.toLowerCase().includes(query.toLowerCase()));
+                           (product.tags && product.tags.some((tag: string) => tag.toLowerCase().includes(query.toLowerCase())));
         
         // 应用额外过滤器
         let matchesFilters = true;

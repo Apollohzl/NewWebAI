@@ -36,20 +36,19 @@ const CheckoutPage = () => {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <FaCheck className="text-green-600 text-2xl" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">支付成功！</h2>
-            <p className="text-gray-800 mb-6">您的订单已成功支付，感谢您的购买！</p>
+            <h2 className="text-2xl font-bold text-black mb-2">支付成功！</h2>
+            <p className="text-black mb-6">您的订单已成功支付，感谢您的购买！</p>
             <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <p className="text-gray-900">订单号: <span className="font-medium">ORD-{Math.floor(Math.random() * 1000000)}</span></p>
-              <p className="text-gray-900">支付金额: <span className="font-medium">¥{orderTotal.toFixed(2)}</span></p>
+              <p className="text-black">订单号: <span className="font-medium">ORD-{Math.floor(Math.random() * 1000000)}</span></p>
+              <p className="text-black">支付金额: <span className="font-medium">¥{orderTotal.toFixed(2)}</span></p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link href="/store" className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                 继续购物
               </Link>
-              <Link href="/orders" className="px-6 py-3 border border-gray-300 text-gray-900 rounded-lg hover:bg-gray-50 transition">
-                查看订单
-              </Link>
-            </div>
+                          <Link href="/orders" className="px-6 py-3 border border-gray-300 text-black rounded-lg hover:bg-gray-50 transition">
+                            查看订单
+                          </Link>            </div>
           </div>
         </div>
       </div>
@@ -65,10 +64,10 @@ const CheckoutPage = () => {
             <span className="text-xl font-bold text-blue-600">NewWebAI</span>
           </Link>
           <div className="hidden md:flex space-x-6">
-            <Link href="/" className="text-gray-800 hover:text-blue-600">首页</Link>
-            <Link href="/blog" className="text-gray-800 hover:text-blue-600">博客</Link>
-            <Link href="/store" className="text-gray-800 font-medium">产品</Link>
-            <Link href="/ai-tools" className="text-gray-800 hover:text-blue-600">AI工具</Link>
+            <Link href="/" className="text-black hover:text-blue-600">首页</Link>
+            <Link href="/blog" className="text-black hover:text-blue-600">博客</Link>
+            <Link href="/store" className="text-black font-medium">产品</Link>
+            <Link href="/ai-tools" className="text-black hover:text-blue-600">AI工具</Link>
           </div>
         </div>
       </nav>
@@ -76,7 +75,7 @@ const CheckoutPage = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-800">结算</h1>
+            <h1 className="text-2xl font-bold text-black">结算</h1>
             <Link href="/cart" className="flex items-center text-blue-600 hover:text-blue-800">
               <FaArrowLeft className="mr-1" />
               返回购物车
@@ -87,10 +86,10 @@ const CheckoutPage = () => {
             {/* 订单信息 */}
             <div>
               <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">收货信息</h2>
+                <h2 className="text-lg font-semibold text-black mb-4">收货信息</h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-gray-900 text-sm font-medium mb-1">姓名</label>
+                    <label className="block text-black text-sm font-medium mb-1">姓名</label>
                     <input 
                       type="text" 
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -98,7 +97,7 @@ const CheckoutPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-900 text-sm font-medium mb-1">电话</label>
+                    <label className="block text-black text-sm font-medium mb-1">电话</label>
                     <input 
                       type="tel" 
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -106,7 +105,7 @@ const CheckoutPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-900 text-sm font-medium mb-1">地址</label>
+                    <label className="block text-black text-sm font-medium mb-1">地址</label>
                     <input 
                       type="text" 
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -117,7 +116,7 @@ const CheckoutPage = () => {
               </div>
 
               <div className="bg-white rounded-xl shadow-md p-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">支付方式</h2>
+                <h2 className="text-lg font-semibold text-black mb-4">支付方式</h2>
                 <div className="space-y-3">
                   <label className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
                     <input 
@@ -137,15 +136,14 @@ const CheckoutPage = () => {
 
             {/* 订单摘要 */}
             <div>
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">订单摘要</h2>
-                
-                <div className="space-y-4 mb-6">
+                          <div className="bg-white rounded-xl shadow-md p-6">
+                            <h2 className="text-lg font-semibold text-black mb-4">订单摘要</h2>
+                            <div className="space-y-4 mb-6">
                   {items.map((item) => (
                     <div key={item.id} className="flex justify-between">
                       <div>
                         <p className="font-medium">{item.name} × {item.quantity}</p>
-                        <p className="text-sm text-gray-700">单价: ¥{item.price.toFixed(2)}</p>
+                        <p className="text-sm text-black">单价: ¥{item.price.toFixed(2)}</p>
                       </div>
                       <p className="font-medium">¥{(item.price * item.quantity).toFixed(2)}</p>
                     </div>
@@ -154,15 +152,15 @@ const CheckoutPage = () => {
                 
                 <div className="border-t border-gray-200 pt-4 space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-gray-800">商品小计</span>
+                    <span className="text-black">商品小计</span>
                     <span>¥{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-800">配送费</span>
+                    <span className="text-black">配送费</span>
                     <span>¥0.00</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-800">税费</span>
+                    <span className="text-black">税费</span>
                     <span>¥{tax.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
@@ -174,7 +172,7 @@ const CheckoutPage = () => {
                 {paymentMethod === 'wechat' && (
                   <div className="mt-6">
                     <div className="bg-gray-50 rounded-lg p-4 text-center">
-                      <p className="text-gray-900 mb-3">请选择支付金额</p>
+                      <p className="text-black mb-3">请选择支付金额</p>
                       <div className="flex justify-center space-x-2 mb-4">
                         <button className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">¥0.01</button>
                         <button className="px-3 py-1 border border-gray-300 rounded-full text-sm">¥1.00</button>
@@ -188,13 +186,13 @@ const CheckoutPage = () => {
                           value={orderTotal}
                           readOnly
                         />
-                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-700">¥</span>
+                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black">¥</span>
                       </div>
                     </div>
                     
                     <div className="mt-6 text-center">
                       <div className="bg-gray-100 rounded-lg p-6 inline-block">
-                        <h3 className="font-semibold text-gray-800 mb-3">推荐使用微信支付</h3>
+                        <h3 className="font-semibold text-black mb-3">推荐使用微信支付</h3>
                         <div className="bg-white p-4 rounded-lg inline-block">
                           <img 
                             src="/微信收款码.jpg" 
@@ -203,10 +201,10 @@ const CheckoutPage = () => {
                             width={192}
                             height={192}
                           />
-                          <p className="mt-2 text-sm text-gray-800">¥{orderTotal.toFixed(2)}</p>
-                          <p className="text-sm text-gray-800">收款人：NewWebAI</p>
+                          <p className="mt-2 text-sm text-black">¥{orderTotal.toFixed(2)}</p>
+                          <p className="text-sm text-black">收款人：NewWebAI</p>
                         </div>
-                        <p className="text-gray-800">请使用微信扫码支付</p>
+                        <p className="text-black">请使用微信扫码支付</p>
                       </div>
                     </div>
                   </div>
@@ -223,7 +221,7 @@ const CheckoutPage = () => {
                     <>
                       <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <path className="opacity-75" fill="currentColor" d={'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'}></path>
                       </svg>
                       处理中...
                     </>
@@ -236,7 +234,7 @@ const CheckoutPage = () => {
                 </button>
                 
                 <div className="mt-4 text-center">
-                  <p className="text-gray-700 text-sm">支付完成后，您将收到确认邮件</p>
+                  <p className="text-black text-sm">支付完成后，您将收到确认邮件</p>
                 </div>
               </div>
             </div>
@@ -250,13 +248,13 @@ const CheckoutPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h4 className="text-lg font-semibold mb-4">NewWebAI</h4>
-              <p className="text-gray-400">
+              <p className="text-black">
                 由小黄の数字宇宙工作室打造的智能AI平台，为您的业务提供智能化解决方案。
               </p>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">产品</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">AI博客</a></li>
                 <li><a href="#" className="hover:text-white transition">智能电商</a></li>
                 <li><a href="#" className="hover:text-white transition">数据分析</a></li>
@@ -265,7 +263,7 @@ const CheckoutPage = () => {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">公司</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">关于我们</a></li>
                 <li><a href="#" className="hover:text-white transition">团队</a></li>
                 <li><a href="#" className="hover:text-white transition">新闻</a></li>
@@ -274,14 +272,14 @@ const CheckoutPage = () => {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">联系我们</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li>邮箱: contact@newwebai.com</li>
                 <li>网址: https://hzliflow.ken520.top/</li>
                 <li>公司: 小黄の数字宇宙工作室</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-gray-600">
+          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-black">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

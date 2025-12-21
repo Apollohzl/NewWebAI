@@ -59,10 +59,18 @@ export async function GET(request: NextRequest) {
     }
     
     // 读取响应数据
-    const data = await response.arrayBuffer();
+    const data = await response.blob();
     
-    // 复制原始响应的头部
-    const headers = new Headers(response.headers);
+    // 复制原始响应的头部，但排除一些可能冲突的头部
+    const headers = new Headers();
+    for (const [key, value] of response.headers) {
+      // 跳过可能引起冲突的头部
+      if (!['content-encoding', 'content-length', 'transfer-encoding'].includes(key.toLowerCase())) {
+        headers.set(key, value);
+      }
+    }
+    
+    // 添加CORS头部
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('Access-Control-Allow-Methods', 'GET');
     headers.set('Access-Control-Allow-Headers', 'Content-Type');

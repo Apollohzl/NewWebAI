@@ -1,0 +1,406 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import ApiParamTable from '@/components/api/ApiParamTable';
+import { ApiCodeExamples } from '@/components/api/ApiCodeExamples';
+
+// 定义API参数类型
+interface ApiParam {
+  name: string;
+  type: string;
+  required: boolean;
+  description: string;
+  example: string;
+}
+
+// 定义API方法数据类型
+interface ApiMethodData {
+  params: ApiParam[];
+  response: any;
+}
+
+// 定义API数据类型
+interface ApiInfo {
+  id: string;
+  name: string;
+  description: string;
+  status: string;
+  visits: string;
+  icon: string;
+  tags: string[];
+  category: string;
+  requestUrl: string;
+  methods: string[];
+}
+
+interface ApiResponse {
+  apis: ApiInfo[];
+  categories: {
+    id: string;
+    name: string;
+    description: string;
+  }[];
+}
+
+const ApiDetailPage = () => {
+  const params = useParams();
+  const apiId = params.id as string;
+  const [apiData, setApiData] = useState<ApiResponse | null>(null);
+  const [currentApi, setCurrentApi] = useState<ApiInfo | null>(null);
+  const [activeTab, setActiveTab] = useState('doc');
+  const [activeMethod, setActiveMethod] = useState('GET');
+  const [testParams, setTestParams] = useState<Record<string, string>>({});
+  const [testResponse, setTestResponse] = useState<any>(null);
+
+  useEffect(() => {
+    // 加载API数据
+    fetch('/config/apis.json')
+      .then(response => response.json())
+      .then(data => {
+        setApiData(data);
+        const api = data.apis.find((a: ApiInfo) => a.id === apiId);
+        if (api) {
+          setCurrentApi(api);
+          if (api.methods.length > 0) {
+            setActiveMethod(api.methods[0]);
+          }
+        }
+      })
+      .catch(error => console.error('Error loading API data:', error));
+  }, [apiId]);
+
+  const getStatusColor = (status: string) => {
+    return status === '正常' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  };
+
+  const handleTestApi = async () => {
+    if (!currentApi) return;
+    
+    try {
+      let url = currentApi.requestUrl;
+      let response;
+
+      if (activeMethod === 'GET' || activeMethod === 'DELETE') {
+        // GET和DELETE请求使用查询参数
+        let params = new URLSearchParams(testParams).toString();
+        if (params) {
+          url += '?' + params;
+        }
+        response = await fetch(url, {
+          method: activeMethod,
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+      } else {
+        // POST、PUT、PATCH请求使用请求体
+        response = await fetch(url, {
+          method: activeMethod,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(testParams)
+        });
+      }
+      
+      const data = await response.json();
+      setTestResponse(data);
+    } catch (error: any) {
+      setTestResponse({ error: error.message });
+    }
+  };
+
+  const handleParamChange = (paramName: string, value: string) => {
+    setTestParams(prev => ({
+      ...prev,
+      [paramName]: value
+    }));
+  };
+
+  if (!currentApi) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl text-gray-600">加载中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* 页眉 */}
+      <nav className="bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <Link href="/" className="flex items-center space-x-2">
+            <span className="text-xl font-bold text-black">NewWebAI</span>
+          </Link>
+          <div className="hidden md:flex space-x-6">
+            <Link href="/" className="text-black hover:text-blue-600">首页</Link>
+            <Link href="/blog" className="text-black hover:text-blue-600">博客</Link>
+            <Link href="/store" className="text-black hover:text-blue-600">产品</Link>
+            <Link href="/ai-tools" className="text-black hover:text-blue-600">AI工具</Link>
+            <Link href="/api-docs" className="text-blue-600 font-medium">API</Link>
+            <Link href="/about" className="text-black hover:text-blue-600">关于</Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* 横幅区域 */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center mb-4">
+            <Link href="/api-docs" className="text-white opacity-75 hover:opacity-100 mr-2">
+              ← 返回API列表
+            </Link>
+          </div>
+          <div className="flex items-center">
+            <span className="text-4xl mr-4">{currentApi.icon}</span>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{currentApi.name}</h1>
+              <div className="flex items-center gap-4">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(currentApi.status)}`}>
+                  {currentApi.status}
+                </span>
+                <div className="flex items-center text-white opacity-75">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  积累调用：{currentApi.visits}
+                </div>
+              </div>
+            </div>
+          </div>
+          <p className="text-white opacity-90 mt-4 max-w-3xl">
+            {currentApi.description}
+          </p>
+          <div className="flex flex-wrap gap-2 mt-4">
+            {currentApi.tags.map((tag, index) => (
+              <span
+                key={index}
+                className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white rounded-xl shadow-md">
+          {/* 标签页导航 */}
+          <div className="border-b border-gray-200">
+            <div className="flex space-x-8 px-6">
+              <button
+                onClick={() => setActiveTab('doc')}
+                className={`py-4 px-2 border-b-2 font-medium text-sm ${
+                  activeTab === 'doc'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                接口文档
+              </button>
+              <button
+                onClick={() => setActiveTab('error')}
+                className={`py-4 px-2 border-b-2 font-medium text-sm ${
+                  activeTab === 'error'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                状态码参照
+              </button>
+              <button
+                onClick={() => setActiveTab('code')}
+                className={`py-4 px-2 border-b-2 font-medium text-sm ${
+                  activeTab === 'code'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                代码示例
+              </button>
+            </div>
+          </div>
+
+          {/* 标签页内容 */}
+          <div className="p-6">
+            {activeTab === 'doc' && (
+              <div>
+                {/* 接口基本信息 */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold mb-3">接口信息</h3>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <span className="font-medium">接口地址：</span>
+                        <code className="ml-2 text-blue-600">{currentApi.requestUrl}</code>
+                      </div>
+                      <div>
+                        <span className="font-medium">请求方式：</span>
+                        <span className="ml-2">{currentApi.methods.join(', ')}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium">返回格式：</span>
+                        <span className="ml-2">Json</span>
+                      </div>
+                      <div>
+                        <span className="font-medium">接口状态：</span>
+                        <span className={`ml-2 px-2 py-1 rounded text-xs ${getStatusColor(currentApi.status)}`}>
+                          {currentApi.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 请求方法选择 */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold mb-3">请求方法</h3>
+                  <div className="flex space-x-2">
+                    {currentApi.methods.map(method => (
+                      <button
+                        key={method}
+                        onClick={() => setActiveMethod(method)}
+                        className={`px-4 py-2 rounded-lg ${
+                          activeMethod === method
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        {method}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 请求参数 */}
+                <ApiParamTable 
+                  params={[
+                    {
+                      name: '示例参数',
+                      type: 'string',
+                      required: true,
+                      description: '这是一个示例参数',
+                      example: 'example'
+                    }
+                  ]}
+                  title="请求参数"
+                />
+
+                {/* 返回参数 */}
+                <ApiParamTable 
+                  params={[
+                    {
+                      name: 'code',
+                      type: 'number',
+                      required: false,
+                      description: '状态码'
+                    },
+                    {
+                      name: 'message',
+                      type: 'string',
+                      required: false,
+                      description: '返回消息'
+                    },
+                    {
+                      name: 'data',
+                      type: 'object',
+                      required: false,
+                      description: '返回数据'
+                    }
+                  ]}
+                  title="返回参数"
+                />
+
+                {/* 在线测试 */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold mb-3">在线测试</h3>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">
+                          示例参数 <span className="text-red-600">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={testParams['example'] || ''}
+                          onChange={(e) => handleParamChange('example', e.target.value)}
+                          placeholder="请输入参数值"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleTestApi}
+                      className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      测试API
+                    </button>
+                    {testResponse && (
+                      <div className="mt-4">
+                        <h4 className="text-md font-semibold mb-2">响应结果:</h4>
+                        <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm">
+                          {JSON.stringify(testResponse, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'error' && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3">状态码参照</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="py-2 px-4 text-left">状态码</th>
+                        <th className="py-2 px-4 text-left">说明</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="py-2 px-4 font-mono text-sm">200</td>
+                        <td className="py-2 px-4">请求成功</td>
+                      </tr>
+                      <tr className="bg-gray-50">
+                        <td className="py-2 px-4 font-mono text-sm">400</td>
+                        <td className="py-2 px-4">请求参数错误</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-4 font-mono text-sm">401</td>
+                        <td className="py-2 px-4">未授权访问</td>
+                      </tr>
+                      <tr className="bg-gray-50">
+                        <td className="py-2 px-4 font-mono text-sm">404</td>
+                        <td className="py-2 px-4">接口不存在</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-4 font-mono text-sm">500</td>
+                        <td className="py-2 px-4">服务器内部错误</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'code' && (
+              <ApiCodeExamples apiUrl={currentApi.requestUrl} method={activeMethod} />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ApiDetailPage;

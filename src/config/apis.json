@@ -1,0 +1,185 @@
+{
+  "apis": [
+    {
+      "id": "hello",
+      "name": "Hello API",
+      "description": "基础问候API，支持多种语言的问候语",
+      "status": "正常",
+      "visits": "6739",
+      "icon": "👋",
+      "tags": ["基础", "问候", "示例"],
+      "category": "basic",
+      "requestUrl": "https://hzliflow.ken520.top/api/hello",
+      "methods": ["GET", "POST"]
+    },
+    {
+      "id": "users",
+      "name": "用户管理 API",
+      "description": "用户信息的增删改查操作",
+      "status": "正常",
+      "visits": "12847",
+      "icon": "👤",
+      "tags": ["用户", "管理", "CRUD"],
+      "category": "management",
+      "requestUrl": "https://hzliflow.ken520.top/api/users",
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    {
+      "id": "products",
+      "name": "产品管理 API",
+      "description": "产品信息的查询、筛选和管理",
+      "status": "正常",
+      "visits": "8923",
+      "icon": "📦",
+      "tags": ["产品", "电商", "管理"],
+      "category": "management",
+      "requestUrl": "https://hzliflow.ken520.top/api/products",
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    {
+      "id": "blog",
+      "name": "博客管理 API",
+      "description": "博客文章的管理与查询",
+      "status": "正常",
+      "visits": "5216",
+      "icon": "📝",
+      "tags": ["博客", "内容", "文章"],
+      "category": "content",
+      "requestUrl": "https://hzliflow.ken520.top/api/blog",
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    {
+      "id": "search",
+      "name": "全站搜索 API",
+      "description": "全站内容搜索，支持多类型数据",
+      "status": "正常",
+      "visits": "15678",
+      "icon": "🔍",
+      "tags": ["搜索", "全站", "多类型"],
+      "category": "utility",
+      "requestUrl": "https://hzliflow.ken520.top/api/search",
+      "methods": ["GET", "POST"]
+    },
+    {
+      "id": "cart",
+      "name": "购物车 API",
+      "description": "购物车管理，包括增删改查",
+      "status": "正常",
+      "visits": "7392",
+      "icon": "🛒",
+      "tags": ["购物车", "电商", "管理"],
+      "category": "ecommerce",
+      "requestUrl": "https://hzliflow.ken520.top/api/cart",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"]
+    },
+    {
+      "id": "ai-chat",
+      "name": "AI对话 API",
+      "description": "智能对话接口，支持多轮对话",
+      "status": "正常",
+      "visits": "24589",
+      "icon": "🤖",
+      "tags": ["AI", "对话", "智能"],
+      "category": "ai",
+      "requestUrl": "https://hzliflow.ken520.top/api/ai/chat",
+      "methods": ["GET", "POST"]
+    },
+    {
+      "id": "ai-image",
+      "name": "AI图像生成 API",
+      "description": "基于文本描述生成图像",
+      "status": "正常",
+      "visits": "19347",
+      "icon": "🎨",
+      "tags": ["AI", "图像", "生成"],
+      "category": "ai",
+      "requestUrl": "https://hzliflow.ken520.top/api/ai/image",
+      "methods": ["GET", "POST"]
+    },
+    {
+      "id": "lyrics",
+      "name": "歌词获取 API",
+      "description": "获取各大平台歌曲歌词信息",
+      "status": "正常",
+      "visits": "66858",
+      "icon": "🎵",
+      "tags": ["音乐", "歌词", "搜索"],
+      "category": "media",
+      "requestUrl": "https://hzliflow.ken520.top/api/lyrics",
+      "methods": ["GET", "POST"]
+    },
+    {
+      "id": "video-parse",
+      "name": "视频解析 API",
+      "description": "解析各大平台视频链接",
+      "status": "正常",
+      "visits": "38924",
+      "icon": "📹",
+      "tags": ["视频", "解析", "媒体"],
+      "category": "media",
+      "requestUrl": "https://hzliflow.ken520.top/api/video/parse",
+      "methods": ["GET", "POST"]
+    },
+    {
+      "id": "weather",
+      "name": "天气查询 API",
+      "description": "获取实时天气信息和预报",
+      "status": "正常",
+      "visits": "8762",
+      "icon": "🌤️",
+      "tags": ["天气", "查询", "环境"],
+      "category": "utility",
+      "requestUrl": "https://hzliflow.ken520.top/api/weather",
+      "methods": ["GET", "POST"]
+    },
+    {
+      "id": "translate",
+      "name": "文本翻译 API",
+      "description": "多语言文本翻译服务",
+      "status": "正常",
+      "visits": "12456",
+      "icon": "🌐",
+      "tags": ["翻译", "文本", "语言"],
+      "category": "utility",
+      "requestUrl": "https://hzliflow.ken520.top/api/translate",
+      "methods": ["GET", "POST"]
+    }
+  ],
+  "categories": [
+    {
+      "id": "basic",
+      "name": "基础服务",
+      "description": "基础API服务"
+    },
+    {
+      "id": "management",
+      "name": "管理工具",
+      "description": "数据管理相关API"
+    },
+    {
+      "id": "content",
+      "name": "内容管理",
+      "description": "内容创建和管理API"
+    },
+    {
+      "id": "utility",
+      "name": "实用工具",
+      "description": "实用工具类API"
+    },
+    {
+      "id": "ecommerce",
+      "name": "电商服务",
+      "description": "电子商务相关API"
+    },
+    {
+      "id": "ai",
+      "name": "AI服务",
+      "description": "人工智能相关API"
+    },
+    {
+      "id": "media",
+      "name": "媒体服务",
+      "description": "媒体处理相关API"
+    }
+  ]
+}

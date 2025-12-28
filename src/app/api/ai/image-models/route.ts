@@ -6,13 +6,7 @@ const BASE_URL = 'https://gen.pollinations.ai';
 export async function GET() {
   try {
     // 获取可用的图像模型
-    const response = await fetch(`${BASE_URL}/image/models`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    const response = await fetch(`${BASE_URL}/image/models?key=${API_KEY}`);
     
     if (!response.ok) {
       const errorText = await response.text();

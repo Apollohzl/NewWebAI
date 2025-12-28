@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   
   try {
     // 构建图像生成URL
-    let imageUrl = `${BASE_URL}/image/${encodeURIComponent(prompt)}?model=${model}&width=${width}&height=${height}&nologo=${nologo}`;
+    let imageUrl = `${BASE_URL}/image/${encodeURIComponent(prompt)}?model=${model}&width=${width}&height=${height}&nologo=${nologo}&key=${API_KEY}`;
     if (seed) {
       imageUrl += `&seed=${seed}`;
     }
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     }
     
     // 构建图像生成URL
-    let imageUrl = `${BASE_URL}/image/${encodeURIComponent(prompt)}?model=${model}&width=${width}&height=${height}&nologo=${nologo}`;
+    let imageUrl = `${BASE_URL}/image/${encodeURIComponent(prompt)}?model=${model}&width=${width}&height=${height}&nologo=${nologo}&key=${API_KEY}`;
     if (seed) {
       imageUrl += `&seed=${seed}`;
     }

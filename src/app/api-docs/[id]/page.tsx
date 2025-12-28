@@ -56,7 +56,7 @@ const ApiDetailPage = () => {
 
   useEffect(() => {
     // 加载API数据
-    fetch('/config/apis.json')
+    fetch('/api/config/apis')
       .then(response => response.json())
       .then(data => {
         setApiData(data);

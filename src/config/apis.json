@@ -73,7 +73,7 @@
       "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"]
     },
     {
-      "id": "ai.chat",
+      "id": "ai-chat",
       "name": "AI对话 API",
       "description": "智能对话接口，支持多轮对话",
       "status": "正常",
@@ -81,7 +81,7 @@
       "icon": "🤖",
       "tags": ["AI", "对话", "智能"],
       "category": "ai",
-      "requestUrl": "https://hzliflow.ken520.top/api/ai/chat",
+      "requestUrl": "https://hzliflow.ken520.top/api/ai-chat",
       "methods": ["GET", "POST"]
     },
     {

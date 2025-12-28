@@ -268,18 +268,53 @@
         "example": "一只可爱的小猫在花园里玩耍"
       },
       {
-        "name": "size",
+        "name": "model",
         "type": "string",
         "required": false,
-        "description": "图像尺寸(256x256/512x512/1024x1024)",
-        "example": "512x512"
+        "description": "AI模型(flux/dall-e/stable-diffusion等)",
+        "example": "flux"
+      },
+      {
+        "name": "width",
+        "type": "number",
+        "required": false,
+        "description": "图像宽度",
+        "example": "512"
+      },
+      {
+        "name": "height",
+        "type": "number",
+        "required": false,
+        "description": "图像高度",
+        "example": "512"
+      },
+      {
+        "name": "seed",
+        "type": "number",
+        "required": false,
+        "description": "随机种子（用于生成相同图像）",
+        "example": "42"
       },
       {
         "name": "style",
         "type": "string",
         "required": false,
-        "description": "图像风格(realistic/artistic)",
+        "description": "图像风格",
         "example": "realistic"
+      },
+      {
+        "name": "negative_prompt",
+        "type": "string",
+        "required": false,
+        "description": "负面描述（不希望在图像中出现的内容）",
+        "example": "模糊, 低质量"
+      },
+      {
+        "name": "nologo",
+        "type": "boolean",
+        "required": false,
+        "description": "是否去除水印",
+        "example": "true"
       }
     ]
   },

@@ -51,6 +51,7 @@ const ApiDetailPage = () => {
   const [currentApi, setCurrentApi] = useState<ApiInfo | null>(null);
   const [apiParams, setApiParams] = useState<any>(null);
   const [availableModels, setAvailableModels] = useState<Array<{id: string, name: string}>>([]);
+  const [availableImageModels, setAvailableImageModels] = useState<Array<{id: string, name: string, description: string}>>([]);
   const [activeTab, setActiveTab] = useState('doc');
   const [activeMethod, setActiveMethod] = useState('GET');
   const [testParams, setTestParams] = useState<Record<string, string>>({});
@@ -106,6 +107,20 @@ const ApiDetailPage = () => {
           }
         })
         .catch(error => console.error('Error loading AI models:', error));
+    }
+  }, [apiId]);
+
+  // 加载AI图像模型列表（仅对AI图像API）
+  useEffect(() => {
+    if (apiId === 'ai-image') {
+      fetch('/api/ai/image-models')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.data) {
+            setAvailableImageModels(data.data);
+          }
+        })
+        .catch(error => console.error('Error loading AI image models:', error));
     }
   }, [apiId]);
 
@@ -377,7 +392,7 @@ const ApiDetailPage = () => {
                             {param.name} 
                             {param.required && <span className="text-red-600"> *</span>}
                           </label>
-                          {param.name === 'model' && apiId === 'ai-chat' && availableModels.length > 0 ? (
+                          {(param.name === 'model' && apiId === 'ai-chat' && availableModels.length > 0) ? (
                             <select
                               value={testParams[param.name] || ''}
                               onChange={(e) => handleParamChange(param.name, e.target.value)}
@@ -387,6 +402,19 @@ const ApiDetailPage = () => {
                               {availableModels.map((model: any) => (
                                 <option key={model.id} value={model.id}>
                                   {model.name}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (param.name === 'model' && apiId === 'ai-image' && availableImageModels.length > 0) ? (
+                            <select
+                              value={testParams[param.name] || ''}
+                              onChange={(e) => handleParamChange(param.name, e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              <option value="">请选择模型</option>
+                              {availableImageModels.map((model: any) => (
+                                <option key={model.id} value={model.id}>
+                                  {model.name} - {model.description}
                                 </option>
                               ))}
                             </select>
@@ -412,9 +440,28 @@ const ApiDetailPage = () => {
                     {testResponse && (
                       <div className="mt-4">
                         <h4 className="text-md font-semibold mb-2">响应结果:</h4>
-                        <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm">
-                          {JSON.stringify(testResponse, null, 2)}
-                        </pre>
+                        {apiId === 'ai-image' && testResponse.data?.imageData ? (
+                          <div className="space-y-4">
+                            <div className="flex justify-center">
+                              <img 
+                                src={testResponse.data.imageData} 
+                                alt="生成的图像" 
+                                className="max-w-full h-auto rounded-lg shadow-lg"
+                                style={{ maxHeight: '500px' }}
+                              />
+                            </div>
+                            <details className="bg-gray-100 p-4 rounded-lg">
+                              <summary className="cursor-pointer font-medium">查看详细响应</summary>
+                              <pre className="mt-2 bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm">
+                                {JSON.stringify(testResponse, null, 2)}
+                              </pre>
+                            </details>
+                          </div>
+                        ) : (
+                          <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm">
+                            {JSON.stringify(testResponse, null, 2)}
+                          </pre>
+                        )}
                       </div>
                     )}
                   </div>

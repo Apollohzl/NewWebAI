@@ -79,7 +79,8 @@ const ApiDetailPage = () => {
     if (!currentApi) return;
     
     try {
-      let url = currentApi.requestUrl;
+      // 使用相对路径而不是绝对URL
+      let url = `/api/${currentApi.id}`;
       let response;
 
       if (activeMethod === 'GET' || activeMethod === 'DELETE') {
@@ -105,7 +106,24 @@ const ApiDetailPage = () => {
         });
       }
       
-      const data = await response.json();
+      // 检查响应是否为JSON
+      const contentType = response.headers.get('content-type');
+      let data;
+      
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { 
+            error: 'Invalid JSON response',
+            response: text.substring(0, 500) + (text.length > 500 ? '...' : '')
+          };
+        }
+      }
+      
       setTestResponse(data);
     } catch (error: any) {
       setTestResponse({ error: error.message });

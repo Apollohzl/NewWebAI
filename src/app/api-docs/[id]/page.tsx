@@ -103,7 +103,7 @@ const ApiDetailPage = () => {
     
     try {
       // 使用相对路径而不是绝对URL
-      let url = `/api/${currentApi.id}`;
+      let url = `/api/${currentApi.id.replace('.', '/')}`;
       let response;
 
       if (activeMethod === 'GET' || activeMethod === 'DELETE') {

@@ -176,7 +176,7 @@ export default function DataVisualizationPage() {
         <div className="absolute inset-0 flex flex-col justify-between pr-6 pb-6">
           {/* Y轴刻度 */}
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex items-center text-xs text-gray-400">
+            <div key={i} className="flex items-center text-xs text-black">
               <div className="w-8 text-right mr-2">{100 - i * 25}</div>
               <div className="flex-1 border-t border-gray-200"></div>
             </div>
@@ -239,12 +239,12 @@ export default function DataVisualizationPage() {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <FaChartLine className="text-blue-600 text-2xl" />
-            <span className="text-xl font-bold text-gray-800">NewWebAI</span>
+            <span className="text-xl font-bold text-black">NewWebAI</span>
           </div>
           <div className="hidden md:flex space-x-6">
-            <a href="/" className="text-gray-800 hover:text-blue-600">首页</a>
-            <a href="/blog" className="text-gray-800 hover:text-blue-600">博客</a>
-            <a href="/store" className="text-gray-800 hover:text-blue-600">产品</a>
+            <a href="/" className="text-black hover:text-blue-600">首页</a>
+            <a href="/blog" className="text-black hover:text-blue-600">博客</a>
+            <a href="/store" className="text-black hover:text-blue-600">产品</a>
             <a href="/ai-tools" className="text-blue-600 font-medium">AI工具</a>
           </div>
         </div>
@@ -252,8 +252,8 @@ export default function DataVisualizationPage() {
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">AI 数据可视化</h1>
-          <p className="text-xl text-gray-800">
+          <h1 className="text-4xl font-bold text-black mb-4">AI 数据可视化</h1>
+          <p className="text-xl text-black">
             NewWebAI 提供智能数据分析和可视化功能，帮助您洞察业务趋势
           </p>
         </div>
@@ -261,9 +261,8 @@ export default function DataVisualizationPage() {
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">数据概览</h2>
-              <p className="text-gray-800">NewWebAI 用户活动数据</p>
-            </div>
+                          <h2 className="text-2xl font-bold text-black">数据概览</h2>
+                          <p className="text-black">NewWebAI 用户活动数据</p>            </div>
             
             <div className="flex flex-wrap gap-3">
               <div className="flex bg-gray-100 rounded-lg p-1">
@@ -274,7 +273,7 @@ export default function DataVisualizationPage() {
                     className={`px-4 py-2 rounded-md text-sm font-medium transition ${
                       timeRange === range
                         ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-gray-800 hover:text-gray-900'
+                        : 'text-black hover:text-black'
                     }`}
                   >
                     {range === 'week' ? '本周' : range === 'month' ? '本月' : '本季度'}
@@ -289,9 +288,8 @@ export default function DataVisualizationPage() {
                     onClick={() => setChartType(type)}
                     className={`p-2 rounded-md transition ${
                       chartType === type
-                        ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-800'
-                    }`}
+                                              ? 'bg-white text-blue-600 shadow-sm'
+                                              : 'text-black hover:text-black'                    }`}
                   >
                     {type === 'line' ? <FaChartLine /> : type === 'bar' ? <FaChartBar /> : <FaChartPie />}
                   </button>
@@ -313,34 +311,33 @@ export default function DataVisualizationPage() {
 
           <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 min-h-[400px] flex items-center justify-center">
             {loading ? (
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-gray-800">加载数据中...</p>
-              </div>
-            ) : data ? (
+                          <div className="flex flex-col items-center">
+                            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                            <p className="text-black">加载数据中...</p>
+                          </div>            ) : data ? (
               renderChart()
             ) : (
-              <p className="text-gray-800">暂无数据</p>
+              <p className="text-black">暂无数据</p>
             )}
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">智能分析</h3>
-            <p className="text-gray-800">
+            <h3 className="text-lg font-semibold text-black mb-3">智能分析</h3>
+            <p className="text-black">
               NewWebAI 使用AI算法自动识别数据中的模式和趋势，提供深入洞察。
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">实时更新</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-semibold text-black mb-3">实时更新</h3>
+            <p className="text-black">
               数据可视化图表实时更新，确保您始终看到最新的业务指标。
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">交互式图表</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-semibold text-black mb-3">交互式图表</h3>
+            <p className="text-black">
               用户可以与图表交互，选择不同的维度和时间范围，深入探索数据。
             </p>
           </div>
@@ -369,13 +366,13 @@ export default function DataVisualizationPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h4 className="text-lg font-semibold mb-4">NewWebAI</h4>
-              <p className="text-gray-400">
+              <p className="text-black">
                 由小黄の数字宇宙工作室打造的智能AI平台，为您的业务提供智能化解决方案。
               </p>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">产品</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">AI博客</a></li>
                 <li><a href="#" className="hover:text-white transition">智能电商</a></li>
                 <li><a href="#" className="hover:text-white transition">数据分析</a></li>
@@ -384,7 +381,7 @@ export default function DataVisualizationPage() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">公司</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">关于我们</a></li>
                 <li><a href="#" className="hover:text-white transition">团队</a></li>
                 <li><a href="#" className="hover:text-white transition">新闻</a></li>
@@ -393,14 +390,14 @@ export default function DataVisualizationPage() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">联系我们</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li>邮箱: contact@newwebai.com</li>
                 <li>网址: https://hzliflow.ken520.top/</li>
                 <li>公司: 小黄の数字宇宙工作室</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-gray-600">
+          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-black">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

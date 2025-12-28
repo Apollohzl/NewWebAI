@@ -38,9 +38,9 @@ export default async function BlogPostPage() {
             <span className="text-xl font-bold text-blue-600">NewWebAI</span>
           </Link>
           <div className="hidden md:flex space-x-6">
-            <Link href="/" className="text-gray-800 hover:text-blue-600">首页</Link>
-            <Link href="/store" className="text-gray-800 hover:text-blue-600">产品</Link>
-            <Link href="/ai-tools" className="text-gray-800 hover:text-blue-600">AI工具</Link>
+            <Link href="/" className="text-black hover:text-blue-600">首页</Link>
+            <Link href="/store" className="text-black hover:text-blue-600">产品</Link>
+            <Link href="/ai-tools" className="text-black hover:text-blue-600">AI工具</Link>
           </div>
         </div>
       </nav>
@@ -52,13 +52,13 @@ export default async function BlogPostPage() {
               {blogPost.date}
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">{blogPost.title}</h1>
-          <div className="flex items-center text-gray-800 mb-8">
+          <h1 className="text-3xl font-bold text-black mb-4">{blogPost.title}</h1>
+          <div className="flex items-center text-black mb-8">
             <span>作者: {blogPost.author}</span>
             <span className="mx-3">•</span>
             <span>服务器时间: {serverTime}</span>
           </div>
-          <div className="prose max-w-none text-gray-900">
+          <div className="prose max-w-none text-black">
             <p>{blogPost.content}</p>
             <p>SSR (Server-Side Rendering) 使此页面在服务器上渲染，为搜索引擎优化和初始加载性能提供最佳体验。</p>
             <h2>Next.js 14 的优势</h2>
@@ -80,13 +80,13 @@ export default async function BlogPostPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h4 className="text-lg font-semibold mb-4">NewWebAI</h4>
-              <p className="text-gray-400">
+              <p className="text-black">
                 由小黄の数字宇宙工作室打造的智能AI平台，为您的业务提供智能化解决方案。
               </p>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">产品</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">AI博客</a></li>
                 <li><a href="#" className="hover:text-white transition">智能电商</a></li>
                 <li><a href="#" className="hover:text-white transition">数据分析</a></li>
@@ -95,7 +95,7 @@ export default async function BlogPostPage() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">公司</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">关于我们</a></li>
                 <li><a href="#" className="hover:text-white transition">团队</a></li>
                 <li><a href="#" className="hover:text-white transition">新闻</a></li>
@@ -104,14 +104,14 @@ export default async function BlogPostPage() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">联系我们</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li>邮箱: contact@newwebai.com</li>
                 <li>网址: https://hzliflow.ken520.top/</li>
                 <li>公司: 小黄の数字宇宙工作室</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-gray-600">
+          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-black">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

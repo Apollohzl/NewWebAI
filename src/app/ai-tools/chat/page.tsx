@@ -149,8 +149,8 @@ export default function AIChatPage() {
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">AI 智能助手</h1>
-          <p className="text-xl text-gray-800">
+          <h1 className="text-4xl font-bold text-black mb-4">AI 智能助手</h1>
+          <p className="text-xl text-black">
             体验 NewWebAI 的智能对话功能，获取实时帮助和信息
           </p>
         </div>
@@ -168,7 +168,7 @@ export default function AIChatPage() {
                     className={`max-w-[80%] rounded-2xl p-5 ${
                       message.role === 'user'
                         ? 'bg-blue-500 text-white rounded-br-none'
-                        : 'bg-gray-100 text-gray-800 rounded-bl-none'
+                        : 'bg-gray-100 text-black rounded-bl-none'
                     }`}
                   >
                     <div className="flex items-start space-x-3">
@@ -197,7 +197,7 @@ export default function AIChatPage() {
               ))}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="max-w-[80%] rounded-2xl p-5 bg-gray-100 text-gray-800 rounded-bl-none">
+                  <div className="max-w-[80%] rounded-2xl p-5 bg-gray-100 text-black rounded-bl-none">
                     <div className="flex items-center space-x-3">
                       <FaRobot className="text-blue-500 text-lg" />
                       <div className="font-medium">NewWebAI 智能助手</div>
@@ -233,7 +233,7 @@ export default function AIChatPage() {
                   className={`absolute right-3 bottom-3 p-2 rounded-full ${
                     isListening 
                       ? 'bg-red-500 text-white' 
-                      : 'text-gray-800 hover:bg-gray-100'
+                      : 'text-black hover:bg-gray-100'
                   }`}
                 >
                   {isListening ? <FaStop /> : <FaMicrophone />}
@@ -244,14 +244,14 @@ export default function AIChatPage() {
                 disabled={isLoading || inputValue.trim() === ''}
                 className={`flex items-center justify-center w-14 h-14 rounded-full ${
                   isLoading || inputValue.trim() === ''
-                    ? 'bg-gray-300 text-gray-800'
+                    ? 'bg-gray-300 text-black'
                     : 'bg-blue-500 text-white hover:bg-blue-600'
                 } transition`}
               >
                 <FaPaperPlane />
               </button>
             </div>
-            <div className="mt-3 text-sm text-gray-700 text-center">
+            <div className="mt-3 text-sm text-black text-center">
               NewWebAI 智能助手可以回答关于产品、技术和服务的问题
             </div>
           </div>
@@ -259,20 +259,20 @@ export default function AIChatPage() {
 
         <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">智能问答</h3>
-            <p className="text-gray-800">
+            <h3 className="text-lg font-semibold text-black mb-3">智能问答</h3>
+            <p className="text-black">
               基于先进的AI模型，NewWebAI助手可以理解自然语言并提供准确的回答。
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">实时交互</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-semibold text-black mb-3">实时交互</h3>
+            <p className="text-black">
               通过实时对话，用户可以快速获取所需信息，提升用户体验。
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">持续学习</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-semibold text-black mb-3">持续学习</h3>
+            <p className="text-black">
               系统不断学习用户交互，提供更加个性化和精准的服务。
             </p>
           </div>
@@ -284,13 +284,13 @@ export default function AIChatPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h4 className="text-lg font-semibold mb-4">NewWebAI</h4>
-              <p className="text-gray-400">
+              <p className="text-black">
                 由小黄の数字宇宙工作室打造的智能AI平台，为您的业务提供智能化解决方案。
               </p>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">产品</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">AI博客</a></li>
                 <li><a href="#" className="hover:text-white transition">智能电商</a></li>
                 <li><a href="#" className="hover:text-white transition">数据分析</a></li>
@@ -299,7 +299,7 @@ export default function AIChatPage() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">公司</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">关于我们</a></li>
                 <li><a href="#" className="hover:text-white transition">团队</a></li>
                 <li><a href="#" className="hover:text-white transition">新闻</a></li>
@@ -308,14 +308,14 @@ export default function AIChatPage() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">联系我们</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li>邮箱: contact@newwebai.com</li>
                 <li>网址: https://hzliflow.ken520.top/</li>
                 <li>公司: 小黄の数字宇宙工作室</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-gray-600">
+          <div className="border-t border-gray-300 mt-12 pt-8 text-center text-black">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

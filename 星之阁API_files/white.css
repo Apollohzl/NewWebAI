@@ -1,0 +1,15 @@
+/* 白色主题 */
+:root {
+    /* 页面主体背景色 */
+    --body-bg: #ecf0f3;
+    /* 新拟态样式背景颜色 */
+    --Neumorphism-bg: var(--body-bg);
+    /* 字体颜色 */
+    --font-color: #61677C;
+    /* 阴影颜色1 */
+    --box-shadow-1: #FFF;
+    /* 阴影颜色2 */
+    --box-shadow-2: #d1d9e6;
+    /* 文字阴影 */
+    --text-shadow: #FFF;
+}

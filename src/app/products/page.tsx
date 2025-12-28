@@ -60,20 +60,20 @@ export default function ProductsPage() {
             <span className="text-xl font-bold text-blue-600">NewWebAI</span>
           </Link>
           <div className="hidden md:flex space-x-6">
-            <Link href="/" className="text-gray-900 hover:text-blue-600">首页</Link>
-            <Link href="/blog" className="text-gray-900 hover:text-blue-600">博客</Link>
-            <Link href="/products" className="text-gray-900 font-medium">产品</Link>
-            <Link href="/ai-tools" className="text-gray-900 hover:text-blue-600">AI工具</Link>
+            <Link href="/" className="text-black hover:text-blue-600">首页</Link>
+            <Link href="/blog" className="text-black hover:text-blue-600">博客</Link>
+            <Link href="/products" className="text-black font-medium">产品</Link>
+            <Link href="/ai-tools" className="text-black hover:text-blue-600">AI工具</Link>
           </div>
         </div>
       </nav>
 
       {/* 产品标题 */}
       <div className="container mx-auto px-4 py-16">
-        <h1 className="text-4xl md:text-5xl font-bold text-center text-gray-800 mb-6">
+        <h1 className="text-4xl md:text-5xl font-bold text-center text-black mb-6">
           我们的 <span className="text-blue-600">AI产品</span>
         </h1>
-        <p className="text-xl text-center text-gray-900 max-w-3xl mx-auto mb-16">
+        <p className="text-xl text-center text-black max-w-3xl mx-auto mb-16">
           NewWebAI提供一系列智能化解决方案，帮助您的业务实现数字化转型
         </p>
 
@@ -87,7 +87,7 @@ export default function ProductsPage() {
                 </div>
               </div>
               <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-gray-900">{feature.description}</p>
+              <p className="text-black">{feature.description}</p>
             </div>
           ))}
         </div>
@@ -98,8 +98,8 @@ export default function ProductsPage() {
             <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row">
               <div className="p-8 flex flex-col justify-center">
                 <div className="mb-4">{product.icon}</div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-3">{product.title}</h3>
-                <p className="text-gray-900 mb-6">{product.description}</p>
+                <h3 className="text-2xl font-bold text-black mb-3">{product.title}</h3>
+                <p className="text-black mb-6">{product.description}</p>
                 <ul className="space-y-2 mb-6">
                   {product.features.map((feature, idx) => (
                     <li key={idx} className="flex items-center">
@@ -127,10 +127,10 @@ export default function ProductsPage() {
 
         {/* 定价方案 */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-800 mb-16">灵活的定价方案</h2>
+          <h2 className="text-3xl font-bold text-black mb-16">灵活的定价方案</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="bg-white p-8 rounded-xl shadow-md border border-blue-100">
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">基础版</h3>
+              <h3 className="text-2xl font-bold text-black mb-4">基础版</h3>
               <div className="text-4xl font-bold text-blue-600 mb-4">¥99<span className="text-lg">/月</span></div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center">
@@ -152,7 +152,7 @@ export default function ProductsPage() {
                   基础支持
                 </li>
               </ul>
-              <button className="w-full bg-gray-100 text-gray-800 py-3 rounded-lg hover:bg-gray-200 transition">
+              <button className="w-full bg-gray-100 text-black py-3 rounded-lg hover:bg-gray-200 transition">
                 选择基础版
               </button>
             </div>
@@ -160,7 +160,7 @@ export default function ProductsPage() {
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
                 推荐
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">专业版</h3>
+              <h3 className="text-2xl font-bold text-black mb-4">专业版</h3>
               <div className="text-4xl font-bold text-blue-600 mb-4">¥299<span className="text-lg">/月</span></div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center">
@@ -193,7 +193,7 @@ export default function ProductsPage() {
               </button>
             </div>
             <div className="bg-white p-8 rounded-xl shadow-md border border-blue-100">
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">企业版</h3>
+              <h3 className="text-2xl font-bold text-black mb-4">企业版</h3>
               <div className="text-4xl font-bold text-blue-600 mb-4">定制报价</div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center">
@@ -235,13 +235,13 @@ export default function ProductsPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h4 className="text-lg font-semibold mb-4">NewWebAI</h4>
-              <p className="text-gray-400">
+              <p className="text-black">
                 由小黄の数字宇宙工作室打造的智能AI平台，为您的业务提供智能化解决方案。
               </p>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">产品</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">AI博客</a></li>
                 <li><a href="#" className="hover:text-white transition">智能电商</a></li>
                 <li><a href="#" className="hover:text-white transition">数据分析</a></li>
@@ -250,7 +250,7 @@ export default function ProductsPage() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">公司</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li><a href="#" className="hover:text-white transition">关于我们</a></li>
                 <li><a href="#" className="hover:text-white transition">团队</a></li>
                 <li><a href="#" className="hover:text-white transition">新闻</a></li>
@@ -259,14 +259,14 @@ export default function ProductsPage() {
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">联系我们</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-black">
                 <li>邮箱: contact@newwebai.com</li>
                 <li>网址: https://hzliflow.ken520.top/</li>
                 <li>公司: 小黄の数字宇宙工作室</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-black">
             <p>© 2025 小黄の数字宇宙工作室. 保留所有权利. NewWebAI 是我们的智能AI平台.</p>
           </div>
         </div>

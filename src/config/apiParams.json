@@ -274,16 +274,9 @@
       {
         "name": "artist",
         "type": "string",
-        "required": false,
+        "required": true,
         "description": "艺术家",
         "example": "Wiz Khalifa"
-      },
-      {
-        "name": "platform",
-        "type": "string",
-        "required": false,
-        "description": "平台(kuwo/qq/netease)",
-        "example": "qq"
       }
     ]
   },

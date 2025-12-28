@@ -49,6 +49,7 @@ const ApiDetailPage = () => {
   const apiId = params.id as string;
   const [apiData, setApiData] = useState<ApiResponse | null>(null);
   const [currentApi, setCurrentApi] = useState<ApiInfo | null>(null);
+  const [apiParams, setApiParams] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('doc');
   const [activeMethod, setActiveMethod] = useState('GET');
   const [testParams, setTestParams] = useState<Record<string, string>>({});
@@ -69,6 +70,28 @@ const ApiDetailPage = () => {
         }
       })
       .catch(error => console.error('Error loading API data:', error));
+  }, [apiId]);
+
+  useEffect(() => {
+    // 加载API参数
+    if (apiId) {
+      fetch(`/api/config/params?api=${apiId}`)
+        .then(response => response.json())
+        .then(data => {
+          setApiParams(data);
+          // 初始化测试参数的默认值
+          const defaultParams: Record<string, string> = {};
+          if (data.params) {
+            data.params.forEach((param: any) => {
+              if (param.example) {
+                defaultParams[param.name] = param.example;
+              }
+            });
+          }
+          setTestParams(defaultParams);
+        })
+        .catch(error => console.error('Error loading API params:', error));
+    }
   }, [apiId]);
 
   const getStatusColor = (status: string) => {
@@ -199,7 +222,7 @@ const ApiDetailPage = () => {
             {currentApi.tags.map((tag, index) => (
               <span
                 key={index}
-                className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm"
+                className="px-3 py-1 bg-blue-100 text-black rounded-full text-sm"
               >
                 {tag}
               </span>
@@ -299,15 +322,7 @@ const ApiDetailPage = () => {
 
                 {/* 请求参数 */}
                 <ApiParamTable 
-                  params={[
-                    {
-                      name: '示例参数',
-                      type: 'string',
-                      required: true,
-                      description: '这是一个示例参数',
-                      example: 'example'
-                    }
-                  ]}
+                  params={apiParams?.params || []}
                   title="请求参数"
                 />
 
@@ -341,18 +356,22 @@ const ApiDetailPage = () => {
                   <h3 className="text-lg font-semibold mb-3">在线测试</h3>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          示例参数 <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={testParams['example'] || ''}
-                          onChange={(e) => handleParamChange('example', e.target.value)}
-                          placeholder="请输入参数值"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
+                      {apiParams?.params?.map((param: any, index: number) => (
+                        <div key={index}>
+                          <label className="block text-sm font-medium mb-1">
+                            {param.name} 
+                            {param.required && <span className="text-red-600"> *</span>}
+                          </label>
+                          <input
+                            type={param.type === 'number' ? 'number' : 'text'}
+                            value={testParams[param.name] || ''}
+                            onChange={(e) => handleParamChange(param.name, e.target.value)}
+                            placeholder={param.example || `请输入${param.name}`}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">{param.description}</p>
+                        </div>
+                      ))}
                     </div>
                     <button
                       onClick={handleTestApi}

@@ -1,0 +1,365 @@
+{
+  "hello": {
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": false,
+        "description": "问候的对象名称",
+        "example": "World"
+      },
+      {
+        "name": "greeting",
+        "type": "string",
+        "required": false,
+        "description": "问候语",
+        "example": "Hello"
+      },
+      {
+        "name": "lang",
+        "type": "string",
+        "required": false,
+        "description": "语言代码(zh/en/ja)",
+        "example": "zh"
+      }
+    ]
+  },
+  "users": {
+    "params": [
+      {
+        "name": "id",
+        "type": "number",
+        "required": false,
+        "description": "用户ID",
+        "example": "1"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "用户名(POST/PUT时必需)",
+        "example": "张三"
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "邮箱(POST/PUT时必需)",
+        "example": "zhangsan@example.com"
+      },
+      {
+        "name": "page",
+        "type": "number",
+        "required": false,
+        "description": "页码(GET时使用)",
+        "example": "1"
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "每页数量(GET时使用)",
+        "example": "10"
+      }
+    ]
+  },
+  "products": {
+    "params": [
+      {
+        "name": "id",
+        "type": "number",
+        "required": false,
+        "description": "产品ID",
+        "example": "1"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "产品名称(POST/PUT时必需)",
+        "example": "智能手机"
+      },
+      {
+        "name": "price",
+        "type": "number",
+        "required": true,
+        "description": "价格(POST/PUT时必需)",
+        "example": "2999"
+      },
+      {
+        "name": "category",
+        "type": "string",
+        "required": false,
+        "description": "产品分类",
+        "example": "电子产品"
+      },
+      {
+        "name": "page",
+        "type": "number",
+        "required": false,
+        "description": "页码(GET时使用)",
+        "example": "1"
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "每页数量(GET时使用)",
+        "example": "10"
+      }
+    ]
+  },
+  "blog": {
+    "params": [
+      {
+        "name": "id",
+        "type": "number",
+        "required": false,
+        "description": "文章ID",
+        "example": "1"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "required": true,
+        "description": "文章标题(POST/PUT时必需)",
+        "example": "如何使用Next.js"
+      },
+      {
+        "name": "content",
+        "type": "string",
+        "required": true,
+        "description": "文章内容(POST/PUT时必需)",
+        "example": "这是一篇关于Next.js的文章..."
+      },
+      {
+        "name": "author",
+        "type": "string",
+        "required": false,
+        "description": "作者",
+        "example": "张三"
+      },
+      {
+        "name": "page",
+        "type": "number",
+        "required": false,
+        "description": "页码(GET时使用)",
+        "example": "1"
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "每页数量(GET时使用)",
+        "example": "10"
+      }
+    ]
+  },
+  "search": {
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "搜索关键词",
+        "example": "Next.js"
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "required": false,
+        "description": "搜索类型(all/blog/product/user)",
+        "example": "all"
+      },
+      {
+        "name": "page",
+        "type": "number",
+        "required": false,
+        "description": "页码",
+        "example": "1"
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "每页数量",
+        "example": "10"
+      }
+    ]
+  },
+  "cart": {
+    "params": [
+      {
+        "name": "userId",
+        "type": "number",
+        "required": true,
+        "description": "用户ID",
+        "example": "1"
+      },
+      {
+        "name": "productId",
+        "type": "number",
+        "required": true,
+        "description": "产品ID(POST/PUT/DELETE时必需)",
+        "example": "1"
+      },
+      {
+        "name": "quantity",
+        "type": "number",
+        "required": false,
+        "description": "数量",
+        "example": "2"
+      }
+    ]
+  },
+  "ai-chat": {
+    "params": [
+      {
+        "name": "message",
+        "type": "string",
+        "required": true,
+        "description": "对话消息",
+        "example": "你好，请介绍一下你自己"
+      },
+      {
+        "name": "sessionId",
+        "type": "string",
+        "required": false,
+        "description": "会话ID",
+        "example": "session_123"
+      },
+      {
+        "name": "model",
+        "type": "string",
+        "required": false,
+        "description": "AI模型(gpt-3.5/gpt-4)",
+        "example": "gpt-3.5"
+      }
+    ]
+  },
+  "ai-image": {
+    "params": [
+      {
+        "name": "prompt",
+        "type": "string",
+        "required": true,
+        "description": "图像描述",
+        "example": "一只可爱的小猫在花园里玩耍"
+      },
+      {
+        "name": "size",
+        "type": "string",
+        "required": false,
+        "description": "图像尺寸(256x256/512x512/1024x1024)",
+        "example": "512x512"
+      },
+      {
+        "name": "style",
+        "type": "string",
+        "required": false,
+        "description": "图像风格(realistic/artistic)",
+        "example": "realistic"
+      }
+    ]
+  },
+  "lyrics": {
+    "params": [
+      {
+        "name": "title",
+        "type": "string",
+        "required": true,
+        "description": "歌曲标题",
+        "example": "See You Again"
+      },
+      {
+        "name": "artist",
+        "type": "string",
+        "required": false,
+        "description": "艺术家",
+        "example": "Wiz Khalifa"
+      },
+      {
+        "name": "platform",
+        "type": "string",
+        "required": false,
+        "description": "平台(kuwo/qq/netease)",
+        "example": "qq"
+      }
+    ]
+  },
+  "video-parse": {
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "视频链接",
+        "example": "https://v.qq.com/x/cover/xxx.html"
+      },
+      {
+        "name": "platform",
+        "type": "string",
+        "required": false,
+        "description": "平台(自动检测或指定)",
+        "example": "qq"
+      },
+      {
+        "name": "quality",
+        "type": "string",
+        "required": false,
+        "description": "视频质量(high/medium/low)",
+        "example": "high"
+      }
+    ]
+  },
+  "weather": {
+    "params": [
+      {
+        "name": "city",
+        "type": "string",
+        "required": true,
+        "description": "城市名称",
+        "example": "北京"
+      },
+      {
+        "name": "units",
+        "type": "string",
+        "required": false,
+        "description": "单位制(metric/imperial)",
+        "example": "metric"
+      },
+      {
+        "name": "lang",
+        "type": "string",
+        "required": false,
+        "description": "语言(zh/en)",
+        "example": "zh"
+      }
+    ]
+  },
+  "translate": {
+    "params": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": "要翻译的文本",
+        "example": "Hello World"
+      },
+      {
+        "name": "from",
+        "type": "string",
+        "required": false,
+        "description": "源语言(自动检测)",
+        "example": "en"
+      },
+      {
+        "name": "to",
+        "type": "string",
+        "required": true,
+        "description": "目标语言",
+        "example": "zh"
+      }
+    ]
+  }
+}

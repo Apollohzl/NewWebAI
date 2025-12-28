@@ -50,6 +50,7 @@ const ApiDetailPage = () => {
   const [apiData, setApiData] = useState<ApiResponse | null>(null);
   const [currentApi, setCurrentApi] = useState<ApiInfo | null>(null);
   const [apiParams, setApiParams] = useState<any>(null);
+  const [availableModels, setAvailableModels] = useState<Array<{id: string, name: string}>>([]);
   const [activeTab, setActiveTab] = useState('doc');
   const [activeMethod, setActiveMethod] = useState('GET');
   const [testParams, setTestParams] = useState<Record<string, string>>({});
@@ -91,6 +92,20 @@ const ApiDetailPage = () => {
           setTestParams(defaultParams);
         })
         .catch(error => console.error('Error loading API params:', error));
+    }
+  }, [apiId]);
+
+  // 加载AI模型列表（仅对AI对话API）
+  useEffect(() => {
+    if (apiId === 'ai-chat') {
+      fetch('/api/ai/models')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.data) {
+            setAvailableModels(data.data);
+          }
+        })
+        .catch(error => console.error('Error loading AI models:', error));
     }
   }, [apiId]);
 
@@ -362,13 +377,28 @@ const ApiDetailPage = () => {
                             {param.name} 
                             {param.required && <span className="text-red-600"> *</span>}
                           </label>
-                          <input
-                            type={param.type === 'number' ? 'number' : 'text'}
-                            value={testParams[param.name] || ''}
-                            onChange={(e) => handleParamChange(param.name, e.target.value)}
-                            placeholder={param.example || `请输入${param.name}`}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
+                          {param.name === 'model' && apiId === 'ai-chat' && availableModels.length > 0 ? (
+                            <select
+                              value={testParams[param.name] || ''}
+                              onChange={(e) => handleParamChange(param.name, e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              <option value="">请选择模型</option>
+                              {availableModels.map((model: any) => (
+                                <option key={model.id} value={model.id}>
+                                  {model.name}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              type={param.type === 'number' ? 'number' : 'text'}
+                              value={testParams[param.name] || ''}
+                              onChange={(e) => handleParamChange(param.name, e.target.value)}
+                              placeholder={param.example || `请输入${param.name}`}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          )}
                           <p className="text-xs text-gray-500 mt-1">{param.description}</p>
                         </div>
                       ))}

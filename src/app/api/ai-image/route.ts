@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { translateToEnglish } from '@/services/translate';
 
 const API_KEY = 'sk_lP8NdaqOKvbNPB8n1ApyB2UQcsVwcT7B';
 const BASE_URL = 'https://gen.pollinations.ai';
@@ -21,8 +22,11 @@ export async function GET(request: NextRequest) {
   }
   
   try {
+    // 自动翻译中文提示词为英文
+    const translatedPrompt = await translateToEnglish(prompt);
+    
     // 构建图像生成URL
-    let imageUrl = `${BASE_URL}/image/${encodeURIComponent(prompt)}?model=${model}&width=${width}&height=${height}&nologo=${nologo}&key=${API_KEY}`;
+    let imageUrl = `${BASE_URL}/image/${encodeURIComponent(translatedPrompt)}?model=${model}&width=${width}&height=${height}&nologo=${nologo}&key=${API_KEY}`;
     if (seed) {
       imageUrl += `&seed=${seed}`;
     }
@@ -51,6 +55,7 @@ export async function GET(request: NextRequest) {
         imageUrl: imageUrl,
         imageData: `data:${mimeType};base64,${base64Image}`,
         prompt: prompt,
+        translatedPrompt: translatedPrompt,
         model: model,
         width: parseInt(width),
         height: parseInt(height),
@@ -91,13 +96,17 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
     
+    // 自动翻译中文提示词为英文
+    const translatedPrompt = await translateToEnglish(prompt);
+    const translatedNegativePrompt = negative_prompt ? await translateToEnglish(negative_prompt) : '';
+    
     // 构建图像生成URL
-    let imageUrl = `${BASE_URL}/image/${encodeURIComponent(prompt)}?model=${model}&width=${width}&height=${height}&nologo=${nologo}&key=${API_KEY}`;
+    let imageUrl = `${BASE_URL}/image/${encodeURIComponent(translatedPrompt)}?model=${model}&width=${width}&height=${height}&nologo=${nologo}&key=${API_KEY}`;
     if (seed) {
       imageUrl += `&seed=${seed}`;
     }
-    if (negative_prompt) {
-      imageUrl += `&negative_prompt=${encodeURIComponent(negative_prompt)}`;
+    if (translatedNegativePrompt) {
+      imageUrl += `&negative_prompt=${encodeURIComponent(translatedNegativePrompt)}`;
     }
     if (style) {
       imageUrl += `&style=${encodeURIComponent(style)}`;
@@ -127,12 +136,14 @@ export async function POST(request: NextRequest) {
         imageUrl: imageUrl,
         imageData: `data:${mimeType};base64,${base64Image}`,
         prompt: prompt,
+        translatedPrompt: translatedPrompt,
         model: model,
         width: width,
         height: height,
         seed: seed,
         style: style,
         negative_prompt: negative_prompt,
+        translatedNegativePrompt: translatedNegativePrompt,
         mimeType: mimeType
       },
       timestamp: new Date().toISOString(),

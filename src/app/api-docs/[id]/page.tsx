@@ -450,6 +450,16 @@ const ApiDetailPage = () => {
                                 style={{ maxHeight: '500px' }}
                               />
                             </div>
+                            {testResponse.data.translatedPrompt && testResponse.data.translatedPrompt !== testResponse.data.prompt && (
+                              <div className="bg-blue-50 p-4 rounded-lg">
+                                <p className="text-sm text-gray-700">
+                                  <span className="font-medium">原始提示词：</span>{testResponse.data.prompt}
+                                </p>
+                                <p className="text-sm text-gray-700 mt-1">
+                                  <span className="font-medium">翻译后提示词：</span>{testResponse.data.translatedPrompt}
+                                </p>
+                              </div>
+                            )}
                             <details className="bg-gray-100 p-4 rounded-lg">
                               <summary className="cursor-pointer font-medium">查看详细响应</summary>
                               <pre className="mt-2 bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm">

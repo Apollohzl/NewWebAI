@@ -264,7 +264,7 @@
         "name": "prompt",
         "type": "string",
         "required": true,
-        "description": "图像描述",
+        "description": "图像描述（支持中文，将自动翻译成英文）",
         "example": "一只可爱的小猫在花园里玩耍"
       },
       {
@@ -306,7 +306,7 @@
         "name": "negative_prompt",
         "type": "string",
         "required": false,
-        "description": "负面描述（不希望在图像中出现的内容）",
+        "description": "负面描述（支持中文，将自动翻译成英文）",
         "example": "模糊, 低质量"
       },
       {

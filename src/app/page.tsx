@@ -86,8 +86,15 @@ export default function Home() {
                   <FaCogs className="text-blue-600 text-5xl" />
                 </div>
                 <div className="p-6">
-                              <h3 className="text-xl font-semibold mb-2">AI产品 {item}</h3>
-                              <p className="text-black mb-4">智能AI解决方案，助力业务增长</p>                  <button className="text-blue-600 font-medium hover:underline">了解更多 →</button>
+                  <h3 className="text-xl font-semibold mb-2">AI产品 {item}</h3>
+                  <p className="text-black mb-4">智能AI解决方案，助力业务增长</p>
+                  {item === 1 ? (
+                    <Link href="/ai-chat" className="text-blue-600 font-medium hover:underline">
+                      了解更多 →
+                    </Link>
+                  ) : (
+                    <button className="text-blue-600 font-medium hover:underline">了解更多 →</button>
+                  )}
                 </div>
               </div>
             ))}

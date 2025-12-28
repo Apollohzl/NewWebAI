@@ -113,7 +113,10 @@ export default function AIDrawPage() {
           >
             ← 返回首页
           </button>
-          <h1 className="text-2xl font-bold text-black">AI 绘画</h1>
+          <div className="flex items-center space-x-2">
+            <img src="/logo.png" alt="NewWebAI" className="h-7 w-7" />
+            <h1 className="text-2xl font-bold text-black">AI 绘画</h1>
+          </div>
           <div className="w-20"></div>
         </div>
       </header>

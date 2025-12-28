@@ -178,7 +178,10 @@ export default function AIChatPage() {
             >
               ← 返回首页
             </button>
-            <h1 className="text-xl font-semibold text-black">AI 对话</h1>
+            <div className="flex items-center space-x-2">
+              <img src="/logo.png" alt="NewWebAI" className="h-6 w-6" />
+              <h1 className="text-xl font-semibold text-black">AI 对话</h1>
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <select

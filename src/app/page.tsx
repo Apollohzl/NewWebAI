@@ -8,7 +8,7 @@ export default function Home() {
       <nav className="bg-white/80 backdrop-blur-md shadow-sm py-4 sticky top-0 z-10">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <FaRobot className="text-blue-600 text-2xl" />
+            <img src="/logo.png" alt="NewWebAI" className="h-8 w-8" />
             <span className="text-xl font-bold text-black">NewWebAI</span>
           </div>
           <div className="hidden md:flex space-x-8">
@@ -145,7 +145,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <FaRobot className="text-blue-400 text-2xl" />
+                <img src="/logo.png" alt="NewWebAI" className="h-8 w-8" />
                 <span className="text-xl font-bold">NewWebAI</span>
               </div>
               <p className="text-black">

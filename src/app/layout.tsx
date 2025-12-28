@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   description: "NewWebAI是一个基于Next.js框架的智能网站，提供AI驱动的博客、产品和服务",
   authors: [{ name: "小黄の数字宇宙工作室" }],
   keywords: ["AI", "Next.js", "智能网站", "博客", "产品展示"],
+  icons: {
+    icon: "/favicon.ico",
+  },
   openGraph: {
     title: "NewWebAI - 小黄の数字宇宙工作室",
     description: "NewWebAI是一个基于Next.js框架的智能网站，提供AI驱动的博客、产品和服务",

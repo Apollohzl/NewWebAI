@@ -58,6 +58,7 @@ const ApiDocsPage = () => {
       <nav className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <a href="/" className="flex items-center space-x-2">
+            <img src="/logo.png" alt="NewWebAI" className="h-6 w-6" />
             <span className="text-xl font-bold text-black">NewWebAI</span>
           </a>
           <div className="hidden md:flex space-x-6">

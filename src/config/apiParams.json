@@ -212,7 +212,7 @@
       }
     ]
   },
-  "ai-chat": {
+  "ai.chat": {
     "params": [
       {
         "name": "message",

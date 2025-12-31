@@ -21,7 +21,7 @@ function getLeanCloudConfig() {
 }
 
 // LeanCloud API 基础请求函数
-async function leancloudRequest(endpoint: string, options: RequestInit = {}) {
+export async function leancloudRequest(endpoint: string, options: RequestInit = {}) {
   const config = getLeanCloudConfig();
   const url = `${config.serverURL}/1.1${endpoint}`;
   

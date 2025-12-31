@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { registerUser } from '@/lib/auth';
+import { LeanCloudUser, initLeanCloud } from '@/lib/leancloud';
+import jwt from 'jsonwebtoken';
+
+// 初始化LeanCloud
+initLeanCloud();
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,29 +25,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 注册用户
-    const result = await registerUser({ username, email, password });
-    
-    if (!result) {
-      return NextResponse.json(
-        { error: '该邮箱已被注册' },
-        { status: 409 }
-      );
+    // 检查邮箱是否已存在
+    try {
+      const existingUser = await LeanCloudUser.findUserByEmail(email);
+      if (existingUser) {
+        return NextResponse.json(
+          { error: '该邮箱已被注册' },
+          { status: 409 }
+        );
+      }
+    } catch (error) {
+      // 如果查询失败，继续执行注册
     }
 
-    // 返回用户信息（不包含密码）
-    const { user, token } = result;
-    const { password: _, ...userWithoutPassword } = user;
+    // 注册用户
+    const registeredUser = await LeanCloudUser.register(username, email, password);
+    
+    // 生成JWT Token
+    const token = jwt.sign(
+      { userId: registeredUser.id, email: registeredUser.getEmail() },
+      process.env.JWT_SECRET || 'fallback-secret',
+      { expiresIn: '7d' }
+    );
 
+    // 返回用户信息
     return NextResponse.json({
       message: '注册成功',
-      user: userWithoutPassword,
+      user: {
+        id: registeredUser.id,
+        username: registeredUser.getUsername(),
+        email: registeredUser.getEmail(),
+        createdAt: registeredUser.createdAt,
+      },
       token,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('注册错误:', error);
     return NextResponse.json(
-      { error: '注册失败，请稍后重试' },
+      { error: error.message || '注册失败，请稍后重试' },
       { status: 500 }
     );
   }

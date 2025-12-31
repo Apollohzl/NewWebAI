@@ -1,10 +1,16 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User } from '@/types';
+
+interface LeanCloudUser {
+  id: string;
+  username: string;
+  email: string;
+  createdAt: string;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: LeanCloudUser | null;
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
@@ -22,7 +28,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<LeanCloudUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 

@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { loginUser } from '@/lib/auth';
+import { LeanCloudUser, initLeanCloud } from '@/lib/leancloud';
+import jwt from 'jsonwebtoken';
+
+// 初始化LeanCloud
+initLeanCloud();
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,30 +17,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 用户登录
-    const result = await loginUser(email, password);
+    // 用户登录（使用邮箱作为用户名）
+    const user = await LeanCloudUser.login(email, password);
     
-    if (!result) {
-      return NextResponse.json(
-        { error: '邮箱或密码错误' },
-        { status: 401 }
-      );
-    }
+    // 生成JWT Token
+    const token = jwt.sign(
+      { userId: user.id, email: user.getEmail() },
+      process.env.JWT_SECRET || 'fallback-secret',
+      { expiresIn: '7d' }
+    );
 
-    // 返回用户信息（不包含密码）
-    const { user, token } = result;
-    const { password: _, ...userWithoutPassword } = user;
-
+    // 返回用户信息
     return NextResponse.json({
       message: '登录成功',
-      user: userWithoutPassword,
+      user: {
+        id: user.id,
+        username: user.getUsername(),
+        email: user.getEmail(),
+        createdAt: user.createdAt,
+      },
       token,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('登录错误:', error);
     return NextResponse.json(
-      { error: '登录失败，请稍后重试' },
-      { status: 500 }
+      { error: error.message || '邮箱或密码错误' },
+      { status: 401 }
     );
   }
 }

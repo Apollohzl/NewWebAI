@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { FaRobot, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useAuth } from '@/context/SimpleAuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -14,6 +16,11 @@ export default function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const { register } = useAuth();
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -23,10 +30,35 @@ export default function Register() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 这里先不实现逻辑，后面再讨论
-    console.log('注册表单提交:', formData);
+    setError('');
+
+    // 验证密码
+    if (formData.password !== formData.confirmPassword) {
+      setError('两次输入的密码不一致');
+      return;
+    }
+
+    if (!formData.agreeTerms) {
+      setError('请同意服务条款和隐私政策');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const success = await register(formData.username, formData.email, formData.password);
+      if (success) {
+        router.push('/');
+      } else {
+        setError('该邮箱已被注册');
+      }
+    } catch (err) {
+      setError('注册失败，请稍后重试');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,6 +100,12 @@ export default function Register() {
               <h1 className="text-3xl font-bold text-black mb-2">创建账户</h1>
               <p className="text-black">加入NewWebAI，开启智能AI之旅</p>
             </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -180,9 +218,10 @@ export default function Register() {
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                注册账户
+                {loading ? '注册中...' : '注册账户'}
               </button>
             </form>
 

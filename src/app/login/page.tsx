@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { FaRobot, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useAuth } from '@/context/SimpleAuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -11,6 +13,11 @@ export default function Login() {
     rememberMe: false
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const { login } = useAuth();
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -20,10 +27,23 @@ export default function Login() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 这里先不实现逻辑，后面再讨论
-    console.log('登录表单提交:', formData);
+    setError('');
+    setLoading(true);
+
+    try {
+      const success = await login(formData.email, formData.password);
+      if (success) {
+        router.push('/');
+      } else {
+        setError('邮箱或密码错误');
+      }
+    } catch (err) {
+      setError('登录失败，请稍后重试');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,6 +85,12 @@ export default function Login() {
               <h1 className="text-3xl font-bold text-black mb-2">欢迎回来</h1>
               <p className="text-black">登录您的NewWebAI账户</p>
             </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -133,9 +159,10 @@ export default function Login() {
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                登录
+                {loading ? '登录中...' : '登录'}
               </button>
             </form>
 

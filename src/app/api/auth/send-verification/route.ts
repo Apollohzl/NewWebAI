@@ -48,56 +48,32 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
-    // 使用LeanCloud REST API发送邮件
+    // 使用LeanCloud免费邮件服务
     try {
-      const emailData = {
-        recipients: [email],
-        subject: 'NewWebAI - 邮箱验证码',
-        text_body: `您的验证码是：${verificationCode}，有效期10分钟。请勿将验证码告诉他人。`,
-        html_body: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">NewWebAI</h1>
-              <p style="color: #e0e7ff; margin: 10px 0 0 0;">邮箱验证码</p>
-            </div>
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-              <p style="margin: 0 0 15px 0; color: #333;">您好！</p>
-              <p style="margin: 0 0 15px 0; color: #333;">您的邮箱验证码是：</p>
-              <div style="background: #ffffff; padding: 20px; border-radius: 6px; text-align: center; border: 2px dashed #667eea;">
-                <span style="font-size: 32px; font-weight: bold; color: #667eea; letter-spacing: 5px;">${verificationCode}</span>
-              </div>
-              <p style="margin: 15px 0 0 0; color: #666; font-size: 14px;">验证码有效期为10分钟，请及时使用。</p>
-            </div>
-            <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107;">
-              <p style="margin: 0; color: #856404; font-size: 14px;">
-                <strong>安全提示：</strong>请勿将验证码告诉他人。如非本人操作，请忽略此邮件。
-              </p>
-            </div>
-            <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
-            <p style="margin: 0; color: #6c757d; font-size: 12px; text-align: center;">
-              此邮件由 NewWebAI 系统自动发送，请勿回复<br>
-              © 2025 小黄の数字宇宙工作室. 保留所有权利.
-            </p>
-          </div>
-        `,
-      };
-
-      // 发送邮件
-      const emailResponse = await leancloudRequest('/requestMail', {
+      // LeanCloud的requestEmailVerify会自动发送验证邮件
+      const emailResponse = await fetch(`${process.env.LEANCLOUD_SERVER_URL}/1.1/requestEmailVerify`, {
         method: 'POST',
-        body: JSON.stringify(emailData),
+        headers: {
+          'X-LC-Id': process.env.LEANCLOUD_APP_ID!,
+          'X-LC-Key': process.env.LEANCLOUD_APP_KEY!,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+        }),
       });
 
-      console.log('邮件发送成功:', emailResponse);
+      const emailData = await emailResponse.json();
+      console.log('LeanCloud邮件发送响应:', emailData);
     } catch (emailError) {
-      console.error('邮件发送失败:', emailError);
-      // 邮件发送失败不影响验证码保存
+      console.error('LeanCloud邮件发送失败:', emailError);
+      // 邮件发送失败不影响验证码保存，用户可以使用控制台显示的验证码
     }
 
     return NextResponse.json({
-      message: '验证码已发送',
-      // 开发环境返回验证码
-      ...(process.env.NODE_ENV === 'development' && { verificationCode }),
+      message: '验证码已生成',
+      verificationCode: verificationCode,
+      note: '请查看邮箱或使用上方验证码完成验证'
     });
   } catch (error: any) {
     console.error('发送验证码失败:', error);

@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { LeanCloudUser, initLeanCloud } from '@/lib/leancloud';
 import jwt from 'jsonwebtoken';
 
-// 初始化LeanCloud
-initLeanCloud();
-
 export async function POST(request: NextRequest) {
   try {
+    // 初始化LeanCloud
+    initLeanCloud();
+    console.log('LeanCloud初始化完成');
+    
     const { username, email, password } = await request.json();
+    console.log('收到注册请求:', { username, email });
 
     // 验证输入
     if (!username || !email || !password) {
@@ -39,7 +41,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 注册用户
+    console.log('开始注册用户...');
     const registeredUser = await LeanCloudUser.register(username, email, password);
+    console.log('用户注册成功:', registeredUser);
     
     // 生成JWT Token
     const token = jwt.sign(
@@ -60,7 +64,7 @@ export async function POST(request: NextRequest) {
       token,
     });
   } catch (error: any) {
-    console.error('注册错误:', error);
+    console.error('注册错误详情:', error);
     return NextResponse.json(
       { error: error.message || '注册失败，请稍后重试' },
       { status: 500 }

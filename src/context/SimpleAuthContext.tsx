@@ -71,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (username: string, email: string, password: string): Promise<boolean> => {
     try {
+      console.log('客户端开始注册请求:', { username, email });
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
@@ -80,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       const data = await response.json();
+      console.log('注册响应:', { status: response.status, data });
 
       if (response.ok) {
         setUser(data.user);
@@ -87,11 +89,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('token', data.token);
         return true;
       } else {
-        console.error(data.error);
+        console.error('注册失败:', data.error);
         return false;
       }
     } catch (error) {
-      console.error('注册错误:', error);
+      console.error('注册请求错误:', error);
       return false;
     }
   };

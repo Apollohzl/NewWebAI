@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { LeanCloudUser, initLeanCloud } from '@/lib/leancloud';
 import jwt from 'jsonwebtoken';
 
-// 初始化LeanCloud
-initLeanCloud();
-
 export async function POST(request: NextRequest) {
   try {
+    // 初始化LeanCloud
+    initLeanCloud();
+    console.log('LeanCloud初始化完成');
+    
     const { email, password } = await request.json();
+    console.log('收到登录请求:', { email });
 
     // 验证输入
     if (!email || !password) {
@@ -18,7 +20,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 用户登录（使用邮箱作为用户名）
+    console.log('开始登录用户...');
     const user = await LeanCloudUser.login(email, password);
+    console.log('用户登录成功:', user);
     
     // 生成JWT Token
     const token = jwt.sign(
@@ -39,7 +43,7 @@ export async function POST(request: NextRequest) {
       token,
     });
   } catch (error: any) {
-    console.error('登录错误:', error);
+    console.error('登录错误详情:', error);
     return NextResponse.json(
       { error: error.message || '邮箱或密码错误' },
       { status: 401 }

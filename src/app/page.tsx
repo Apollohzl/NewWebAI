@@ -19,9 +19,14 @@ export default function Home() {
             <Link href="/api-docs" className="text-black hover:text-blue-600 transition">API</Link>
             <Link href="/about" className="text-black hover:text-blue-600 transition">关于</Link>
           </div>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-            免费试用
-          </button>
+          <div className="flex space-x-3">
+            <Link href="/login" className="border border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition">
+              登录
+            </Link>
+            <Link href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+              注册
+            </Link>
+          </div>
         </div>
       </nav>
 

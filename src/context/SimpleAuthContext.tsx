@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (username: string, email: string, password: string): Promise<boolean> => {
+  const register = async (username: string, email: string, password: string, verificationCode?: string): Promise<boolean> => {
     try {
       console.log('客户端开始注册请求:', { username, email });
       const response = await fetch('/api/auth/register', {
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ username, email, password, verificationCode }),
       });
 
       const data = await response.json();

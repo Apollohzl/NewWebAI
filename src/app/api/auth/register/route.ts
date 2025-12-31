@@ -8,13 +8,13 @@ export async function POST(request: NextRequest) {
     initLeanCloud();
     console.log('LeanCloud初始化完成');
     
-    const { username, email, password } = await request.json();
+    const { username, email, password, verificationCode } = await request.json();
     console.log('收到注册请求:', { username, email });
 
     // 验证输入
-    if (!username || !email || !password) {
+    if (!username || !email || !password || !verificationCode) {
       return NextResponse.json(
-        { error: '用户名、邮箱和密码都是必填的' },
+        { error: '用户名、邮箱、密码和验证码都是必填的' },
         { status: 400 }
       );
     }
@@ -26,6 +26,25 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // 验证邮箱验证码
+    console.log('验证邮箱验证码...');
+    const verifyResponse = await fetch(`${process.env.VERCEL_URL || 'http://localhost:3000'}/api/auth/verify-code`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, code: verificationCode }),
+    });
+
+    const verifyData = await verifyResponse.json();
+    if (!verifyResponse.ok) {
+      return NextResponse.json(
+        { error: verifyData.error || '邮箱验证码无效' },
+        { status: 400 }
+      );
+    }
+    console.log('邮箱验证码验证成功');
 
     // 检查邮箱是否已存在
     try {

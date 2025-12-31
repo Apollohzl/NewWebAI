@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { FaRobot, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '@/context/SimpleAuthContext';
 import { useRouter } from 'next/navigation';
+import VerificationCodeInput from '@/components/VerificationCodeInput';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -12,12 +13,14 @@ export default function Register() {
     email: '',
     password: '',
     confirmPassword: '',
+    verificationCode: '',
     agreeTerms: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
   
   const { register } = useAuth();
   const router = useRouter();
@@ -40,6 +43,11 @@ export default function Register() {
       return;
     }
 
+    if (!emailVerified) {
+      setError('请先完成邮箱验证');
+      return;
+    }
+
     if (!formData.agreeTerms) {
       setError('请同意服务条款和隐私政策');
       return;
@@ -48,11 +56,16 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const success = await register(formData.username, formData.email, formData.password);
+      const success = await register(
+        formData.username, 
+        formData.email, 
+        formData.password,
+        formData.verificationCode
+      );
       if (success) {
         router.push('/');
       } else {
-        setError('该邮箱已被注册');
+        setError('注册失败，请稍后重试');
       }
     } catch (err) {
       setError('注册失败，请稍后重试');
@@ -139,6 +152,13 @@ export default function Register() {
                   required
                 />
               </div>
+
+              {/* 邮箱验证码 */}
+              <VerificationCodeInput
+                email={formData.email}
+                onVerified={setEmailVerified}
+                onCodeChange={(code) => setFormData(prev => ({ ...prev, verificationCode: code }))}
+              />
 
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-black mb-2">

@@ -54,14 +54,35 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
+    // 基础验证
+    if (!formData.username || !formData.email) {
+      setError('请填写用户名和邮箱地址');
+      return;
+    }
+
+    if (!formData.verificationCode) {
+      setError('请输入验证码');
+      return;
+    }
+
+    if (!emailVerified) {
+      setError('请先验证邮箱验证码');
+      return;
+    }
+
+    if (!formData.password || !formData.confirmPassword) {
+      setError('请输入密码和确认密码');
+      return;
+    }
+
     // 验证密码
     if (formData.password !== formData.confirmPassword) {
       setError('两次输入的密码不一致');
       return;
     }
 
-    if (!emailVerified) {
-      setError('请先完成邮箱验证');
+    if (formData.password.length < 6) {
+      setError('密码长度至少为6位');
       return;
     }
 
@@ -410,7 +431,7 @@ export default function Register() {
                         注册中...
                       </span>
                     ) : (
-                      '创建账户'
+                      '注册账户'
                     )}
                   </button>
                 </form>

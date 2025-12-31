@@ -99,10 +99,14 @@ export default function VerificationCodeInput({ email, onVerified, onCodeChange 
     const numericValue = value.replace(/\D/g, '').slice(0, 6);
     setCode(numericValue);
     onCodeChange(numericValue);
-    
-    if (numericValue.length === 6) {
-      verifyCode();
+  };
+
+  const handleVerifyCode = () => {
+    if (code.length !== 6) {
+      setError('请输入6位验证码');
+      return;
     }
+    verifyCode();
   };
 
   return (
@@ -132,15 +136,20 @@ export default function VerificationCodeInput({ email, onVerified, onCodeChange 
         </div>
       </div>
 
+      {code.length > 0 && (
+        <button
+          type="button"
+          onClick={handleVerifyCode}
+          disabled={code.length !== 6}
+          className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          验证
+        </button>
+      )}
+
       {error && (
         <div className={`text-sm ${error.includes('开发环境验证码') ? 'text-blue-600' : 'text-red-600'}`}>
           {error}
-        </div>
-      )}
-
-      {code.length === 6 && (
-        <div className="text-sm text-green-600">
-          正在验证...
         </div>
       )}
     </div>

@@ -14,7 +14,7 @@ interface AuthContextType {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (username: string, email: string, password: string, verificationCode?: string) => Promise<boolean>;
+  register: (username: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (username: string, email: string, password: string, verificationCode?: string): Promise<boolean> => {
+  const register = async (username: string, email: string, password: string): Promise<boolean> => {
     try {
       console.log('客户端开始注册请求:', { username, email });
       const response = await fetch('/api/auth/register', {
@@ -77,16 +77,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, email, password, verificationCode }),
+        body: JSON.stringify({ username, email, password }),
       });
 
       const data = await response.json();
       console.log('注册响应:', { status: response.status, data });
 
       if (response.ok) {
-        setUser(data.user);
-        setToken(data.token);
-        localStorage.setItem('token', data.token);
+        // 注册成功，但需要邮箱验证，不自动登录
         return true;
       } else {
         console.error('注册失败:', data.error);

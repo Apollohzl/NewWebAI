@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { FaRobot, FaEye, FaEyeSlash, FaCheck, FaExclamationTriangle, FaEnvelope, FaLock, FaUser, FaShieldAlt, FaArrowRight } from 'react-icons/fa';
 import { useAuth } from '@/context/SimpleAuthContext';
 import { useRouter } from 'next/navigation';
-import VerificationCodeInput from '@/components/VerificationCodeInput';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -13,16 +12,15 @@ export default function Register() {
     email: '',
     password: '',
     confirmPassword: '',
-    verificationCode: '',
     agreeTerms: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [message, setMessage] = useState('');
   
   const { register } = useAuth();
   const router = useRouter();
@@ -53,20 +51,11 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setMessage('');
 
     // 基础验证
     if (!formData.username || !formData.email) {
       setError('请填写用户名和邮箱地址');
-      return;
-    }
-
-    if (!formData.verificationCode) {
-      setError('请输入验证码');
-      return;
-    }
-
-    if (!emailVerified) {
-      setError('请先验证邮箱验证码');
       return;
     }
 
@@ -94,16 +83,29 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const success = await register(
-        formData.username, 
-        formData.email, 
-        formData.password,
-        formData.verificationCode
-      );
-      if (success) {
-        router.push('/');
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(data.message);
+        if (data.needEmailVerification) {
+          setTimeout(() => {
+            router.push('/login');
+          }, 3000);
+        }
       } else {
-        setError('注册失败，请稍后重试');
+        setError(data.error || '注册失败，请稍后重试');
       }
     } catch (err) {
       setError('注册失败，请稍后重试');
@@ -253,10 +255,10 @@ export default function Register() {
                 )}
 
                 {/* 成功提示 */}
-                {emailVerified && (
+                {message && (
                   <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start space-x-3">
                     <FaCheck className="text-green-500 mt-0.5" />
-                    <p className="text-green-700 text-sm">邮箱验证成功！</p>
+                    <p className="text-green-700 text-sm">{message}</p>
                   </div>
                 )}
 
@@ -296,16 +298,6 @@ export default function Register() {
                       required
                     />
                   </div>
-
-                  {/* 验证码 */}
-                  <VerificationCodeInput
-                    email={formData.email}
-                    onVerified={(verified) => {
-                      setEmailVerified(verified);
-                      if (verified) setCurrentStep(2);
-                    }}
-                    onCodeChange={(code) => setFormData(prev => ({ ...prev, verificationCode: code }))}
-                  />
 
                   {/* 密码 */}
                   <div className="space-y-2">
@@ -419,7 +411,7 @@ export default function Register() {
                   {/* 提交按钮 */}
                   <button
                     type="submit"
-                    disabled={loading || !emailVerified || formData.password !== formData.confirmPassword}
+                    disabled={loading || formData.password !== formData.confirmPassword}
                     className="w-full py-3.5 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white font-medium rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
                   >
                     {loading ? (

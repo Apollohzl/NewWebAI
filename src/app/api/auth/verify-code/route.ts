@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       code,
       type: 'email_verification',
       isUsed: false,
-      expiresAt: { $gt: ISODate(new Date().toISOString()) },
+      expiresAt: { $gt: { "__type": "Date", "iso": new Date().toISOString() } },
     };
 
     const queryString = encodeURIComponent(JSON.stringify(where));

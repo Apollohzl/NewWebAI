@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     
     // 生成JWT Token
     const token = jwt.sign(
-      { userId: registeredUser.id, email: registeredUser.getEmail() },
+      { userId: registeredUser.objectId, email: registeredUser.email },
       process.env.JWT_SECRET || 'fallback-secret',
       { expiresIn: '7d' }
     );
@@ -56,9 +56,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: '注册成功',
       user: {
-        id: registeredUser.id,
-        username: registeredUser.getUsername(),
-        email: registeredUser.getEmail(),
+        id: registeredUser.objectId,
+        username: registeredUser.username,
+        email: registeredUser.email,
         createdAt: registeredUser.createdAt,
       },
       token,

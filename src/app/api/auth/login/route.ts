@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     
     // 生成JWT Token
     const token = jwt.sign(
-      { userId: user.id, email: user.getEmail() },
+      { userId: user.objectId, email: user.email },
       process.env.JWT_SECRET || 'fallback-secret',
       { expiresIn: '7d' }
     );
@@ -35,9 +35,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: '登录成功',
       user: {
-        id: user.id,
-        username: user.getUsername(),
-        email: user.getEmail(),
+        id: user.objectId,
+        username: user.username,
+        email: user.email,
         createdAt: user.createdAt,
       },
       token,

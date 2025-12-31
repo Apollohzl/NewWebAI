@@ -23,7 +23,10 @@ function getLeanCloudConfig() {
 // LeanCloud API 基础请求函数
 export async function leancloudRequest(endpoint: string, options: RequestInit = {}) {
   const config = getLeanCloudConfig();
-  const url = `${config.serverURL}/1.1${endpoint}`;
+  
+  // 确保endpoint以/开头
+  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${config.serverURL}/1.1${normalizedEndpoint}`;
   
   console.log('LeanCloud API请求:', { url, endpoint });
   

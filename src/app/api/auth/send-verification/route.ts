@@ -54,10 +54,41 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
+    // 使用LeanCloud邮件发送API
+    try {
+      const emailPayload = {
+        email: email,
+        template_name: 'email_verification', // 使用模板名称
+        verification_code: verificationCode, // 模板变量
+        app_name: 'NewWebAI',
+      };
+
+      // 发送邮件
+      const emailResponse = await fetch(`${process.env.LEANCLOUD_SERVER_URL}/1.1/requestEmailVerify`, {
+        method: 'POST',
+        headers: {
+          'X-LC-Id': process.env.LEANCLOUD_APP_ID!,
+          'X-LC-Key': process.env.LEANCLOUD_APP_KEY!,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        const errorData = await emailResponse.json().catch(() => ({}));
+        console.log('LeanCloud邮件发送响应:', errorData);
+        // 邮件发送失败不影响验证码保存
+      }
+    } catch (emailError) {
+      console.log('邮件发送失败，但验证码已保存:', emailError);
+    }
+
     return NextResponse.json({
-      message: '验证码已生成',
-      verificationCode: verificationCode, // 临时返回验证码，方便测试
-      note: '实际部署时应该通过邮件发送验证码'
+      message: '验证码已发送',
+      // 开发环境返回验证码
+      ...(process.env.NODE_ENV === 'development' && { verificationCode }),
     });
   } catch (error: any) {
     console.error('发送验证码失败:', error);

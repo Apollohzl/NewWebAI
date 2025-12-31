@@ -23,11 +23,12 @@ export async function POST(request: NextRequest) {
       code,
       type: 'email_verification',
       isUsed: false,
-      expiresAt: { $gt: new Date().toISOString() },
+      expiresAt: { $gt: ISODate(new Date().toISOString()) },
     };
 
+    const queryString = encodeURIComponent(JSON.stringify(where));
     const response = await leancloudRequest(
-      `/classes/EmailVerification?where=${encodeURIComponent(JSON.stringify(where))}&limit=1`
+      `/classes/EmailVerification?where=${queryString}&limit=1&order=-createdAt`
     );
 
     if (!response.results || response.results.length === 0) {

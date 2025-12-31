@@ -46,7 +46,7 @@ interface ApiResponse {
 
 const ApiDetailPage = () => {
   const params = useParams();
-  const apiId = params.id as string;
+  const apiId = params?.id as string;
   const [apiData, setApiData] = useState<ApiResponse | null>(null);
   const [currentApi, setCurrentApi] = useState<ApiInfo | null>(null);
   const [apiParams, setApiParams] = useState<any>(null);

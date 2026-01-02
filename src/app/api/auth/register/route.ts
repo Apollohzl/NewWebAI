@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     initLeanCloud();
     console.log('LeanCloud初始化完成');
     
-    const { username, email, password, phone } = await request.json();
+    const { username, email, password } = await request.json();
     console.log('收到注册请求:', { username, email });
 
     // 验证输入
@@ -30,16 +30,11 @@ export async function POST(request: NextRequest) {
     // 使用LeanCloud的邮箱验证注册
     try {
       // 先创建用户
-      const userData: any = {
+      const userData = {
         username,
         email,
         password
       };
-
-      // 如果提供了手机号，添加到用户数据
-      if (phone) {
-        userData.mobilePhoneNumber = phone;
-      }
 
       // 使用LeanCloud REST API直接创建用户
       const response = await leancloudRequest('/users', {

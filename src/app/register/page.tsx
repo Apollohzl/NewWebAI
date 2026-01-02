@@ -10,7 +10,6 @@ export default function Register() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    phone: '',
     password: '',
     confirmPassword: '',
     agreeTerms: false
@@ -22,10 +21,6 @@ export default function Register() {
   const [currentStep, setCurrentStep] = useState(1);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [message, setMessage] = useState('');
-  const [phoneCodeSent, setPhoneCodeSent] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const [phoneCodeCountdown, setPhoneCodeCountdown] = useState(0);
-  const [phoneCode, setPhoneCode] = useState('');
   
   const { register, user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -72,90 +67,6 @@ export default function Register() {
     }));
   };
 
-  // 发送手机验证码
-  const handleSendPhoneCode = async () => {
-    if (!formData.phone) {
-      setError('请输入手机号');
-      return;
-    }
-
-    if (!/^1[3-9]\d{9}$/.test(formData.phone)) {
-      setError('请输入正确的手机号格式');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch('/api/auth/send-phone-verification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phone: formData.phone }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setPhoneCodeSent(true);
-        setError('');
-        // 开始倒计时
-        setPhoneCodeCountdown(60);
-        const timer = setInterval(() => {
-          setPhoneCodeCountdown((prev) => {
-            if (prev <= 1) {
-              clearInterval(timer);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
-      } else {
-        setError(data.error || '发送验证码失败');
-      }
-    } catch (error) {
-      setError('网络错误，请重试');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 验证手机验证码
-  const handleVerifyPhoneCode = async () => {
-    if (!phoneCode || phoneCode.length !== 6) {
-      setError('请输入6位验证码');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch('/api/auth/verify-phone-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          phone: formData.phone, 
-          code: phoneCode 
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setPhoneVerified(true);
-        setError('');
-        setPhoneCode('');
-      } else {
-        setError(data.error || '验证码错误');
-      }
-    } catch (error) {
-      setError('网络错误，请重试');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -183,12 +94,6 @@ export default function Register() {
       return;
     }
 
-    // 手机号验证检查（如果填写了手机号）
-    if (formData.phone && !phoneVerified) {
-      setError('请先验证手机号');
-      return;
-    }
-
     // 同意条款检查
     if (!formData.agreeTerms) {
       setError('请同意服务条款和隐私政策');
@@ -206,8 +111,7 @@ export default function Register() {
         body: JSON.stringify({
           username: formData.username,
           email: formData.email,
-          password: formData.password,
-          phone: formData.phone || undefined
+          password: formData.password
         }),
       });
 
@@ -413,64 +317,6 @@ export default function Register() {
                       placeholder="请输入邮箱地址"
                       required
                     />
-                  </div>
-
-                  {/* 手机号（选填） */}
-                  <div className="space-y-2">
-                    <label htmlFor="phone" className="flex items-center text-sm font-medium text-gray-700">
-                      <FaUser className="mr-2 text-gray-400" />
-                      手机号（选填）
-                    </label>
-                    <div className="flex space-x-2">
-                      <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all"
-                        placeholder="请输入手机号（选填）"
-                      />
-                      {formData.phone && (
-                        <button
-                          type="button"
-                          onClick={handleSendPhoneCode}
-                          disabled={phoneCodeCountdown > 0 || loading}
-                          className="px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all whitespace-nowrap text-sm"
-                        >
-                          {phoneCodeCountdown > 0 ? `${phoneCodeCountdown}s` : '发送验证码'}
-                        </button>
-                      )}
-                    </div>
-                    
-                    {/* 验证码输入 */}
-                    {phoneCodeSent && (
-                      <div className="space-y-2">
-                        <input
-                          type="text"
-                          value={phoneCode}
-                          onChange={(e) => setPhoneCode(e.target.value)}
-                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all"
-                          placeholder="请输入6位验证码"
-                          maxLength={6}
-                        />
-                        {phoneCode.length === 6 && (
-                          <button
-                            type="button"
-                            onClick={handleVerifyPhoneCode}
-                            disabled={loading}
-                            className="w-full px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-50 transition-all"
-                          >
-                            验证手机号
-                          </button>
-                        )}
-                        {phoneVerified && (
-                          <div className="text-green-600 text-sm flex items-center">
-                            <FaCheck className="mr-1" /> 手机号已验证
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   {/* 密码 */}

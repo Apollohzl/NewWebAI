@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
         id: user.objectId,
         username: user.username,
         email: user.email,
+        avatar: user.avatar || null, // 包含头像信息
         createdAt: user.createdAt,
       },
       token: jwtToken,

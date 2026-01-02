@@ -21,18 +21,25 @@ export default function ProfilePage() {
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
 
   useEffect(() => {
+    // 如果还在加载认证状态，不执行任何操作
+    if (loading) {
+      return;
+    }
+
+    // 如果认证状态加载完成但没有用户信息，跳转到登录页面
     if (!user) {
       router.push('/login');
       return;
     }
 
+    // 用户已登录，初始化表单数据
     setFormData({
       username: user.username || '',
       email: user.email || '',
     });
     
     setAvatarPreview(user.avatar || '/user0.svg');
-  }, [user, router]);
+  }, [user, loading, router]);
 
   const showMessage = (msg: string, type: 'success' | 'error' = 'success') => {
     setMessage(msg);

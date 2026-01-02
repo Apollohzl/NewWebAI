@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { leancloudRequest } from '@/lib/leancloud';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
 import jwt from 'jsonwebtoken';
 
 export async function POST(request: NextRequest) {
@@ -54,27 +52,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '用户不存在' }, { status: 404 });
     }
 
-    // 保存文件到本地
-    const bytes = await avatar.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    // 上传文件到LeanCloud
+    const fileBuffer = await avatar.arrayBuffer();
+    const base64Data = Buffer.from(fileBuffer).toString('base64');
     
-    // 确保上传目录存在
-    const uploadDir = join(process.cwd(), 'public', 'avatars');
-    try {
-      await mkdir(uploadDir, { recursive: true });
-    } catch (error) {
-      // 目录已存在，忽略错误
-    }
+    const fileData = {
+      name: `avatar_${currentUserResponse.objectId}_${Date.now()}.${avatar.name.split('.').pop()}`,
+      mime_type: avatar.type,
+      base64: `data:${avatar.type};base64,${base64Data}`,
+      metadata: {
+        userId: currentUserResponse.objectId,
+        type: 'avatar'
+      }
+    };
 
-    // 生成唯一文件名
-    const fileExtension = avatar.name.split('.').pop();
-    const fileName = `${currentUserResponse.objectId}_${Date.now()}.${fileExtension}`;
-    const filePath = join(uploadDir, fileName);
-    
-    await writeFile(filePath, buffer);
-    
-    // 构建公开访问URL
-    const avatarUrl = `/avatars/${fileName}`;
+    // 上传到LeanCloud文件服务
+    const fileUploadResponse = await leancloudRequest('/files', {
+      method: 'POST',
+      headers: {
+        'X-LC-Session': sessionToken,
+      },
+      body: JSON.stringify(fileData),
+    });
+
+    const avatarUrl = fileUploadResponse.url;
 
     // 更新用户头像字段
     const updateResponse = await leancloudRequest(`/users/${currentUserResponse.objectId}`, {

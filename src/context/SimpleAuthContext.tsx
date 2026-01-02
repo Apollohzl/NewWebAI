@@ -7,6 +7,8 @@ interface LeanCloudUser {
   username: string;
   email: string;
   createdAt: string;
+  avatar?: string;
+  emailVerified?: boolean;
 }
 
 interface AuthContextType {
@@ -16,6 +18,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (username: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  updateUser: (updatedUser: Partial<LeanCloudUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -25,6 +28,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => false,
   register: async () => false,
   logout: () => {},
+  updateUser: () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -32,12 +36,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 初始化时从localStorage读取token
+  // 初始化时从localStorage读取保存的认证信息
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
-    if (savedToken) {
-      setToken(savedToken);
-      // 这里可以添加验证token的逻辑
+    const savedUser = localStorage.getItem('user');
+    
+    if (savedToken && savedUser) {
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        setToken(savedToken);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('解析用户信息失败:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
     }
     setLoading(false);
   }, []);
@@ -57,7 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         setUser(data.user);
         setToken(data.token);
+        // 保存到localStorage
         localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         return true;
       } else {
         console.error(data.error);
@@ -99,7 +114,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null);
     setToken(null);
+    // 清除localStorage中的认证信息
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  };
+
+  // 更新用户信息的函数
+  const updateUser = (updatedUser: Partial<LeanCloudUser>) => {
+    if (user) {
+      const newUser = { ...user, ...updatedUser };
+      setUser(newUser);
+      localStorage.setItem('user', JSON.stringify(newUser));
+    }
   };
 
   return (
@@ -111,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        updateUser,
       }}
     >
       {children}

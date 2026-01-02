@@ -2,9 +2,10 @@
 
 import { useAuth } from '@/context/SimpleAuthContext';
 import Link from 'next/link';
+import UserAvatar from './UserAvatar';
 
 export default function AuthButtons() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -17,17 +18,7 @@ export default function AuthButtons() {
   }
 
   if (user) {
-    return (
-      <div className="flex items-center space-x-3">
-        <span className="text-sm text-black">欢迎, {user.username}</span>
-        <button
-          onClick={logout}
-          className="border border-red-600 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition"
-        >
-          退出
-        </button>
-      </div>
-    );
+    return <UserAvatar />;
   }
 
   return (

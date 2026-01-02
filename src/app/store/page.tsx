@@ -1,9 +1,22 @@
 'use client';
 
-import { Product, products } from '@/lib/products';
+import { useState, useEffect } from 'react';
 import { FaStar, FaRegStar, FaStarHalfAlt, FaTag, FaShoppingCart } from 'react-icons/fa';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice: number;
+  image: string;
+  category: string;
+  rating: number;
+  tags: string[];
+  features: string[];
+}
 
 interface ProductCardProps {
   product: Product;
@@ -105,9 +118,59 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
 const ProductPage = () => {
   const { items, getTotal, getItemCount } = useCart();
-  
-  return (
-    <div className="min-h-screen bg-gray-50 pb-24"> {/* 添加底部边距，为固定栏留出空间 */}
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/config/products');
+        const data = await response.json();
+        
+        if (response.ok) {
+          setProducts(data.products || []);
+        } else {
+          setError('获取产品数据失败');
+        }
+      } catch (error) {
+        setError('网络错误，请稍后重试');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">加载产品数据中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            重新加载
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (    <div className="min-h-screen bg-gray-50 pb-24"> {/* 添加底部边距，为固定栏留出空间 */}
       {/* 导航栏 */}
       <nav className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">

@@ -205,9 +205,23 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">账户设置</h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* 导航栏 */}
+      <nav className="bg-white/80 backdrop-blur-md shadow-sm py-4 sticky top-0 z-10">
+        <div className="container mx-auto px-4 flex justify-between items-center max-w-6xl">
+          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition">
+            <img src="/logo.png" alt="NewWebAI" className="h-8 w-8" />
+            <span className="text-xl font-bold text-black">NewWebAI</span>
+          </Link>
+          <div className="text-sm text-gray-600">
+            账户设置
+          </div>
+        </div>
+      </nav>
+
+      <div className="py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">账户设置</h1>
 
         {/* 消息提示 */}
         {message && (
@@ -330,5 +344,6 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+  </div>
   );
 }

@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     console.log('用户登录成功:', user);
     
     // 生成JWT Token
-    const token = jwt.sign(
+    const jwtToken = jwt.sign(
       { userId: user.objectId, email: user.email },
       process.env.JWT_SECRET || 'fallback-secret',
       { expiresIn: '7d' }
@@ -40,7 +40,8 @@ export async function POST(request: NextRequest) {
         email: user.email,
         createdAt: user.createdAt,
       },
-      token,
+      token: jwtToken,
+      sessionToken: user.sessionToken, // LeanCloud session token
     });
   } catch (error: any) {
     console.error('登录错误详情:', error);

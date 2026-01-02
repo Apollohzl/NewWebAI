@@ -37,9 +37,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '无效的登录状态' }, { status: 401 });
     }
 
+    // 获取session token
+    const sessionToken = request.headers.get('X-LC-Session');
+    if (!sessionToken) {
+      return NextResponse.json({ error: '缺少session token' }, { status: 401 });
+    }
+
     // 获取当前用户信息
-    const currentUserResponse = await leancloudRequest(`/users/${decoded.userId}`, {
-      method: 'GET',
+    const currentUserResponse = await leancloudRequest('/users/me', {
+      headers: {
+        'X-LC-Session': sessionToken,
+      },
     });
 
     if (!currentUserResponse || !currentUserResponse.objectId) {
@@ -71,6 +79,9 @@ export async function POST(request: NextRequest) {
     // 更新用户头像字段
     const updateResponse = await leancloudRequest(`/users/${currentUserResponse.objectId}`, {
       method: 'PUT',
+      headers: {
+        'X-LC-Session': sessionToken,
+      },
       body: JSON.stringify({
         avatar: avatarUrl,
       }),

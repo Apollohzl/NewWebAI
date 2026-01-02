@@ -14,6 +14,7 @@ interface LeanCloudUser {
 interface AuthContextType {
   user: LeanCloudUser | null;
   token: string | null;
+  sessionToken: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (username: string, email: string, password: string) => Promise<boolean>;
@@ -24,6 +25,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   token: null,
+  sessionToken: null,
   loading: true,
   login: async () => false,
   register: async () => false,
@@ -34,21 +36,25 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<LeanCloudUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // 初始化时从localStorage读取保存的认证信息
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
+    const savedSessionToken = localStorage.getItem('sessionToken');
     const savedUser = localStorage.getItem('user');
     
     if (savedToken && savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser);
         setToken(savedToken);
+        setSessionToken(savedSessionToken);
         setUser(parsedUser);
       } catch (error) {
         console.error('解析用户信息失败:', error);
         localStorage.removeItem('token');
+        localStorage.removeItem('sessionToken');
         localStorage.removeItem('user');
       }
     }
@@ -70,8 +76,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         setUser(data.user);
         setToken(data.token);
+        setSessionToken(data.sessionToken);
         // 保存到localStorage
         localStorage.setItem('token', data.token);
+        localStorage.setItem('sessionToken', data.sessionToken);
         localStorage.setItem('user', JSON.stringify(data.user));
         return true;
       } else {
@@ -114,8 +122,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null);
     setToken(null);
+    setSessionToken(null);
     // 清除localStorage中的认证信息
     localStorage.removeItem('token');
+    localStorage.removeItem('sessionToken');
     localStorage.removeItem('user');
   };
 
@@ -133,6 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         token,
+        sessionToken,
         loading,
         login,
         register,

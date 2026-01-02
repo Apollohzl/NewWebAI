@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function ProfilePage() {
-  const { user, token, updateUser } = useAuth();
+  const { user, token, sessionToken, updateUser } = useAuth();
   const router = useRouter();
   
   const [formData, setFormData] = useState({
@@ -72,6 +72,7 @@ export default function ProfilePage() {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          'X-LC-Session': sessionToken || '',
         },
         body: JSON.stringify({
           username: formData.username,
@@ -103,6 +104,7 @@ export default function ProfilePage() {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          'X-LC-Session': sessionToken || '',
         },
         body: JSON.stringify({
           email: user?.email,
@@ -141,6 +143,7 @@ export default function ProfilePage() {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
+          'X-LC-Session': sessionToken || '',
         },
         body: formData,
       });

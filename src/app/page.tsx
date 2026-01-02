@@ -111,32 +111,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 客户评价 */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-black mb-16">用户反馈</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="bg-gray-50 p-8 rounded-xl">
-                <div className="flex items-center mb-4">
-                  <div className="bg-gray-200 rounded-full w-12 h-12 flex items-center justify-center mr-4">
-                    <FaUsers className="text-blue-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">用户 {item}</h4>
-                    <div className="flex text-yellow-400">
-                      {'★'.repeat(5)}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-black italic">
-                  "NewWebAI的AI功能大大提升了我们的工作效率，智能推荐系统准确率很高，用户体验极佳！"
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      
 
       {/* 页脚 */}
       <footer className="bg-gray-900 text-white py-12">

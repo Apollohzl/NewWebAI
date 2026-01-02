@@ -55,6 +55,13 @@ export default function ProfilePage() {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // 检查文件格式，只支持PNG和JPG
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+      if (!allowedTypes.includes(file.type)) {
+        showMessage('头像文件只支持PNG和JPG格式', 'error');
+        return;
+      }
+      
       if (file.size > 10 * 1024 * 1024) {
         showMessage('头像文件大小不能超过10MB', 'error');
         return;

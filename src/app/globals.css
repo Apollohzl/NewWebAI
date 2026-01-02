@@ -25,6 +25,10 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.bg-gray-900 {
+    background-color: lab(85 36.59 -19.26);
+}
+
 /* API页面样式 */
 .api-card {
   transition: all 0.3s ease;

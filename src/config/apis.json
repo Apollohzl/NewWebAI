@@ -12,66 +12,7 @@
       "requestUrl": "https://hzliflow.ken520.top/api/hello",
       "methods": ["GET", "POST"]
     },
-    {
-      "id": "users",
-      "name": "用户管理 API",
-      "description": "用户信息的增删改查操作",
-      "status": "正常",
-      "visits": "12847",
-      "icon": "👤",
-      "tags": ["用户", "管理", "CRUD"],
-      "category": "management",
-      "requestUrl": "https://hzliflow.ken520.top/api/users",
-      "methods": ["GET", "POST", "PUT", "DELETE"]
-    },
-    {
-      "id": "products",
-      "name": "产品管理 API",
-      "description": "产品信息的查询、筛选和管理",
-      "status": "正常",
-      "visits": "8923",
-      "icon": "📦",
-      "tags": ["产品", "电商", "管理"],
-      "category": "management",
-      "requestUrl": "https://hzliflow.ken520.top/api/products",
-      "methods": ["GET", "POST", "PUT", "DELETE"]
-    },
-    {
-      "id": "blog",
-      "name": "博客管理 API",
-      "description": "博客文章的管理与查询",
-      "status": "正常",
-      "visits": "5216",
-      "icon": "📝",
-      "tags": ["博客", "内容", "文章"],
-      "category": "content",
-      "requestUrl": "https://hzliflow.ken520.top/api/blog",
-      "methods": ["GET", "POST", "PUT", "DELETE"]
-    },
-    {
-      "id": "search",
-      "name": "全站搜索 API",
-      "description": "全站内容搜索，支持多类型数据",
-      "status": "正常",
-      "visits": "15678",
-      "icon": "🔍",
-      "tags": ["搜索", "全站", "多类型"],
-      "category": "utility",
-      "requestUrl": "https://hzliflow.ken520.top/api/search",
-      "methods": ["GET", "POST"]
-    },
-    {
-      "id": "cart",
-      "name": "购物车 API",
-      "description": "购物车管理，包括增删改查",
-      "status": "正常",
-      "visits": "7392",
-      "icon": "🛒",
-      "tags": ["购物车", "电商", "管理"],
-      "category": "ecommerce",
-      "requestUrl": "https://hzliflow.ken520.top/api/cart",
-      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"]
-    },
+    
     {
       "id": "ai-chat",
       "name": "AI对话 API",

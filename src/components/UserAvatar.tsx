@@ -13,8 +13,23 @@ export default function UserAvatar() {
     return null;
   }
 
-  // 默认头像或用户头像
-  const avatarUrl = user.avatar || '/user0.svg';
+  // 处理头像URL
+  const getAvatarUrl = () => {
+    if (!user.avatar) {
+      return '/user0.svg';
+    }
+    
+    // 如果是LeanCloud URL，确保正确格式
+    if (user.avatar.startsWith('http')) {
+      return user.avatar;
+    }
+    
+    // 如果是相对路径，添加LeanCloud域名前缀（如果需要）
+    // 这里可能需要根据您的LeanCloud配置调整
+    return user.avatar;
+  };
+  
+  const avatarUrl = getAvatarUrl();
 
   const handleMouseEnter = () => {
     // 清除任何现有的延迟隐藏

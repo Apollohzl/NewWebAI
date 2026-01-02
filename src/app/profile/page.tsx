@@ -178,6 +178,7 @@ export default function ProfilePage() {
 
       if (response.ok) {
         updateUser({ avatar: data.avatarUrl });
+        setAvatarPreview(data.avatarUrl); // 更新预览
         showMessage('头像上传成功', 'success');
         setAvatarFile(null);
       } else {

@@ -75,7 +75,18 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(fileData),
     });
 
-    const avatarUrl = fileUploadResponse.url;
+    console.log('LeanCloud文件上传响应:', fileUploadResponse);
+
+    // LeanCloud文件上传响应可能包含不同的字段
+    const avatarUrl = fileUploadResponse.url || fileUploadResponse.cdn || fileUploadResponse.location;
+    
+    if (!avatarUrl) {
+      console.error('无法从LeanCloud响应中获取文件URL:', fileUploadResponse);
+      return NextResponse.json(
+        { error: '文件上传成功但无法获取文件URL' },
+        { status: 500 }
+      );
+    }
 
     // 更新用户头像字段
     const updateResponse = await leancloudRequest(`/users/${currentUserResponse.objectId}`, {

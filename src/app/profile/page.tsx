@@ -64,6 +64,13 @@ export default function ProfilePage() {
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!sessionToken) {
+      showMessage('登录状态已过期，请重新登录', 'error');
+      router.push('/login');
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -72,7 +79,7 @@ export default function ProfilePage() {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'X-LC-Session': sessionToken || '',
+          'X-LC-Session': sessionToken,
         },
         body: JSON.stringify({
           username: formData.username,
@@ -96,6 +103,12 @@ export default function ProfilePage() {
   };
 
   const handlePasswordResetRequest = async () => {
+    if (!sessionToken) {
+      showMessage('登录状态已过期，请重新登录', 'error');
+      router.push('/login');
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -104,7 +117,7 @@ export default function ProfilePage() {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'X-LC-Session': sessionToken || '',
+          'X-LC-Session': sessionToken,
         },
         body: JSON.stringify({
           email: user?.email,
@@ -133,6 +146,12 @@ export default function ProfilePage() {
       return;
     }
 
+    if (!sessionToken) {
+      showMessage('登录状态已过期，请重新登录', 'error');
+      router.push('/login');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -143,7 +162,7 @@ export default function ProfilePage() {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'X-LC-Session': sessionToken || '',
+          'X-LC-Session': sessionToken,
         },
         body: formData,
       });

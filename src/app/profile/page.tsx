@@ -12,9 +12,6 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
   });
   
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -32,9 +29,6 @@ export default function ProfilePage() {
     setFormData({
       username: user.username || '',
       email: user.email || '',
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
     });
     
     setAvatarPreview(user.avatar || '/user0.svg');
@@ -54,8 +48,8 @@ export default function ProfilePage() {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        showMessage('头像文件大小不能超过5MB', 'error');
+      if (file.size > 10 * 1024 * 1024) {
+        showMessage('头像文件大小不能超过10MB', 'error');
         return;
       }
       
@@ -100,46 +94,27 @@ export default function ProfilePage() {
     }
   };
 
-  const handlePasswordUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (formData.newPassword !== formData.confirmPassword) {
-      showMessage('新密码和确认密码不匹配', 'error');
-      return;
-    }
-
-    if (formData.newPassword.length < 6) {
-      showMessage('新密码长度至少为6位', 'error');
-      return;
-    }
-
+  const handlePasswordResetRequest = async () => {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/update-password', {
-        method: 'PUT',
+      const response = await fetch('/api/auth/request-password-reset', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword,
+          email: user?.email,
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        showMessage('密码修改成功', 'success');
-        setFormData(prev => ({
-          ...prev,
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: '',
-        }));
+        showMessage('重置密码邮件已发送，请查收邮件', 'success');
       } else {
-        showMessage(data.error || '密码修改失败', 'error');
+        showMessage(data.error || '发送邮件失败', 'error');
       }
     } catch (error) {
       showMessage('网络错误，请重试', 'error');
@@ -242,7 +217,7 @@ export default function ProfilePage() {
                   选择头像
                 </label>
                 <p className="text-sm text-gray-500 mt-2">
-                  支持 JPG、PNG 格式，文件大小不超过5MB
+                  支持 JPG、PNG、GIF、WebP 格式，文件大小不超过10MB
                 </p>
               </div>
             </div>
@@ -305,62 +280,23 @@ export default function ProfilePage() {
         {/* 密码修改 */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4">密码修改</h2>
-          <form onSubmit={handlePasswordUpdate} className="space-y-4">
-            <div>
-              <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                当前密码
-              </label>
-              <input
-                type="password"
-                id="currentPassword"
-                name="currentPassword"
-                value={formData.currentPassword}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                新密码
-              </label>
-              <input
-                type="password"
-                id="newPassword"
-                name="newPassword"
-                value={formData.newPassword}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                minLength={6}
-                required
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                确认新密码
-              </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                minLength={6}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition disabled:opacity-50"
-            >
-              {loading ? '修改中...' : '修改密码'}
-            </button>
-          </form>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <p className="text-sm text-blue-800">
+              为了账户安全，密码修改需要通过邮件验证。点击下方按钮发送重置密码邮件到您的邮箱。
+            </p>
+          </div>
+          
+          <button
+            onClick={handlePasswordResetRequest}
+            disabled={loading}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+          >
+            {loading ? '发送中...' : '发送重置密码邮件'}
+          </button>
+          
+          <p className="text-xs text-gray-500 mt-2">
+            邮件发送后，请查收邮件并点击重置链接来设置新密码
+          </p>
         </div>
       </div>
     </div>

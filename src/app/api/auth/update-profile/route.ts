@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { leancloudRequest } from '@/lib/leancloud';
+import jwt from 'jsonwebtoken';
 
 export async function PUT(request: NextRequest) {
   try {
@@ -15,15 +16,21 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: '用户名和邮箱不能为空' }, { status: 400 });
     }
 
-    // 验证token并获取用户信息
-    const currentUserResponse = await leancloudRequest('/users/me', {
-      headers: {
-        'X-LC-Session': token,
-      },
+    // 验证JWT token
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+    } catch (error) {
+      return NextResponse.json({ error: '无效的登录状态' }, { status: 401 });
+    }
+
+    // 获取用户信息
+    const currentUserResponse = await leancloudRequest(`/users/${decoded.userId}`, {
+      method: 'GET',
     });
 
     if (!currentUserResponse || !currentUserResponse.objectId) {
-      return NextResponse.json({ error: '无效的登录状态' }, { status: 401 });
+      return NextResponse.json({ error: '用户不存在' }, { status: 404 });
     }
 
     // 更新用户信息
@@ -39,9 +46,6 @@ export async function PUT(request: NextRequest) {
 
     const updateResponse = await leancloudRequest(`/users/${currentUserResponse.objectId}`, {
       method: 'PUT',
-      headers: {
-        'X-LC-Session': token,
-      },
       body: JSON.stringify(updateData),
     });
 
@@ -50,9 +54,6 @@ export async function PUT(request: NextRequest) {
       try {
         await leancloudRequest('/requestEmailVerify', {
           method: 'POST',
-          headers: {
-            'X-LC-Session': token,
-          },
           body: JSON.stringify({
             email: email.trim(),
           }),

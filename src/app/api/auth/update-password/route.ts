@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { leancloudRequest } from '@/lib/leancloud';
+import jwt from 'jsonwebtoken';
 
 export async function PUT(request: NextRequest) {
   try {
@@ -19,27 +20,28 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: '新密码长度至少为6位' }, { status: 400 });
     }
 
-    // 验证当前密码
-    const loginResponse = await leancloudRequest('/login', {
-      method: 'POST',
-      body: JSON.stringify({
-        username: '', // 这里需要从token获取用户名
-        password: currentPassword,
-      }),
-    });
+    // 验证JWT token
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+    } catch (error) {
+      return NextResponse.json({ error: '无效的登录状态' }, { status: 401 });
+    }
 
     // 获取当前用户信息
-    const currentUserResponse = await leancloudRequest('/users/me', {
-      headers: {
-        'X-LC-Session': token,
-      },
+    const currentUserResponse = await leancloudRequest(`/users/${decoded.userId}`, {
+      method: 'GET',
     });
 
-    // 使用用户名和当前密码验证
+    if (!currentUserResponse || !currentUserResponse.objectId) {
+      return NextResponse.json({ error: '用户不存在' }, { status: 404 });
+    }
+
+    // 使用邮箱和当前密码验证
     const verifyResponse = await leancloudRequest('/login', {
       method: 'POST',
       body: JSON.stringify({
-        username: currentUserResponse.username,
+        username: currentUserResponse.email,
         password: currentPassword,
       }),
     });
@@ -51,9 +53,6 @@ export async function PUT(request: NextRequest) {
     // 更新密码
     const updateResponse = await leancloudRequest(`/users/${currentUserResponse.objectId}`, {
       method: 'PUT',
-      headers: {
-        'X-LC-Session': token,
-      },
       body: JSON.stringify({
         password: newPassword,
       }),

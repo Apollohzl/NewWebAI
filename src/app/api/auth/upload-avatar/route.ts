@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { leancloudRequest } from '@/lib/leancloud';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
+import jwt from 'jsonwebtoken';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,19 +25,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '只支持 JPG、PNG、GIF、WebP 格式的图片' }, { status: 400 });
     }
 
-    if (avatar.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: '头像文件大小不能超过5MB' }, { status: 400 });
+    if (avatar.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: '头像文件大小不能超过10MB' }, { status: 400 });
+    }
+
+    // 验证JWT token
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+    } catch (error) {
+      return NextResponse.json({ error: '无效的登录状态' }, { status: 401 });
     }
 
     // 获取当前用户信息
-    const currentUserResponse = await leancloudRequest('/users/me', {
-      headers: {
-        'X-LC-Session': token,
-      },
+    const currentUserResponse = await leancloudRequest(`/users/${decoded.userId}`, {
+      method: 'GET',
     });
 
     if (!currentUserResponse || !currentUserResponse.objectId) {
-      return NextResponse.json({ error: '无效的登录状态' }, { status: 401 });
+      return NextResponse.json({ error: '用户不存在' }, { status: 404 });
     }
 
     // 保存文件到本地
@@ -64,9 +71,6 @@ export async function POST(request: NextRequest) {
     // 更新用户头像字段
     const updateResponse = await leancloudRequest(`/users/${currentUserResponse.objectId}`, {
       method: 'PUT',
-      headers: {
-        'X-LC-Session': token,
-      },
       body: JSON.stringify({
         avatar: avatarUrl,
       }),

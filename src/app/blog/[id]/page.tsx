@@ -1,35 +1,77 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
 interface BlogPost {
-  id: number;
+  objectId: string;
   title: string;
   content: string;
-  date: string;
+  excerpt: string;
+  category: string;
+  tags: string[];
   author: string;
+  readTime: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-async function getBlogPost(): Promise<{ blogPost: BlogPost; serverTime: string }> {
-  // 模拟从数据库或API获取博客文章
-  const blogPost: BlogPost = {
-    id: 1,
-    title: 'Next.js 14 与 AI 技术的完美结合',
-    content: 'Next.js 14 引入了众多新特性，包括App Router、流式渲染和React Server Components。这些特性使得构建现代化Web应用变得更加高效。结合AI技术，我们可以创建更加智能和个性化的用户体验。',
-    date: '2025-01-15',
-    author: '小黄AI团队'
-  };
+export default function BlogPostPage() {
+  const params = useParams();
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 获取服务器时间
-  const serverTime = new Date().toISOString();
+  useEffect(() => {
+    const fetchPost = async () => {
+      if (!params?.id) return;
+      
+      try {
+        const response = await fetch(`/api/blog/${params.id}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          setPost(data.post);
+        } else {
+          setError(data.error || '博客文章不存在');
+        }
+      } catch (error) {
+        setError('网络错误，请稍后重试');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  return {
-    blogPost,
-    serverTime
-  };
-}
-
-export default async function BlogPostPage() {
-  const { blogPost, serverTime } = await getBlogPost();
+    fetchPost();
+  }, [params?.id]);
   
+  // 加载状态
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">加载博客文章中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 错误状态
+  if (error || !post) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error || '博客文章不存在'}</p>
+          <Link href="/blog" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            返回博客列表
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
@@ -49,22 +91,34 @@ export default async function BlogPostPage() {
         <div className="bg-white rounded-xl shadow-md p-8">
           <div className="mb-6">
             <span className="text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-              {blogPost.date}
+              {post.category}
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-black mb-4">{blogPost.title}</h1>
+          <h1 className="text-3xl font-bold text-black mb-4">{post.title}</h1>
           <div className="flex items-center text-black mb-8">
-            <span>作者: {blogPost.author}</span>
+            <span>作者: {post.author}</span>
             <span className="mx-3">•</span>
-            <span>服务器时间: {serverTime}</span>
+            <span>{post.readTime}</span>
+            <span className="mx-3">•</span>
+            <span>{new Date(post.createdAt).toLocaleDateString('zh-CN')}</span>
           </div>
+          
+          {/* 标签 */}
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-8">
+              {post.tags.map((tag, index) => (
+                <span 
+                  key={index}
+                  className="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-full"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
           <div className="prose max-w-none text-black">
-            <p>{blogPost.content}</p>
-            <p>SSR (Server-Side Rendering) 使此页面在服务器上渲染，为搜索引擎优化和初始加载性能提供最佳体验。</p>
-            <h2>Next.js 14 的优势</h2>
-            <p>Next.js 14 提供了 App Router、流式渲染和其他性能优化功能，使构建现代 Web 应用变得更加容易。</p>
-            <h2>AI 集成</h2>
-            <p>NewWebAI 利用 AI 技术提供智能内容推荐、个性化体验和自动化功能，为用户带来卓越的服务。</p>
+            <div dangerouslySetInnerHTML={{ __html: post.content }} />
           </div>
         </div>
 

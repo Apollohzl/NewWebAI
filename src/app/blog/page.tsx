@@ -1,41 +1,73 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+interface BlogPost {
+  objectId: string;
+  title: string;
+  content: string;
+  excerpt: string;
+  category: string;
+  author: string;
+  readTime: string;
+  createdAt: string;
+  updatedAt: string;
+  tags: string[];
+}
+
 export default function BlogPage() {
-  // 模拟博客文章数据
-  const blogPosts = [
-    {
-      id: 1,
-      title: 'AI技术的未来发展趋势',
-      excerpt: '探讨人工智能技术的最新进展和未来发展方向，以及对社会的影响。',
-      date: '2025-01-15',
-      author: '小黄AI团队',
-      readTime: '5 分钟阅读'
-    },
-    {
-      id: 2,
-      title: 'Next.js 14 新特性详解',
-      excerpt: '深入了解Next.js 14的新功能，包括服务器组件、流式渲染等。',
-      date: '2025-01-12',
-      author: '小黄AI团队',
-      readTime: '8 分钟阅读'
-    },
-    {
-      id: 3,
-      title: '构建智能推荐系统',
-      excerpt: '如何使用机器学习算法构建个性化推荐系统，提升用户体验。',
-      date: '2025-01-10',
-      author: '小黄AI团队',
-      readTime: '6 分钟阅读'
-    },
-    {
-      id: 4,
-      title: 'Web开发最佳实践',
-      excerpt: '现代Web开发中的最佳实践，包括性能优化、安全性和可访问性。',
-      date: '2025-01-08',
-      author: '小黄AI团队',
-      readTime: '7 分钟阅读'
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    total: 0,
+    count: 0,
+    hasNext: false,
+    hasPrev: false
+  });
+
+  const fetchPosts = async (page = 1, search = '') => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '6',
+        search: search
+      });
+      
+      const response = await fetch(`/api/blog?${params}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setPosts(data.posts || []);
+        setPagination(data.pagination || pagination);
+      } else {
+        setError(data.error || '获取博客数据失败');
+      }
+    } catch (error) {
+      setError('网络错误，请稍后重试');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchPosts(currentPage, searchTerm);
+  }, [currentPage]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    fetchPosts(1, searchTerm);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -62,41 +94,121 @@ export default function BlogPage() {
           探索人工智能、Web开发和技术创新的最新动态
         </p>
 
-        {/* 博客文章列表 */}
-        <div className="max-w-4xl mx-auto">
-          {blogPosts.map((post) => (
-            <article 
-              key={post.id} 
-              className="bg-white rounded-xl shadow-md overflow-hidden mb-8 hover:shadow-lg transition"
+        {/* 搜索栏 */}
+        <div className="max-w-2xl mx-auto mb-8">
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="搜索博客文章..."
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              <div className="p-8">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm text-blue-600 font-medium">{post.date}</span>
-                  <span className="text-sm text-black">{post.readTime}</span>
-                </div>
-                <h2 className="text-2xl font-bold text-black mb-3">{post.title}</h2>
-                <p className="text-black mb-4">{post.excerpt}</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-black">作者: {post.author}</span>
-                  <Link 
-                    href={`/blog/${post.id}`} 
-                    className="text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    阅读更多 →
-                  </Link>
-                </div>
-              </div>
-            </article>
-          ))}
+              搜索
+            </button>
+          </form>
         </div>
 
+        {/* 加载状态 */}
+        {loading && (
+          <div className="max-w-4xl mx-auto text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">加载博客文章中...</p>
+          </div>
+        )}
+
+        {/* 错误状态 */}
+        {error && (
+          <div className="max-w-4xl mx-auto text-center py-12">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button 
+              onClick={() => fetchPosts(currentPage, searchTerm)} 
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+              重新加载
+            </button>
+          </div>
+        )}
+
+        {/* 博客文章列表 */}
+        {!loading && !error && (
+          <div className="max-w-4xl mx-auto">
+            {posts.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-600">暂无博客文章</p>
+              </div>
+            ) : (
+              posts.map((post) => (
+                <article 
+                  key={post.objectId} 
+                  className="bg-white rounded-xl shadow-md overflow-hidden mb-8 hover:shadow-lg transition"
+                >
+                  <div className="p-8">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-sm text-blue-600 font-medium">
+                        {new Date(post.createdAt).toLocaleDateString('zh-CN')}
+                      </span>
+                      <span className="text-sm text-black">{post.readTime}</span>
+                    </div>
+                    <h2 className="text-2xl font-bold text-black mb-3">{post.title}</h2>
+                    <p className="text-black mb-4">{post.excerpt}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-black">作者: {post.author}</span>
+                      <Link 
+                        href={`/blog/${post.objectId}`} 
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        阅读更多 →
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+        )}
+
         {/* 分页 */}
-        <div className="flex justify-center mt-12 space-x-2">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">1</button>
-          <button className="px-4 py-2 text-black hover:bg-gray-200 rounded-lg">2</button>
-          <button className="px-4 py-2 text-black hover:bg-gray-200 rounded-lg">3</button>
-          <button className="px-4 py-2 text-black hover:bg-gray-200 rounded-lg">下一页 →</button>
-        </div>
+        {!loading && !error && posts.length > 0 && (
+          <div className="flex justify-center mt-12 space-x-2">
+            {pagination.hasPrev && (
+              <button
+                onClick={() => handlePageChange(pagination.current - 1)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                ← 上一页
+              </button>
+            )}
+            
+            {/* 页码按钮 */}
+            {Array.from({ length: pagination.total }, (_, i) => i + 1).map((pageNum) => (
+              <button
+                key={pageNum}
+                onClick={() => handlePageChange(pageNum)}
+                className={`px-4 py-2 rounded-lg transition ${
+                  pageNum === pagination.current
+                    ? 'bg-blue-600 text-white'
+                    : 'text-black hover:bg-gray-200'
+                }`}
+              >
+                {pageNum}
+              </button>
+            ))}
+            
+            {pagination.hasNext && (
+              <button
+                onClick={() => handlePageChange(pagination.current + 1)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                下一页 →
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 页脚 */}

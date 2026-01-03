@@ -66,15 +66,9 @@ async function generateBlogContent(topic: any) {
 请确保内容专业、实用、有价值，避免空洞的描述。
 请直接返回HTML代码，不要使用代码块包装。`;
 
-    const response = await fetch('/api/ai-chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: prompt,
-        model: "gpt-4"
-      }),
+    // 使用GET方法调用AI聊天API
+    const response = await fetch(`/api/ai-chat?message=${encodeURIComponent(prompt)}&model=openai`, {
+      method: 'GET',
     });
 
     const data = await response.json();

@@ -31,8 +31,8 @@ export async function POST(request: NextRequest) {
         readTime: readTime || '5 分钟阅读',
         status: '正常',
         published: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: { "__type": "Date", "iso": new Date().toISOString() },
+        updatedAt: { "__type": "Date", "iso": new Date().toISOString() }
       }),
     });
 

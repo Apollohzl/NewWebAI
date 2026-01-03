@@ -66,18 +66,19 @@ async function generateBlogContent(topic: any) {
 请确保内容专业、实用、有价值，避免空洞的描述。
 请直接返回HTML代码，不要使用代码块包装。`;
 
-    // 使用GET方法调用AI聊天API
-    const response = await fetch(`/api/ai-chat?message=${encodeURIComponent(prompt)}&model=openai`, {
+    // 使用GET方法调用AI聊天API，指定deepseek模型
+    const response = await fetch(`/api/ai-chat?message=${encodeURIComponent(prompt)}&model=deepseek&max_tokens=3000`, {
       method: 'GET',
     });
 
     const data = await response.json();
     
-    if (!response.ok || !data.content) {
+    if (!response.ok || !data.data) {
       throw new Error('AI生成失败');
     }
 
-    return data.content;
+    // 根据API文档，返回数据在data字段中
+    return data.data.content || data.data;
   } catch (error) {
     console.error('生成博客内容失败:', error);
     // 如果AI生成失败，返回一个默认内容

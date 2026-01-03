@@ -33,7 +33,19 @@ export default function BlogWritePage() {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('/api/auth/check-status');
+      // 从localStorage获取sessionToken
+      const sessionToken = localStorage.getItem('sessionToken');
+      
+      if (!sessionToken) {
+        router.push('/blog');
+        return;
+      }
+
+      const response = await fetch('/api/auth/check-status', {
+        headers: {
+          'Authorization': `Bearer ${sessionToken}`,
+        },
+      });
       const data = await response.json();
       
       if (data.authenticated && data.user) {

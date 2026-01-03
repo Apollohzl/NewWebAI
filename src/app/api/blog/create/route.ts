@@ -1,32 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// LeanCloud配置
-const LEANCLOUD_APP_ID = process.env.LEANCLOUD_APP_ID;
-const LEANCLOUD_APP_KEY = process.env.LEANCLOUD_APP_KEY;
-const LEANCLOUD_MASTER_KEY = process.env.LEANCLOUD_MASTER_KEY;
-
-async function leancloudRequest(path: string, options: RequestInit = {}) {
-  const url = `https://api.leancloud.cn/1.1${path}`;
-  
-  const headers = {
-    'X-LC-Id': LEANCLOUD_APP_ID!,
-    'X-LC-Key': LEANCLOUD_MASTER_KEY!,
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-  }
-
-  return response.json();
-}
+import { leancloudRequest } from '@/lib/leancloud';
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,6 +16,9 @@ export async function POST(request: NextRequest) {
     // 创建博客文章
     const blogPost = await leancloudRequest('/classes/BlogPosts', {
       method: 'POST',
+      headers: {
+        'X-LC-Key': process.env.LEANCLOUD_MASTER_KEY!,
+      },
       body: JSON.stringify({
         title,
         content,

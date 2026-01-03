@@ -184,13 +184,22 @@ body {
   }
 }
 
-/* Markdown内容样式 */
-.markdown-content {
+/* HTML内容样式 - 隔离样式，不影响外部CSS */
+.html-content {
   line-height: 1.7;
   font-size: 16px;
+  all: initial;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  color: #000;
 }
 
-.markdown-content h1 {
+/* 隔离HTML内容中的样式，防止外部CSS影响 */
+.html-content * {
+  all: revert;
+  box-sizing: border-box;
+}
+
+.html-content h1 {
   font-size: 2.5rem;
   font-weight: 700;
   margin-top: 2.5rem;
@@ -198,9 +207,10 @@ body {
   line-height: 1.2;
   border-bottom: 1px solid #e5e7eb;
   padding-bottom: 0.5rem;
+  color: #000;
 }
 
-.markdown-content h2 {
+.html-content h2 {
   font-size: 2rem;
   font-weight: 600;
   margin-top: 2rem;
@@ -208,56 +218,64 @@ body {
   line-height: 1.3;
   border-bottom: 1px solid #f3f4f6;
   padding-bottom: 0.5rem;
+  color: #000;
 }
 
-.markdown-content h3 {
+.html-content h3 {
   font-size: 1.5rem;
   font-weight: 600;
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
   line-height: 1.4;
+  color: #000;
 }
 
-.markdown-content h4 {
+.html-content h4 {
   font-size: 1.25rem;
   font-weight: 600;
   margin-top: 1.25rem;
   margin-bottom: 0.5rem;
   line-height: 1.5;
+  color: #000;
 }
 
-.markdown-content h5 {
+.html-content h5 {
   font-size: 1.125rem;
   font-weight: 600;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
   line-height: 1.5;
+  color: #000;
 }
 
-.markdown-content h6 {
+.html-content h6 {
   font-size: 1rem;
   font-weight: 600;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
   line-height: 1.5;
+  color: #000;
 }
 
-.markdown-content p {
+.html-content p {
   margin-top: 1rem;
   margin-bottom: 1rem;
+  color: #000;
 }
 
-.markdown-content ul, .markdown-content ol {
+.html-content ul, .html-content ol {
   margin-top: 1rem;
   margin-bottom: 1rem;
   padding-left: 2rem;
+  color: #000;
 }
 
-.markdown-content li {
+.html-content li {
   margin-bottom: 0.5rem;
+  color: #000;
 }
 
-.markdown-content blockquote {
+.html-content blockquote {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   padding-left: 1rem;
@@ -266,7 +284,7 @@ body {
   color: #6b7280;
 }
 
-.markdown-content table {
+.html-content table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1.5rem;
@@ -274,22 +292,22 @@ body {
   font-size: 0.875rem;
 }
 
-.markdown-content th, .markdown-content td {
+.html-content th, .html-content td {
   padding: 0.75rem 1rem;
   text-align: left;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.markdown-content th {
+.html-content th {
   font-weight: 600;
   background-color: #f9fafb;
 }
 
-.markdown-content tr:nth-child(even) {
+.html-content tr:nth-child(even) {
   background-color: #f9fafb;
 }
 
-.markdown-content code {
+.html-content code {
   background-color: #f3f4f6;
   color: #ef4444;
   padding: 0.25rem 0.5rem;
@@ -298,7 +316,7 @@ body {
   font-family: 'Courier New', monospace;
 }
 
-.markdown-content pre {
+.html-content pre {
   background-color: #1f2937;
   color: #f9fafb;
   padding: 1rem;
@@ -308,7 +326,7 @@ body {
   margin-bottom: 1.5rem;
 }
 
-.markdown-content pre code {
+.html-content pre code {
   background-color: transparent;
   color: inherit;
   padding: 0;
@@ -316,17 +334,17 @@ body {
   line-height: 1.5;
 }
 
-.markdown-content a {
+.html-content a {
   color: #3b82f6;
   text-decoration: underline;
   transition: color 0.2s;
 }
 
-.markdown-content a:hover {
+.html-content a:hover {
   color: #1d4ed8;
 }
 
-.markdown-content img {
+.html-content img {
   max-width: 100%;
   height: auto;
   margin-top: 1.5rem;
@@ -334,7 +352,7 @@ body {
   border-radius: 0.5rem;
 }
 
-.markdown-content hr {
+.html-content hr {
   border: none;
   border-top: 1px solid #e5e7eb;
   margin-top: 2rem;

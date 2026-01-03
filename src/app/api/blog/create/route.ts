@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { leancloudRequest } from '@/lib/leancloud';
 
+// 移除HTML标签的辅助函数
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '');
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { title, content, excerpt, category, tags, author, readTime } = await request.json();
@@ -13,16 +18,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 获取用户的session token
+    const authHeader = request.headers.get('authorization');
+    const sessionToken = authHeader?.replace('Bearer ', '');
+
+    if (!sessionToken) {
+      return NextResponse.json(
+        { error: '需要登录才能创建博客' },
+        { status: 401 }
+      );
+    }
+
     // 创建博客文章
     const blogPost = await leancloudRequest('/classes/BlogPosts', {
       method: 'POST',
       headers: {
-        'X-LC-Key': process.env.LEANCLOUD_MASTER_KEY!,
+        'X-LC-Session': sessionToken,
       },
       body: JSON.stringify({
         title,
         content,
-        excerpt: excerpt || content.substring(0, 150) + '...',
+        excerpt: excerpt || stripHtml(content).substring(0, 150) + '...',
         category: category || '技术',
         tags: tags || [],
         author,

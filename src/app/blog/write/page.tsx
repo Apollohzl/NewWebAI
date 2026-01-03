@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -25,6 +25,7 @@ export default function BlogWritePage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 检查用户登录状态
   useEffect(() => {
@@ -88,9 +89,6 @@ export default function BlogWritePage() {
     setError(null);
 
     try {
-      // 将内容转换为HTML
-      const htmlContent = convertToHtml(formData.content);
-      
       // 准备标签数组
       const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
       
@@ -104,8 +102,8 @@ export default function BlogWritePage() {
         },
         body: JSON.stringify({
           title: formData.title,
-          content: htmlContent,
-          excerpt: formData.excerpt || formData.content.substring(0, 150) + '...',
+          content: formData.content, // 直接使用HTML内容
+          excerpt: formData.excerpt || stripHtml(formData.content).substring(0, 150) + '...',
           category: formData.category,
           tags: tagsArray,
           author: user.name || user.username,
@@ -131,27 +129,79 @@ export default function BlogWritePage() {
     }
   };
 
-  const convertToHtml = (text: string): string => {
-    // 简单的文本到HTML转换
-    let html = text
-      // 标题
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      // 粗体
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      // 斜体
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      // 代码块
-      .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-      // 行内代码
-      .replace(/`(.+?)`/g, '<code>$1</code>')
-      // 链接
-      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
-      // 换行
-      .replace(/\n/g, '<br>');
+  const stripHtml = (html: string): string => {
+    // 移除HTML标签，只保留纯文本
+    return html.replace(/<[^>]*>/g, '');
+  };
 
-    return html;
+  const insertText = (before: string, after: string = '') => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+    const newText = before + selectedText + after;
+    
+    const newStart = start + before.length;
+    const newEnd = newStart + selectedText.length;
+
+    const newValue = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
+    
+    setFormData(prev => ({ ...prev, content: newValue }));
+    
+    // 恢复焦点和选择
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(newStart, newEnd);
+    }, 0);
+  };
+
+  const insertHeading = (level: number) => {
+    insertText(`<h${level}>`, `</h${level}>`);
+  };
+
+  const insertBold = () => {
+    insertText('<strong>', '</strong>');
+  };
+
+  const insertItalic = () => {
+    insertText('<em>', '</em>');
+  };
+
+  const insertCode = () => {
+    insertText('<code>', '</code>');
+  };
+
+  const insertCodeBlock = () => {
+    insertText('<pre><code>', '</code></pre>');
+  };
+
+  const insertLink = () => {
+    const url = prompt('请输入链接地址:');
+    if (url) {
+      insertText(`<a href="${url}">`, '</a>');
+    }
+  };
+
+  const insertImage = () => {
+    const url = prompt('请输入图片地址:');
+    if (url) {
+      insertText(`<img src="${url}" alt="图片" />`);
+    }
+  };
+
+  const insertList = (ordered: boolean) => {
+    const tag = ordered ? 'ol' : 'ul';
+    insertText(`<${tag}>\n<li>`, '</li>\n</' + tag + '>');
+  };
+
+  const insertQuote = () => {
+    insertText('<blockquote>', '</blockquote>');
+  };
+
+  const insertLine = () => {
+    insertText('<hr>');
   };
 
   const calculateReadTime = (text: string): string => {
@@ -278,17 +328,144 @@ export default function BlogWritePage() {
                 <label htmlFor="content" className="block text-black font-medium mb-2">
                   文章内容 *
                 </label>
+                
+                {/* HTML编辑工具栏 */}
+                <div className="mb-2 border border-gray-300 rounded-t-lg bg-gray-50 p-2 flex flex-wrap gap-2">
+                  {/* 标题按钮 */}
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => insertHeading(1)}
+                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100"
+                      title="一级标题"
+                    >
+                      H1
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => insertHeading(2)}
+                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100"
+                      title="二级标题"
+                    >
+                      H2
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => insertHeading(3)}
+                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100"
+                      title="三级标题"
+                    >
+                      H3
+                    </button>
+                  </div>
+
+                  {/* 格式按钮 */}
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={insertBold}
+                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 font-bold"
+                      title="粗体"
+                    >
+                      B
+                    </button>
+                    <button
+                      type="button"
+                      onClick={insertItalic}
+                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 italic"
+                      title="斜体"
+                    >
+                      I
+                    </button>
+                    <button
+                      type="button"
+                      onClick={insertCode}
+                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100 font-mono"
+                      title="行内代码"
+                    >
+                      &lt;/&gt;
+                    </button>
+                  </div>
+
+                  {/* 代码块 */}
+                  <button
+                    type="button"
+                    onClick={insertCodeBlock}
+                    className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100"
+                    title="代码块"
+                  >
+                    { } 代码块
+                  </button>
+
+                  {/* 列表 */}
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => insertList(false)}
+                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100"
+                      title="无序列表"
+                    >
+                      • 列表
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => insertList(true)}
+                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100"
+                      title="有序列表"
+                    >
+                      1. 列表
+                    </button>
+                  </div>
+
+                  {/* 其他 */}
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={insertLink}
+                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100"
+                      title="插入链接"
+                    >
+                      🔗 链接
+                    </button>
+                    <button
+                      type="button"
+                      onClick={insertImage}
+                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100"
+                      title="插入图片"
+                    >
+                      🖼️ 图片
+                    </button>
+                    <button
+                      type="button"
+                      onClick={insertQuote}
+                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100"
+                      title="引用"
+                    >
+                      " 引用
+                    </button>
+                    <button
+                      type="button"
+                      onClick={insertLine}
+                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100"
+                      title="分割线"
+                    >
+                      — 分割线
+                    </button>
+                  </div>
+                </div>
+
                 <div className="mb-2 text-sm text-gray-600">
-                  支持简单格式：# 标题 ## 二级标题 ### 三级标题 **粗体** *斜体* `代码` ```代码块``` [链接](URL)
+                  直接编写HTML代码，或使用上方工具栏插入常用标签
                 </div>
                 <textarea
+                  ref={textareaRef}
                   id="content"
                   name="content"
                   value={formData.content}
                   onChange={handleInputChange}
                   rows={15}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                  placeholder="编写文章内容..."
+                  className="w-full px-4 py-2 border border-gray-300 border-t-0 rounded-b-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  placeholder="编写HTML内容..."
                   required
                 />
               </div>

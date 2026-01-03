@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 
 interface BlogPost {
   objectId: string;
@@ -171,7 +172,7 @@ export default function BlogPostPage() {
 
           <div className="markdown-content max-w-none text-black">
             <ReactMarkdown 
-              remarkPlugins={[remarkGfm]}
+              remarkPlugins={[remarkGfm, remarkBreaks]}
               components={components}
             >
               {post.content}

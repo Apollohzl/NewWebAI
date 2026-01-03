@@ -95,17 +95,10 @@ export default function BlogWritePage() {
       // 计算阅读时间
       const readTime = calculateReadTime(formData.content);
 
-      const sessionToken = localStorage.getItem('sessionToken');
-      if (!sessionToken) {
-        setError('登录已过期，请重新登录');
-        return;
-      }
-
       const response = await fetch('/api/blog/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({
           title: formData.title,

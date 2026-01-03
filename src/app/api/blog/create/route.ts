@@ -18,23 +18,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 获取用户的session token
-    const authHeader = request.headers.get('authorization');
-    const sessionToken = authHeader?.replace('Bearer ', '');
-
-    if (!sessionToken) {
-      return NextResponse.json(
-        { error: '需要登录才能创建博客' },
-        { status: 401 }
-      );
-    }
-
-    // 创建博客文章
+    // 创建博客文章 - 使用App Key，不需要用户权限
     const blogPost = await leancloudRequest('/classes/BlogPosts', {
       method: 'POST',
-      headers: {
-        'X-LC-Session': sessionToken,
-      },
       body: JSON.stringify({
         title,
         content,

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@next-auth/firebase-adapter": "^2.0.1",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "bcryptjs": "^3.0.3",

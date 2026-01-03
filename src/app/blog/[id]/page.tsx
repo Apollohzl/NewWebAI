@@ -169,7 +169,7 @@ export default function BlogPostPage() {
             </div>
           )}
 
-          <div className="prose max-w-none text-black prose prose-headings: prose-p: prose-ul: prose-table: prose-blockquote: prose-code">
+          <div className="markdown-content max-w-none text-black">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={components}

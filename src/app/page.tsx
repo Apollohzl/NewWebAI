@@ -1,8 +1,13 @@
+'use client';
+
 import Link from 'next/link';
-import { FaRobot, FaBlog, FaShoppingCart, FaChartLine, FaCogs, FaUsers } from 'react-icons/fa';
+import { useState } from 'react';
+import { FaRobot, FaBlog, FaShoppingCart, FaChartLine, FaCogs, FaUsers, FaBars, FaTimes } from 'react-icons/fa';
 import AuthButtons from '@/components/AuthButtons';
 
 export default function Home() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 font-sans">
       {/* 导航栏 */}
@@ -12,6 +17,8 @@ export default function Home() {
             <img src="/logo.png" alt="NewWebAI" className="h-8 w-8" />
             <span className="text-xl font-bold text-black">NewWebAI</span>
           </div>
+          
+          {/* 桌面端导航 */}
           <div className="hidden md:flex space-x-8">
             <Link href="/" className="text-blue-600 font-medium">首页</Link>
             <Link href="/blog" className="text-black hover:text-blue-600 transition">博客</Link>
@@ -20,8 +27,73 @@ export default function Home() {
             <Link href="/api-docs" className="text-black hover:text-blue-600 transition">API</Link>
             <Link href="/about" className="text-black hover:text-blue-600 transition">关于</Link>
           </div>
-          <AuthButtons />
+          
+          {/* 移动端菜单按钮和登录按钮 */}
+          <div className="flex items-center space-x-4">
+            <div className="hidden md:block">
+              <AuthButtons />
+            </div>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden text-black hover:text-blue-600 transition"
+            >
+              {mobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+            </button>
+          </div>
         </div>
+        
+        {/* 移动端导航菜单 */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-200">
+            <div className="container mx-auto px-4 py-4 space-y-3">
+              <Link 
+                href="/" 
+                className="block text-blue-600 font-medium py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                首页
+              </Link>
+              <Link 
+                href="/blog" 
+                className="block text-black hover:text-blue-600 transition py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                博客
+              </Link>
+              <Link 
+                href="/store" 
+                className="block text-black hover:text-blue-600 transition py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                产品
+              </Link>
+              <Link 
+                href="/ai-tools" 
+                className="block text-black hover:text-blue-600 transition py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                AI工具
+              </Link>
+              <Link 
+                href="/api-docs" 
+                className="block text-black hover:text-blue-600 transition py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                API
+              </Link>
+              <Link 
+                href="/about" 
+                className="block text-black hover:text-blue-600 transition py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                关于
+              </Link>
+              <div className="pt-3 border-t border-gray-200">
+                <AuthButtons />
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* 英雄区域 */}

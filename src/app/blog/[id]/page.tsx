@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface BlogPost {
   objectId: string;
@@ -16,6 +18,56 @@ interface BlogPost {
   createdAt: string;
   updatedAt: string;
 }
+
+// 配置ReactMarkdown组件
+const components = {
+  code: (props: any) => (
+    <pre className={`${props.className || ''} bg-gray-100 rounded-lg p-4 overflow-x-auto`}>
+      <code className="text-sm">{props.children}</code>
+    </pre>
+  ),
+  table: (props: any) => (
+    <div className={`overflow-x-auto ${props.className || ''}`}>
+      <table className="min-w-full divide-y divide-gray-200">
+        {props.children}
+      </table>
+    </div>
+  ),
+  thead: (props: any) => <thead className="bg-gray-50">{props.children}</thead>,
+  tbody: (props: any) => <tbody className="divide-y divide-gray-200">{props.children}</tbody>,
+  tr: (props: any) => <tr className={props.className || ''}>{props.children}</tr>,
+  th: (props: any) => <th className={`font-medium text-gray-900 px-4 py-2 ${props.className || ''}`}>{props.children}</th>,
+  td: (props: any) => <td className={`px-4 py-2 text-sm ${props.className || ''}`}>{props.children}</td>,
+  ul: (props: any) => <ul className={`list-disc list-inside space-y-2 ${props.className || ''}`}>{props.children}</ul>,
+  ol: (props: any) => <ol className={`list-decimal list-inside space-y-2 ${props.className || ''}`}>{props.children}</ol>,
+  li: (props: any) => <li className={props.className || ''}>{props.children}</li>,
+  blockquote: (props: any) => (
+    <blockquote className={`border-l-4 border-gray-300 pl-4 py-2 italic text-gray-700 ${props.className || ''}`}>
+      {props.children}
+    </blockquote>
+  ),
+  h1: (props: any) => <h1 className={`text-3xl font-bold mb-4 ${props.className || ''}`}>{props.children}</h1>,
+  h2: (props: any) => <h2 className={`text-2xl font-bold mb-3 ${props.className || ''}`}>{props.children}</h2>,
+  h3: (props: any) => <h3 className={`text-xl font-bold mb-2 ${props.className || ''}`}>{props.children}</h3>,
+  h4: (props: any) => <h4 className={`text-lg font-bold mb-1 ${props.className || ''}`}>{props.children}</h4>,
+  h5: (props: any) => <h5 className={`text-base font-bold mb-1 ${props.className || ''}`}>{props.children}</h5>,
+  h6: (props: any) => <h6 className={`text-sm font-bold mb-1 ${props.className || ''}`}>{props.children}</h6>,
+  p: (props: any) => <p className={props.className || ''}>{props.children}</p>,
+  a: (props: any) => (
+    <a href={props.href} className={`${props.className || ''} text-blue-600 hover:text-blue-800`}>
+      {props.children}
+    </a>
+  ),
+  span: (props: any) => <span className={props.className || ''}>{props.children}</span>,
+  em: (props: any) => <span className={`italic ${props.className || ''}`}>{props.children}</span>,
+  strong: (props: any) => <span className={`font-bold ${props.className || ''}`}>{props.children}</span>,
+  inlineCode: (props: any) => <code className={`bg-gray-100 px-1 py-0.5 rounded text-sm ${props.className || ''}`}>{props.children}</code>,
+  pre: (props: any) => (
+    <pre className={`${props.className || ''} bg-gray-100 rounded-lg p-4 overflow-x-auto`}>
+      <code className="text-sm">{props.children}</code>
+    </pre>
+  ),
+};
 
 export default function BlogPostPage() {
   const params = useParams();
@@ -117,8 +169,13 @@ export default function BlogPostPage() {
             </div>
           )}
 
-          <div className="prose max-w-none text-black">
-            <div dangerouslySetInnerHTML={{ __html: post.content }} />
+          <div className="prose max-w-none text-black prose prose-headings: prose-p: prose-ul: prose-table: prose-blockquote: prose-code">
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={components}
+            >
+              {post.content}
+            </ReactMarkdown>
           </div>
         </div>
 

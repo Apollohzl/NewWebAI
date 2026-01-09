@@ -10,6 +10,9 @@ export async function DELETE(request: NextRequest) {
     const { id } = await request.json();
     const sessionToken = request.headers.get('Authorization')?.replace('Bearer ', '');
 
+    console.log('Delete Blog - Session Token:', sessionToken ? sessionToken.substring(0, 20) + '...' : '不存在');
+    console.log('Delete Blog - Blog ID:', id);
+
     if (!id) {
       return NextResponse.json(
         { error: '缺少博客ID' },
@@ -32,13 +35,19 @@ export async function DELETE(request: NextRequest) {
       'Content-Type': 'application/json',
     };
 
+    console.log('Delete Blog - Request URL:', url);
+    console.log('Delete Blog - Request Headers:', headers);
+
     const response = await fetch(url, {
       method: 'DELETE',
       headers,
     });
 
+    console.log('Delete Blog - Response Status:', response.status);
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error('Delete Blog - Error Response:', errorData);
       throw new Error(errorData.error || `HTTP ${response.status}`);
     }
 

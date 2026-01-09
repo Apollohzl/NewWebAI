@@ -10,6 +10,10 @@ export async function POST(request: NextRequest) {
     const { id, status } = await request.json();
     const sessionToken = request.headers.get('Authorization')?.replace('Bearer ', '');
 
+    console.log('Update API Status - Session Token:', sessionToken ? sessionToken.substring(0, 20) + '...' : '不存在');
+    console.log('Update API Status - API ID:', id);
+    console.log('Update API Status - New Status:', status);
+
     if (!id || !status) {
       return NextResponse.json(
         { error: '缺少必要参数' },
@@ -32,14 +36,19 @@ export async function POST(request: NextRequest) {
       'Content-Type': 'application/json',
     };
 
+    console.log('Update API Status - Request URL:', url);
+
     const response = await fetch(url, {
       method: 'PUT',
       headers,
       body: JSON.stringify({ status }),
     });
 
+    console.log('Update API Status - Response Status:', response.status);
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error('Update API Status - Error Response:', errorData);
       throw new Error(errorData.error || `HTTP ${response.status}`);
     }
 

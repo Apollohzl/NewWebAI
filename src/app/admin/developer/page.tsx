@@ -301,6 +301,8 @@ function BlogsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean;
     }
 
     const sessionToken = localStorage.getItem('sessionToken');
+    console.log('Session Token:', sessionToken ? '存在' : '不存在');
+    
     if (!sessionToken) {
       alert('请先登录');
       return;
@@ -316,16 +318,20 @@ function BlogsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean;
         body: JSON.stringify({ id: postId }),
       });
 
+      console.log('Delete Response Status:', response.status);
+      const responseData = await response.json().catch(() => ({}));
+      console.log('Delete Response Data:', responseData);
+
       if (response.ok) {
         alert('删除成功');
         setRefreshKey(prev => prev + 1);
         // 重新加载数据
         window.location.reload();
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        alert('删除失败：' + (errorData.error || '未知错误'));
+        alert('删除失败：' + (responseData.error || '未知错误'));
       }
     } catch (error) {
+      console.error('Delete Error:', error);
       alert('删除失败：' + error);
     }
   };
@@ -590,6 +596,8 @@ function ApisTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; 
     }
 
     const sessionToken = localStorage.getItem('sessionToken');
+    console.log('Session Token:', sessionToken ? '存在' : '不存在');
+    
     if (!sessionToken) {
       alert('请先登录');
       return;
@@ -608,16 +616,20 @@ function ApisTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; 
         }),
       });
 
+      console.log('Update Status Response:', response.status);
+      const responseData = await response.json().catch(() => ({}));
+      console.log('Update Status Data:', responseData);
+
       if (response.ok) {
         // 更新本地状态
         setApis(prev => prev.map(api =>
           api.objectId === apiId ? { ...api, status: newStatus } : api
         ));
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        alert('状态更新失败：' + (errorData.error || '未知错误'));
+        alert('状态更新失败：' + (responseData.error || '未知错误'));
       }
     } catch (error) {
+      console.error('Update Status Error:', error);
       alert('状态更新失败：' + error);
     }
   };

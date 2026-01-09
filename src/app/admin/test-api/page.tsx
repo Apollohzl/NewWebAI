@@ -84,37 +84,26 @@ export default function TestApiPage() {
     addTestResult('用户数据查询测试', true, '开始测试用户数据查询...');
     
     try {
-      // 直接在浏览器中测试用户查询
-      const LEANCLOUD_APP_ID = process.env.NEXT_PUBLIC_LEANCLOUD_APP_ID || '';
-      const LEANCLOUD_SERVER_URL = process.env.NEXT_PUBLIC_LEANCLOUD_SERVER_URL || '';
-      
-      addTestResult('获取环境变量', true, `APP_ID: ${LEANCLOUD_APP_ID ? '已设置' : '未设置'}, SERVER_URL: ${LEANCLOUD_SERVER_URL ? '已设置' : '未设置'}`);
-      
-      if (!LEANCLOUD_APP_ID || !LEANCLOUD_SERVER_URL) {
-        addTestResult('环境变量检查', false, '环境变量未设置，无法继续测试');
-        return;
-      }
-
-      // 测试1: 使用普通App Key
-      addTestResult('测试1: 普通App Key查询', true, '开始使用普通App Key查询...');
+      // 测试1: 调用我们的API
+      addTestResult('测试1: 调用我们的API', true, '开始调用我们的API...');
       try {
-        const response = await fetch(`${LEANCLOUD_SERVER_URL}/1.1/users?limit=10`, {
-          headers: {
-            'X-LC-Id': LEANCLOUD_APP_ID,
-            'X-LC-Key': 'test-key', // 使用测试key
-            'Content-Type': 'application/json',
-          },
-        });
-        const data = await response.json();
-        addTestResult('测试1结果', response.ok, `状态码: ${response.status}`, data);
+        const response = await fetch('/api/admin/leancloud-data');
+        const text = await response.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { rawText: text };
+        }
+        addTestResult('测试1结果', response.ok, `状态码: ${response.status}, 内容长度: ${text.length}`, data);
       } catch (error) {
         addTestResult('测试1结果', false, `错误: ${error instanceof Error ? error.message : '未知错误'}`);
       }
 
-      // 测试2: 调用我们的API
-      addTestResult('测试2: 调用我们的API', true, '开始调用我们的API...');
+      // 测试2: 测试LeanCloud连接
+      addTestResult('测试2: 测试LeanCloud连接', true, '开始测试LeanCloud连接...');
       try {
-        const response = await fetch('/api/admin/leancloud-data');
+        const response = await fetch('/api/test-leancloud-connection');
         const data = await response.json();
         addTestResult('测试2结果', response.ok, `状态码: ${response.status}`, data);
       } catch (error) {

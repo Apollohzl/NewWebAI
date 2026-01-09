@@ -19,6 +19,7 @@ interface LeanCloudData {
     totalBlogPosts: number;
     totalProducts: number;
     totalApis: number;
+    todayNewUsers: number;
   };
 }
 
@@ -222,10 +223,10 @@ export default function DeveloperPage() {
               <BlogsTab darkMode={darkMode} leanCloudData={leanCloudData} loadingData={loadingData} />
             )}
             {activeTab === 'products' && (
-              <ProductsTab darkMode={darkMode} leanCloudData={leanCloudData} loadingData={loadingData} />
+              <ProductsTab darkMode={darkMode} leanCloudData={leanCloudData || { blogPosts: [], products: [], apis: [], stats: { totalBlogPosts: 0, totalProducts: 0, totalApis: 0, todayNewUsers: 0 } }} loadingData={loadingData} />
             )}
             {activeTab === 'apis' && (
-              <ApisTab darkMode={darkMode} leanCloudData={leanCloudData} loadingData={loadingData} />
+              <ApisTab darkMode={darkMode} leanCloudData={leanCloudData || { blogPosts: [], products: [], apis: [], stats: { totalBlogPosts: 0, totalProducts: 0, totalApis: 0, todayNewUsers: 0 } }} loadingData={loadingData} />
             )}
             {activeTab === 'tools' && (
               <ToolsTab darkMode={darkMode} />
@@ -239,13 +240,16 @@ export default function DeveloperPage() {
 
 // 概览标签页组件
 function OverviewTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; leanCloudData: LeanCloudData | null; loadingData: boolean }) {
+  const stats = leanCloudData?.stats || { totalBlogPosts: 0, totalProducts: 0, totalApis: 0, todayNewUsers: 0 };
+
   return (
     <div className="space-y-6">
       {/* 统计卡片 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard darkMode={darkMode} title="博客文章" value={leanCloudData?.stats.totalBlogPosts || 0} icon="📝" />
-        <StatCard darkMode={darkMode} title="产品数量" value={leanCloudData?.stats.totalProducts || 0} icon="🛍️" />
-        <StatCard darkMode={darkMode} title="API配置" value={leanCloudData?.stats.totalApis || 0} icon="🔌" />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <StatCard darkMode={darkMode} title="今日新增用户" value={stats.todayNewUsers} icon="👥" />
+        <StatCard darkMode={darkMode} title="博客文章" value={stats.totalBlogPosts} icon="📝" />
+        <StatCard darkMode={darkMode} title="产品数量" value={stats.totalProducts} icon="🛍️" />
+        <StatCard darkMode={darkMode} title="API配置" value={stats.totalApis} icon="🔌" />
       </div>
 
       {/* 项目信息 */}
@@ -275,141 +279,481 @@ function OverviewTab({ darkMode, leanCloudData, loadingData }: { darkMode: boole
 }
 
 function BlogsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; leanCloudData: LeanCloudData | null; loadingData: boolean }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [posts, setPosts] = useState<any[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    if (leanCloudData?.blogPosts) {
+      // 按创建时间倒序排序
+      const sortedPosts = [...leanCloudData.blogPosts].sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0);
+        const dateB = new Date(b.createdAt || 0);
+        return dateB.getTime() - dateA.getTime();
+      });
+      setPosts(sortedPosts);
+    }
+  }, [leanCloudData]);
+
+  const handleDelete = async (postId: string) => {
+    if (!confirm('确定要删除这篇博客文章吗？')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/blog/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: postId }),
+      });
+
+      if (response.ok) {
+        alert('删除成功');
+        setRefreshKey(prev => prev + 1);
+        // 重新加载数据
+        window.location.reload();
+      } else {
+        alert('删除失败');
+      }
+    } catch (error) {
+      alert('删除失败：' + error);
+    }
+  };
+
+  const filteredPosts = posts.filter(post =>
+    post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    post.author?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    post.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="space-y-6">
-      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-6 transition-colors duration-300`}>
-        <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-black'} mb-4`}>博客文章列表</h2>
-        {loadingData ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>加载中...</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className={`${darkMode ? 'border-gray-600' : 'border-gray-200'} border-b`}>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>标题</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>作者</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>分类</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>状态</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>创建时间</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leanCloudData?.blogPosts.map((post: any) => (
-                  <tr key={post.objectId} className={`${darkMode ? 'border-gray-600 hover:bg-gray-600' : 'border-gray-200 hover:bg-gray-100'} border-b transition-colors`}>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-white' : 'text-black'}`}>{post.title}</td>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{post.author}</td>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{post.category}</td>
-                    <td className={`py-3 px-4`}>
-                      <span className={`px-2 py-1 rounded-full text-xs ${post.status === '正常' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                        {post.status}
-                      </span>
-                    </td>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{new Date(post.createdAt).toLocaleDateString('zh-CN')}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+    <div className={`rounded-lg p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'} border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-black">博客文章</h2>
+        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>共 {posts.length} 篇文章</span>
       </div>
+
+      {/* 搜索框 */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="搜索文章标题、作者或分类..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className={`w-full px-4 py-2 rounded-lg border ${
+            darkMode
+              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+              : 'bg-white border-gray-300 text-black placeholder-gray-500'
+          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+        />
+      </div>
+
+      {loadingData ? (
+        <div className="text-center py-8 text-gray-500">加载中...</div>
+      ) : filteredPosts.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          {searchTerm ? '没有找到匹配的文章' : '暂无博客文章'}
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">标题</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">作者</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">分类</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">状态</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">创建时间</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredPosts.map((post: any, index: number) => (
+                <tr key={post.objectId || index} className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} hover:bg-gray-50`}>
+                  <td className="py-3 px-4 text-sm text-black">{post.title}</td>
+                  <td className="py-3 px-4 text-sm text-black">{post.author}</td>
+                  <td className="py-3 px-4 text-sm text-black">{post.category}</td>
+                  <td className="py-3 px-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      post.status === '正常'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {post.status || '-'}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-sm text-black">
+                    {post.createdAt ? new Date(post.createdAt).toLocaleDateString('zh-CN') : '-'}
+                  </td>
+                  <td className="py-3 px-4">
+                    <button
+                      onClick={() => handleDelete(post.objectId)}
+                      className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+                    >
+                      删除
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
 
-// 产品管理标签页组件
-function ProductsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; leanCloudData: LeanCloudData | null; loadingData: boolean }) {
+function ProductsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; leanCloudData: LeanCloudData; loadingData: boolean }) {
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const products = leanCloudData?.products || [];
+
   return (
-    <div className="space-y-6">
-      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-6 transition-colors duration-300`}>
-        <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-black'} mb-4`}>产品列表</h2>
-        {loadingData ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>加载中...</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className={`${darkMode ? 'border-gray-600' : 'border-gray-200'} border-b`}>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>名称</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>价格</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>分类</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>库存</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>创建时间</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leanCloudData?.products.map((product: any) => (
-                  <tr key={product.objectId} className={`${darkMode ? 'border-gray-600 hover:bg-gray-600' : 'border-gray-200 hover:bg-gray-100'} border-b transition-colors`}>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-white' : 'text-black'}`}>{product.name}</td>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>¥{product.price}</td>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{product.category}</td>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{product.stock}</td>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{new Date(product.createdAt).toLocaleDateString('zh-CN')}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+    <div className={`rounded-lg p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'} border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-black">产品管理</h2>
+        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>共 {products.length} 个产品</span>
       </div>
+
+      {loadingData ? (
+        <div className="text-center py-8 text-gray-500">加载中...</div>
+      ) : products.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">暂无产品</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {products.map((product: any, index: number) => (
+            <div
+              key={product.objectId || index}
+              onClick={() => setSelectedProduct(product)}
+              className={`p-4 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : 'bg-white border-gray-200 hover:bg-gray-50'} cursor-pointer transition-colors`}
+            >
+              <h3 className="font-medium text-black mb-2">{product.name}</h3>
+              <p className="text-2xl font-bold text-blue-600 mb-2">¥{product.price}</p>
+              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{product.category}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 产品悬浮窗口 */}
+      {selectedProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setSelectedProduct(null)}>
+          <div 
+            className={`rounded-lg p-6 w-full max-w-4xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-2xl font-bold text-black">{selectedProduct.name}</h2>
+              <button
+                onClick={() => setSelectedProduct(null)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            {/* 模拟淘宝产品界面 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 产品图片 */}
+              <div className={`aspect-square rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} flex items-center justify-center`}>
+                <span className={`text-6xl ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>📦</span>
+              </div>
+              
+              {/* 产品信息 */}
+              <div className="space-y-4">
+                <div>
+                  <p className="text-3xl font-bold text-red-600">¥{selectedProduct.price}</p>
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>价格</p>
+                </div>
+                
+                <div>
+                  <p className="font-medium text-black">{selectedProduct.category}</p>
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>分类</p>
+                </div>
+                
+                <div>
+                  <p className="font-medium text-black">{selectedProduct.stock || '有货'}</p>
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>库存</p>
+                </div>
+                
+                <div>
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    创建时间: {selectedProduct.createdAt ? new Date(selectedProduct.createdAt).toLocaleDateString('zh-CN') : '-'}
+                  </p>
+                </div>
+                
+                <div className="pt-4 border-t">
+                  <button 
+                    onClick={() => window.location.href = '/admin/products/edit'}
+                    className="w-full py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    编辑产品
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// API配置标签页组件
-function ApisTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; leanCloudData: LeanCloudData | null; loadingData: boolean }) {
+function ApisTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; leanCloudData: LeanCloudData; loadingData: boolean }) {
+  const [apis, setApis] = useState<any[]>([]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    if (leanCloudData?.apis) {
+      setApis(leanCloudData.apis);
+    }
+  }, [leanCloudData]);
+
+  const handleStatusChange = async (apiId: string, currentStatus: string) => {
+    const newStatus = currentStatus === '正常' ? '关闭' : '正常';
+    
+    if (!confirm(`确定要将此API状态改为${newStatus}吗？`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/api/update-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: apiId,
+          status: newStatus,
+        }),
+      });
+
+      if (response.ok) {
+        // 更新本地状态
+        setApis(prev => prev.map(api =>
+          api.objectId === apiId ? { ...api, status: newStatus } : api
+        ));
+      } else {
+        alert('状态更新失败');
+      }
+    } catch (error) {
+      alert('状态更新失败：' + error);
+    }
+  };
+
+  const handleAddApi = async (apiData: any) => {
+    try {
+      const response = await fetch('/api/api/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (response.ok) {
+        alert('添加成功');
+        setShowAddModal(false);
+        setRefreshKey(prev => prev + 1);
+        window.location.reload();
+      } else {
+        alert('添加失败');
+      }
+    } catch (error) {
+      alert('添加失败：' + error);
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-6 transition-colors duration-300`}>
-        <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-black'} mb-4`}>API配置列表</h2>
-        {loadingData ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>加载中...</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className={`${darkMode ? 'border-gray-600' : 'border-gray-200'} border-b`}>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>名称</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>端点</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>方法</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>状态</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leanCloudData?.apis.map((api: any) => (
-                  <tr key={api.objectId} className={`${darkMode ? 'border-gray-600 hover:bg-gray-600' : 'border-gray-200 hover:bg-gray-100'} border-b transition-colors`}>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-white' : 'text-black'}`}>{api.name}</td>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{api.endpoint}</td>
-                    <td className={`py-3 px-4`}>
-                      <span className={`px-2 py-1 rounded-full text-xs ${api.method === 'GET' ? 'bg-blue-100 text-blue-800' : api.method === 'POST' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'}`}>
-                        {api.method}
-                      </span>
-                    </td>
-                    <td className={`py-3 px-4`}>
-                      <span className={`px-2 py-1 rounded-full text-xs ${api.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                        {api.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+    <div className={`rounded-lg p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'} border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-black">API配置列表</h2>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            添加
+          </button>
+          <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>共 {apis.length} 个API</span>
+        </div>
       </div>
+
+      {loadingData ? (
+        <div className="text-center py-8 text-gray-500">加载中...</div>
+      ) : apis.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">暂无API配置</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">名称</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">请求链接</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">状态</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">创建时间</th>
+              </tr>
+            </thead>
+            <tbody>
+              {apis.map((api: any, index: number) => (
+                <tr 
+                  key={api.objectId || index} 
+                  className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} hover:bg-gray-50 cursor-pointer`}
+                  onClick={() => window.location.href = `/api-docs/${api.objectId}`}
+                >
+                  <td className="py-3 px-4 text-sm text-black">{api.name}</td>
+                  <td className="py-3 px-4 text-sm text-black font-mono">{api.endpoint}</td>
+                  <td className="py-3 px-4">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(api.objectId, api.status);
+                      }}
+                      className={`px-3 py-1 rounded text-xs font-medium ${
+                        api.status === '正常'
+                          ? 'bg-green-500 text-white hover:bg-green-600'
+                          : 'bg-red-500 text-white hover:bg-red-600'
+                      }`}
+                    >
+                      {api.status || '-'}
+                    </button>
+                  </td>
+                  <td className="py-3 px-4 text-sm text-black">
+                    {api.createdAt ? new Date(api.createdAt).toLocaleDateString('zh-CN') : '-'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* 添加API的悬浮窗口 */}
+      {showAddModal && (
+        <AddApiModal
+          darkMode={darkMode}
+          onClose={() => setShowAddModal(false)}
+          onSubmit={handleAddApi}
+        />
+      )}
     </div>
   );
 }
 
 // 开发工具标签页组件
+function AddApiModal({ darkMode, onClose, onSubmit }: { darkMode: boolean; onClose: () => void; onSubmit: (data: any) => void }) {
+  const [formData, setFormData] = useState({
+    name: '',
+    endpoint: '',
+    description: '',
+    category: 'general',
+    method: 'GET',
+    tags: '',
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({
+      ...formData,
+      tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className={`rounded-lg p-6 w-full max-w-2xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+        <h2 className="text-xl font-semibold mb-4 text-black">添加新API</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-white' : 'text-black'}`}>API名称 *</label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className={`w-full px-3 py-2 rounded border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-black'}`}
+            />
+          </div>
+          <div>
+            <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-white' : 'text-black'}`}>请求链接 *</label>
+            <input
+              type="text"
+              required
+              value={formData.endpoint}
+              onChange={(e) => setFormData({ ...formData, endpoint: e.target.value })}
+              className={`w-full px-3 py-2 rounded border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-black'}`}
+            />
+          </div>
+          <div>
+            <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-white' : 'text-black'}`}>描述</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className={`w-full px-3 py-2 rounded border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-black'}`}
+              rows={3}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-white' : 'text-black'}`}>分类</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className={`w-full px-3 py-2 rounded border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-black'}`}
+              >
+                <option value="general">通用</option>
+                <option value="ai">AI服务</option>
+                <option value="data">数据服务</option>
+                <option value="auth">认证服务</option>
+              </select>
+            </div>
+            <div>
+              <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-white' : 'text-black'}`}>方法</label>
+              <select
+                value={formData.method}
+                onChange={(e) => setFormData({ ...formData, method: e.target.value })}
+                className={`w-full px-3 py-2 rounded border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-black'}`}
+              >
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-white' : 'text-black'}`}>标签（逗号分隔）</label>
+            <input
+              type="text"
+              value={formData.tags}
+              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+              className={`w-full px-3 py-2 rounded border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-black'}`}
+              placeholder="例如: AI, GPT, 聊天"
+            />
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded border hover:bg-gray-100"
+            >
+              取消
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              添加
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 function ToolsTab({ darkMode }: { darkMode: boolean }) {
   return (
     <div className="space-y-6">

@@ -19,9 +19,7 @@ const ApiCard: React.FC<ApiCardProps> = ({
   icon,
   tags
 }) => {
-  const getStatusColor = (status: string) => {
-    return status === '正常' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-  };
+  const isDisabled = status !== '正常';
 
   return (
     <div className="api-card bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group">
@@ -33,7 +31,11 @@ const ApiCard: React.FC<ApiCardProps> = ({
               {name}
             </h3>
           </div>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
+          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+            isDisabled 
+              ? 'bg-red-500 text-white' 
+              : 'bg-green-500 text-white'
+          }`}>
             {status}
           </span>
         </div>
@@ -64,18 +66,14 @@ const ApiCard: React.FC<ApiCardProps> = ({
         <div className="flex gap-2">
           <Link
             href={`/api-docs/${id}`}
-            className="flex-1 api-button api-button-primary text-center"
+            className={`flex-1 text-center py-2 px-4 rounded-lg transition-colors ${
+              isDisabled
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
           >
             查看
           </Link>
-          <button
-            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-            title="反馈"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-          </button>
         </div>
       </div>
     </div>

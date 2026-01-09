@@ -44,6 +44,19 @@ export async function GET(request: NextRequest) {
       apis = [];
     }
 
+    // 计算今日新增用户（从博客文章作者中获取）
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayUsers = new Set<string>();
+    blogPosts.forEach((post: any) => {
+      if (post.createdAt) {
+        const postDate = new Date(post.createdAt);
+        if (postDate >= today) {
+          todayUsers.add(post.author || 'unknown');
+        }
+      }
+    });
+
     const data = {
       blogPosts,
       products,
@@ -52,6 +65,7 @@ export async function GET(request: NextRequest) {
         totalBlogPosts: blogPosts.length,
         totalProducts: products.length,
         totalApis: apis.length,
+        todayNewUsers: todayUsers.size,
       }
     };
 

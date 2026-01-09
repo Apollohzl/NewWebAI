@@ -101,6 +101,17 @@ export default function UserAvatar() {
             账户设置
           </Link>
           
+          {/* 开发者选项 - 仅对特定邮箱显示 */}
+          {user.email === '959855534@qq.com' && (
+            <Link
+              href="/admin/developer"
+              className="block px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
+              onClick={handleMenuClick}
+            >
+              开发者选项
+            </Link>
+          )}
+          
           <button
             onClick={() => {
               logout();

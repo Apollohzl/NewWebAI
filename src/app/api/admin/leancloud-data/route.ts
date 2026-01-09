@@ -44,18 +44,43 @@ export async function GET(request: NextRequest) {
       apis = [];
     }
 
-    // 计算今日新增用户（从博客文章作者中获取）
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayUsers = new Set<string>();
-    blogPosts.forEach((post: any) => {
-      if (post.createdAt) {
-        const postDate = new Date(post.createdAt);
-        if (postDate >= today) {
-          todayUsers.add(post.author || 'unknown');
+    // 获取今日新增用户
+    let todayNewUsers = 0;
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      // 使用LeanCloud的日期查询
+      const whereClause = JSON.stringify({
+        createdAt: {
+          $gte: { __type: "Date", iso: today.toISOString() },
+          $lt: { __type: "Date", iso: tomorrow.toISOString() }
         }
+      });
+      
+      const usersResponse = await leancloudRequest(`/users?where=${encodeURIComponent(whereClause)}&count=1&limit=0`);
+      
+      if (usersResponse.count !== undefined) {
+        todayNewUsers = usersResponse.count;
       }
-    });
+    } catch (error) {
+      console.error('获取今日新增用户失败:', error);
+      // 失败时使用备用方案：从博客文章作者中获取
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayUsers = new Set<string>();
+      blogPosts.forEach((post: any) => {
+        if (post.createdAt) {
+          const postDate = new Date(post.createdAt);
+          if (postDate >= today) {
+            todayUsers.add(post.author || 'unknown');
+          }
+        }
+      });
+      todayNewUsers = todayUsers.size;
+    }
 
     const data = {
       blogPosts,
@@ -65,7 +90,7 @@ export async function GET(request: NextRequest) {
         totalBlogPosts: blogPosts.length,
         totalProducts: products.length,
         totalApis: apis.length,
-        todayNewUsers: todayUsers.size,
+        todayNewUsers: todayNewUsers,
       }
     };
 

@@ -8,6 +8,7 @@ const LEANCLOUD_SERVER_URL = process.env.LEANCLOUD_SERVER_URL;
 export async function DELETE(request: NextRequest) {
   try {
     const { id } = await request.json();
+    const sessionToken = request.headers.get('Authorization')?.replace('Bearer ', '');
 
     if (!id) {
       return NextResponse.json(
@@ -16,11 +17,18 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // 使用Master Key删除博客文章
+    if (!sessionToken) {
+      return NextResponse.json(
+        { error: '未登录，请先登录' },
+        { status: 401 }
+      );
+    }
+
+    // 使用用户session token删除博客文章
     const url = `${LEANCLOUD_SERVER_URL}/1.1/classes/BlogPosts/${id}`;
     const headers = {
       'X-LC-Id': LEANCLOUD_APP_ID!,
-      'X-LC-Key': `${LEANCLOUD_APP_KEY},master`,
+      'X-LC-Session': sessionToken,
       'Content-Type': 'application/json',
     };
 

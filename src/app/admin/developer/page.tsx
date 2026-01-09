@@ -300,11 +300,18 @@ function BlogsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean;
       return;
     }
 
+    const sessionToken = localStorage.getItem('sessionToken');
+    if (!sessionToken) {
+      alert('请先登录');
+      return;
+    }
+
     try {
       const response = await fetch(`/api/blog/delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({ id: postId }),
       });
@@ -315,7 +322,8 @@ function BlogsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean;
         // 重新加载数据
         window.location.reload();
       } else {
-        alert('删除失败');
+        const errorData = await response.json().catch(() => ({}));
+        alert('删除失败：' + (errorData.error || '未知错误'));
       }
     } catch (error) {
       alert('删除失败：' + error);
@@ -581,11 +589,18 @@ function ApisTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; 
       return;
     }
 
+    const sessionToken = localStorage.getItem('sessionToken');
+    if (!sessionToken) {
+      alert('请先登录');
+      return;
+    }
+
     try {
       const response = await fetch('/api/api/update-status', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({
           id: apiId,
@@ -599,7 +614,8 @@ function ApisTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; 
           api.objectId === apiId ? { ...api, status: newStatus } : api
         ));
       } else {
-        alert('状态更新失败');
+        const errorData = await response.json().catch(() => ({}));
+        alert('状态更新失败：' + (errorData.error || '未知错误'));
       }
     } catch (error) {
       alert('状态更新失败：' + error);

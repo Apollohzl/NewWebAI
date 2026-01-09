@@ -305,6 +305,7 @@ function BlogsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean;
     
     if (!sessionToken) {
       alert('请先登录');
+      window.location.href = '/login';
       return;
     }
 
@@ -328,7 +329,15 @@ function BlogsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean;
         // 重新加载数据
         window.location.reload();
       } else {
-        alert('删除失败：' + (responseData.error || '未知错误'));
+        if (responseData.error === 'Unauthorized' || responseData.error === 'Invalid session token') {
+          alert('登录已过期，请重新登录');
+          localStorage.removeItem('sessionToken');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        } else {
+          alert('删除失败：' + (responseData.error || '未知错误'));
+        }
       }
     } catch (error) {
       console.error('Delete Error:', error);
@@ -600,6 +609,7 @@ function ApisTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; 
     
     if (!sessionToken) {
       alert('请先登录');
+      window.location.href = '/login';
       return;
     }
 
@@ -626,7 +636,15 @@ function ApisTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; 
           api.objectId === apiId ? { ...api, status: newStatus } : api
         ));
       } else {
-        alert('状态更新失败：' + (responseData.error || '未知错误'));
+        if (responseData.error === 'Unauthorized' || responseData.error === 'Invalid session token') {
+          alert('登录已过期，请重新登录');
+          localStorage.removeItem('sessionToken');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        } else {
+          alert('状态更新失败：' + (responseData.error || '未知错误'));
+        }
       }
     } catch (error) {
       console.error('Update Status Error:', error);

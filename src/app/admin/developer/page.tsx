@@ -12,12 +12,10 @@ interface User {
 }
 
 interface LeanCloudData {
-  users: any[];
   blogPosts: any[];
   products: any[];
   apis: any[];
   stats: {
-    totalUsers: number;
     totalBlogPosts: number;
     totalProducts: number;
     totalApis: number;
@@ -173,16 +171,6 @@ export default function DeveloperPage() {
                 概览
               </button>
               <button
-                onClick={() => setActiveTab('users')}
-                className={`py-2 px-1 border-b-2 transition-colors ${
-                  activeTab === 'users'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                } ${darkMode ? 'text-white' : ''}`}
-              >
-                用户管理
-              </button>
-              <button
                 onClick={() => setActiveTab('blogs')}
                 className={`py-2 px-1 border-b-2 transition-colors ${
                   activeTab === 'blogs'
@@ -230,9 +218,6 @@ export default function DeveloperPage() {
             {activeTab === 'overview' && (
               <OverviewTab darkMode={darkMode} leanCloudData={leanCloudData} loadingData={loadingData} />
             )}
-            {activeTab === 'users' && (
-              <UsersTab darkMode={darkMode} leanCloudData={leanCloudData} loadingData={loadingData} />
-            )}
             {activeTab === 'blogs' && (
               <BlogsTab darkMode={darkMode} leanCloudData={leanCloudData} loadingData={loadingData} />
             )}
@@ -257,8 +242,7 @@ function OverviewTab({ darkMode, leanCloudData, loadingData }: { darkMode: boole
   return (
     <div className="space-y-6">
       {/* 统计卡片 */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard darkMode={darkMode} title="总用户数" value={leanCloudData?.stats.totalUsers || 0} icon="👥" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard darkMode={darkMode} title="博客文章" value={leanCloudData?.stats.totalBlogPosts || 0} icon="📝" />
         <StatCard darkMode={darkMode} title="产品数量" value={leanCloudData?.stats.totalProducts || 0} icon="🛍️" />
         <StatCard darkMode={darkMode} title="API配置" value={leanCloudData?.stats.totalApis || 0} icon="🔌" />
@@ -290,51 +274,6 @@ function OverviewTab({ darkMode, leanCloudData, loadingData }: { darkMode: boole
   );
 }
 
-// 用户管理标签页组件
-function UsersTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; leanCloudData: LeanCloudData | null; loadingData: boolean }) {
-  return (
-    <div className="space-y-6">
-      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-6 transition-colors duration-300`}>
-        <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-black'} mb-4`}>用户列表</h2>
-        {loadingData ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>加载中...</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className={`${darkMode ? 'border-gray-600' : 'border-gray-200'} border-b`}>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>用户名</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>邮箱</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>创建时间</th>
-                  <th className={`text-left py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>邮箱验证</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leanCloudData?.users.map((user: any) => (
-                  <tr key={user.objectId} className={`${darkMode ? 'border-gray-600 hover:bg-gray-600' : 'border-gray-200 hover:bg-gray-100'} border-b transition-colors`}>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-white' : 'text-black'}`}>{user.username}</td>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{user.email}</td>
-                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{new Date(user.createdAt).toLocaleDateString('zh-CN')}</td>
-                    <td className={`py-3 px-4`}>
-                      <span className={`px-2 py-1 rounded-full text-xs ${user.emailVerified ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {user.emailVerified ? '已验证' : '未验证'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// 博客文章标签页组件
 function BlogsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; leanCloudData: LeanCloudData | null; loadingData: boolean }) {
   return (
     <div className="space-y-6">

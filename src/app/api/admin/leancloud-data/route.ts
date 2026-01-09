@@ -1,109 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { leancloudRequest } from '@/lib/leancloud';
 
-// LeanCloud配置
-const LEANCLOUD_APP_ID = process.env.LEANCLOUD_APP_ID;
-const LEANCLOUD_APP_KEY = process.env.LEANCLOUD_APP_KEY;
-const LEANCLOUD_SERVER_URL = process.env.LEANCLOUD_SERVER_URL;
-
-// 使用Master Key的请求函数
-async function leancloudRequestWithMasterKey(endpoint: string, options: RequestInit = {}) {
-  const url = `${LEANCLOUD_SERVER_URL}/1.1${endpoint}`;
-  
-  const headers = {
-    'X-LC-Id': LEANCLOUD_APP_ID!,
-    'X-LC-Key': `${LEANCLOUD_APP_KEY},master`,
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP ${response.status}`);
-  }
-
-  return response.json();
-}
-
 export async function GET(request: NextRequest) {
   try {
     console.log('开始获取LeanCloud数据...');
-
-    // 获取用户数据 - 尝试直接查询用户表
-    let users: any[] = [];
-    try {
-      console.log('尝试直接查询用户表...');
-      
-      // 尝试使用Master Key查询用户表
-      const usersResponse = await leancloudRequestWithMasterKey('/users?limit=100');
-      console.log('用户查询响应:', JSON.stringify(usersResponse).substring(0, 500));
-      
-      if (usersResponse.results && usersResponse.results.length > 0) {
-        users = usersResponse.results;
-        console.log(`成功获取 ${users.length} 个用户`);
-        console.log('用户列表:', users.map((u: any) => ({ username: u.username, email: u.email, objectId: u.objectId })));
-      } else {
-        console.log('用户表为空，尝试从博客文章提取用户信息...');
-        
-        // 如果用户表为空，从博客文章中提取作者信息
-        const blogPostsResponse = await leancloudRequest('/classes/BlogPosts?limit=1000');
-        const blogPosts = blogPostsResponse.results || [];
-        
-        // 提取唯一的作者信息
-        const authorMap = new Map<string, any>();
-        
-        blogPosts.forEach((post: any) => {
-          if (post.author && !authorMap.has(post.author)) {
-            authorMap.set(post.author, {
-              username: post.author,
-              email: `${post.author}@example.com`,
-              objectId: `author-${post.author}`,
-              createdAt: post.createdAt,
-              emailVerified: true,
-              source: 'blog_posts'
-            });
-          }
-        });
-        
-        users = Array.from(authorMap.values());
-        console.log(`从博客文章中提取到 ${users.length} 个用户`);
-      }
-    } catch (error) {
-      console.error('获取用户数据失败:', error);
-      console.error('错误详情:', error instanceof Error ? error.message : '未知错误');
-      
-      // 如果直接查询失败，从博客文章提取用户信息
-      try {
-        console.log('尝试从博客文章中提取用户信息...');
-        const blogPostsResponse = await leancloudRequest('/classes/BlogPosts?limit=1000');
-        const blogPosts = blogPostsResponse.results || [];
-        
-        const authorMap = new Map<string, any>();
-        blogPosts.forEach((post: any) => {
-          if (post.author && !authorMap.has(post.author)) {
-            authorMap.set(post.author, {
-              username: post.author,
-              email: `${post.author}@example.com`,
-              objectId: `author-${post.author}`,
-              createdAt: post.createdAt,
-              emailVerified: true,
-              source: 'blog_posts'
-            });
-          }
-        });
-        
-        users = Array.from(authorMap.values());
-        console.log(`从博客文章中提取到 ${users.length} 个用户`);
-      } catch (fallbackError) {
-        console.error('从博客文章提取用户信息也失败:', fallbackError);
-        users = [];
-      }
-    }
 
     // 获取博客文章
     let blogPosts: any[] = [];
@@ -145,12 +45,10 @@ export async function GET(request: NextRequest) {
     }
 
     const data = {
-      users,
       blogPosts,
       products,
       apis,
       stats: {
-        totalUsers: users.length,
         totalBlogPosts: blogPosts.length,
         totalProducts: products.length,
         totalApis: apis.length,

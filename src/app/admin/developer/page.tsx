@@ -438,55 +438,118 @@ function ProductsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boole
 
       {/* 产品悬浮窗口 */}
       {selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setSelectedProduct(null)}>
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50" onClick={() => setSelectedProduct(null)}>
           <div 
-            className={`rounded-lg p-6 w-full max-w-4xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
+            className={`rounded-lg p-6 w-full max-w-4xl ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-2xl`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start mb-6">
               <h2 className="text-2xl font-bold text-black">{selectedProduct.name}</h2>
               <button
                 onClick={() => setSelectedProduct(null)}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
+                className="text-gray-500 hover:text-gray-700 text-2xl font-light"
               >
                 ×
               </button>
             </div>
             
             {/* 模拟淘宝产品界面 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* 产品图片 */}
               <div className={`aspect-square rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} flex items-center justify-center`}>
-                <span className={`text-6xl ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>📦</span>
+                {selectedProduct.image ? (
+                  <img 
+                    src={selectedProduct.image} 
+                    alt={selectedProduct.name}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                ) : (
+                  <span className={`text-6xl ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>📦</span>
+                )}
               </div>
               
               {/* 产品信息 */}
               <div className="space-y-4">
-                <div>
-                  <p className="text-3xl font-bold text-red-600">¥{selectedProduct.price}</p>
-                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>价格</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-4xl font-bold text-red-600">¥{selectedProduct.price}</p>
+                  {selectedProduct.originalPrice && (
+                    <p className="text-xl text-gray-400 line-through">¥{selectedProduct.originalPrice}</p>
+                  )}
                 </div>
                 
                 <div>
-                  <p className="font-medium text-black">{selectedProduct.category}</p>
-                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>分类</p>
+                  <p className="text-sm text-gray-500 mb-1">价格</p>
                 </div>
                 
                 <div>
-                  <p className="font-medium text-black">{selectedProduct.stock || '有货'}</p>
-                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>库存</p>
+                  <p className="font-medium text-black text-lg">{selectedProduct.description}</p>
+                  <p className="text-sm text-gray-500">描述</p>
                 </div>
                 
                 <div>
-                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    创建时间: {selectedProduct.createdAt ? new Date(selectedProduct.createdAt).toLocaleDateString('zh-CN') : '-'}
+                  <p className={`px-3 py-1 rounded-full text-sm inline-block ${
+                    darkMode ? 'bg-gray-700 text-gray-300' : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {selectedProduct.category}
                   </p>
+                  <p className="text-sm text-gray-500 mt-1">分类</p>
                 </div>
+                
+                {selectedProduct.features && selectedProduct.features.length > 0 && (
+                  <div>
+                    <div className="space-y-2">
+                      {selectedProduct.features.map((feature: string, index: number) => (
+                        <div key={index} className="flex items-center text-sm">
+                          <span className="text-green-500 mr-2">✓</span>
+                          <span className="text-black">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">特性</p>
+                  </div>
+                )}
+                
+                {selectedProduct.tags && selectedProduct.tags.length > 0 && (
+                  <div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProduct.tags.map((tag: string, index: number) => (
+                        <span
+                          key={index}
+                          className={`px-2 py-1 rounded text-xs ${
+                            darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">标签</p>
+                  </div>
+                )}
+                
+                {selectedProduct.rating && (
+                  <div>
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <span
+                          key={i}
+                          className={`text-xl ${
+                            i < Math.floor(selectedProduct.rating) ? 'text-yellow-400' : 'text-gray-300'
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                      <span className="ml-2 text-black font-medium">{selectedProduct.rating}</span>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">评分</p>
+                  </div>
+                )}
                 
                 <div className="pt-4 border-t">
                   <button 
                     onClick={() => window.location.href = '/admin/products/edit'}
-                    className="w-full py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                    className="w-full py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
                   >
                     编辑产品
                   </button>

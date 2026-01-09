@@ -34,51 +34,36 @@ export async function GET(request: NextRequest) {
   try {
     console.log('开始获取LeanCloud数据...');
 
-    // 获取用户数据 - 使用Master Key，尝试多种方式
+    // 获取用户数据 - 从博客文章中提取用户信息
     let users: any[] = [];
     try {
-      console.log('尝试获取用户数据(使用Master Key)...');
-      console.log('环境变量检查:', {
-        LEANCLOUD_APP_ID: LEANCLOUD_APP_ID ? '已设置' : '未设置',
-        LEANCLOUD_APP_KEY: LEANCLOUD_APP_KEY ? '已设置' : '未设置',
-        LEANCLOUD_SERVER_URL: LEANCLOUD_SERVER_URL ? '已设置' : '未设置',
+      console.log('尝试从博客文章中提取用户信息...');
+      
+      // 获取博客文章来提取作者信息
+      const blogPostsResponse = await leancloudRequest('/classes/BlogPosts?limit=1000');
+      const blogPosts = blogPostsResponse.results || [];
+      
+      // 提取唯一的作者信息
+      const authorMap = new Map<string, any>();
+      
+      blogPosts.forEach((post: any) => {
+        if (post.author && !authorMap.has(post.author)) {
+          authorMap.set(post.author, {
+            username: post.author,
+            email: `${post.author}@example.com`, // 生成模拟邮箱
+            objectId: `author-${post.author}`,
+            createdAt: post.createdAt,
+            emailVerified: true,
+            source: 'blog_posts'
+          });
+        }
       });
       
-      // 尝试方式1: /users端点
-      let usersResponse;
-      try {
-        usersResponse = await leancloudRequestWithMasterKey('/users?limit=100&count=1');
-        console.log('方式1(/users)响应:', JSON.stringify(usersResponse).substring(0, 500));
-        users = usersResponse.results || [];
-      } catch (error1) {
-        console.log('方式1失败，尝试方式2...');
-        
-        // 尝试方式2: /classes/_User端点
-        try {
-          usersResponse = await leancloudRequestWithMasterKey('/classes/_User?limit=100&count=1');
-          console.log('方式2(/classes/_User)响应:', JSON.stringify(usersResponse).substring(0, 500));
-          users = usersResponse.results || [];
-        } catch (error2) {
-          console.log('方式2也失败，尝试方式3...');
-          
-          // 尝试方式3: /classes/User端点
-          try {
-            usersResponse = await leancloudRequestWithMasterKey('/classes/User?limit=100&count=1');
-            console.log('方式3(/classes/User)响应:', JSON.stringify(usersResponse).substring(0, 500));
-            users = usersResponse.results || [];
-          } catch (error3) {
-            console.error('所有方式都失败了');
-            throw error3;
-          }
-        }
-      }
-      
-      console.log(`成功获取 ${users.length} 个用户`);
-      if (users.length > 0) {
-        console.log('用户列表:', users.map((u: any) => ({ username: u.username, email: u.email, objectId: u.objectId })));
-      }
+      users = Array.from(authorMap.values());
+      console.log(`从博客文章中提取到 ${users.length} 个用户`);
+      console.log('用户列表:', users.map((u: any) => ({ username: u.username, source: u.source })));
     } catch (error) {
-      console.error('获取用户数据失败:', error);
+      console.error('提取用户信息失败:', error);
       console.error('错误详情:', error instanceof Error ? error.message : '未知错误');
       users = [];
     }

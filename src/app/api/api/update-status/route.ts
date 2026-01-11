@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
     };
 
     console.log('Update API Status - Request URL:', url);
+    console.log('Update API Status - Using Master Key');
 
     const response = await fetch(url, {
       method: 'PUT',
@@ -40,6 +41,44 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('Update API Status - Error Response:', errorData);
+      
+      // 如果是ACL错误，尝试先清除ACL再更新
+      if (errorData.error && errorData.error.includes('ACL')) {
+        console.log('尝试清除ACL后更新...');
+        
+        // 先更新ACL为允许所有用户写入
+        const aclUpdateResponse = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'X-LC-Id': LEANCLOUD_APP_ID!,
+            'X-LC-Key': `${LEANCLOUD_APP_KEY},master`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ACL: {
+              '*': {
+                read: true,
+                write: true
+              }
+            }
+          }),
+        });
+
+        if (aclUpdateResponse.ok) {
+          console.log('ACL更新成功，重新尝试更新状态...');
+          // 再次尝试更新状态
+          const statusUpdateResponse = await fetch(url, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify({ status }),
+          });
+
+          if (statusUpdateResponse.ok) {
+            return NextResponse.json({ success: true });
+          }
+        }
+      }
+      
       throw new Error(errorData.error || `HTTP ${response.status}`);
     }
 

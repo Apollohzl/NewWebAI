@@ -8,9 +8,7 @@ const LEANCLOUD_SERVER_URL = process.env.LEANCLOUD_SERVER_URL;
 export async function DELETE(request: NextRequest) {
   try {
     const { id } = await request.json();
-    const sessionToken = request.headers.get('Authorization')?.replace('Bearer ', '');
 
-    console.log('Delete Blog - Session Token:', sessionToken ? sessionToken.substring(0, 20) + '...' : '不存在');
     console.log('Delete Blog - Blog ID:', id);
 
     if (!id) {
@@ -20,23 +18,15 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    if (!sessionToken) {
-      return NextResponse.json(
-        { error: '未登录，请先登录' },
-        { status: 401 }
-      );
-    }
-
-    // 使用用户session token删除博客文章
+    // 使用Master Key删除博客文章
     const url = `${LEANCLOUD_SERVER_URL}/1.1/classes/BlogPosts/${id}`;
     const headers = {
       'X-LC-Id': LEANCLOUD_APP_ID!,
-      'X-LC-Session': sessionToken,
+      'X-LC-Key': `${LEANCLOUD_APP_KEY},master`,
       'Content-Type': 'application/json',
     };
 
     console.log('Delete Blog - Request URL:', url);
-    console.log('Delete Blog - Request Headers:', headers);
 
     const response = await fetch(url, {
       method: 'DELETE',

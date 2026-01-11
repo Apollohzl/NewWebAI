@@ -8,9 +8,7 @@ const LEANCLOUD_SERVER_URL = process.env.LEANCLOUD_SERVER_URL;
 export async function POST(request: NextRequest) {
   try {
     const { id, status } = await request.json();
-    const sessionToken = request.headers.get('Authorization')?.replace('Bearer ', '');
 
-    console.log('Update API Status - Session Token:', sessionToken ? sessionToken.substring(0, 20) + '...' : '不存在');
     console.log('Update API Status - API ID:', id);
     console.log('Update API Status - New Status:', status);
 
@@ -21,18 +19,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!sessionToken) {
-      return NextResponse.json(
-        { error: '未登录，请先登录' },
-        { status: 401 }
-      );
-    }
-
-    // 使用用户session token更新API状态
+    // 使用Master Key更新API状态
     const url = `${LEANCLOUD_SERVER_URL}/1.1/classes/APIs/${id}`;
     const headers = {
       'X-LC-Id': LEANCLOUD_APP_ID!,
-      'X-LC-Session': sessionToken,
+      'X-LC-Key': `${LEANCLOUD_APP_KEY},master`,
       'Content-Type': 'application/json',
     };
 

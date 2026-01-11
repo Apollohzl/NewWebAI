@@ -300,21 +300,11 @@ function BlogsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean;
       return;
     }
 
-    const sessionToken = localStorage.getItem('sessionToken');
-    console.log('Session Token:', sessionToken ? '存在' : '不存在');
-    
-    if (!sessionToken) {
-      alert('请先登录');
-      window.location.href = '/login';
-      return;
-    }
-
     try {
       const response = await fetch(`/api/blog/delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({ id: postId }),
       });
@@ -329,15 +319,7 @@ function BlogsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean;
         // 重新加载数据
         window.location.reload();
       } else {
-        if (responseData.error === 'Unauthorized' || responseData.error === 'Invalid session token') {
-          alert('登录已过期，请重新登录');
-          localStorage.removeItem('sessionToken');
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
-        } else {
-          alert('删除失败：' + (responseData.error || '未知错误'));
-        }
+        alert('删除失败：' + (responseData.error || '未知错误'));
       }
     } catch (error) {
       console.error('Delete Error:', error);
@@ -604,21 +586,11 @@ function ApisTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; 
       return;
     }
 
-    const sessionToken = localStorage.getItem('sessionToken');
-    console.log('Session Token:', sessionToken ? '存在' : '不存在');
-    
-    if (!sessionToken) {
-      alert('请先登录');
-      window.location.href = '/login';
-      return;
-    }
-
     try {
       const response = await fetch('/api/api/update-status', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({
           id: apiId,
@@ -636,15 +608,7 @@ function ApisTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; 
           api.objectId === apiId ? { ...api, status: newStatus } : api
         ));
       } else {
-        if (responseData.error === 'Unauthorized' || responseData.error === 'Invalid session token') {
-          alert('登录已过期，请重新登录');
-          localStorage.removeItem('sessionToken');
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
-        } else {
-          alert('状态更新失败：' + (responseData.error || '未知错误'));
-        }
+        alert('状态更新失败：' + (responseData.error || '未知错误'));
       }
     } catch (error) {
       console.error('Update Status Error:', error);

@@ -134,7 +134,7 @@ export default function AIChatPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* 顶部导航栏 */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
@@ -164,18 +164,17 @@ export default function AIChatPage() {
         </div>
       </header>
 
-      {/* 聊天区域 */}
-      <div className="flex-1 max-w-4xl mx-auto w-full p-4">
-        <div className="bg-white rounded-lg shadow-md h-[calc(100vh-200px)] flex flex-col">
-          {/* 消息列表 */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.length === 0 ? (
-              <div className="text-center text-gray-500 mt-8">
-                <p className="text-lg">开始新的对话</p>
-                <p className="text-sm mt-2">当前模型：{currentModel}</p>
-              </div>
-            ) : (
-              messages.map((message) => (
+      {/* 消息列表 */}
+      <div className="flex-1 overflow-y-auto p-4 pb-24 flex flex-col-reverse">
+        <div className="max-w-4xl mx-auto w-full">
+          {messages.length === 0 ? (
+            <div className="text-center text-gray-500 mt-8">
+              <p className="text-lg">开始新的对话</p>
+              <p className="text-sm mt-2">当前模型：{currentModel}</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -227,64 +226,66 @@ export default function AIChatPage() {
                     </button>
                   </div>
                 </div>
-              ))
-            )}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 text-black p-3 rounded-lg">
-                  <p className="text-sm">AI正在思考...</p>
+              ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-100 text-black p-3 rounded-lg">
+                    <p className="text-sm">AI正在思考...</p>
+                  </div>
                 </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
+      </div>
 
-          {/* 输入区域 */}
-          <div className="border-t border-gray-200 p-4">
-            <div className="flex items-end space-x-2 mb-2">
-              <div className="flex-1">
-                <label className="text-xs text-gray-600">创造性 (0-2):</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="2"
-                  step="0.1"
-                  value={temperature}
-                  onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                />
-              </div>
-              <div className="flex-1">
-                <label className="text-xs text-gray-600">最大长度:</label>
-                <input
-                  type="number"
-                  min="100"
-                  max="4000"
-                  step="100"
-                  value={maxTokens}
-                  onChange={(e) => setMaxTokens(parseInt(e.target.value))}
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                />
-              </div>
-            </div>
-            <div className="flex space-x-2">
+      {/* 输入区域 - 固定在底部 */}
+      <div className="bg-white border-t border-gray-200 p-4 fixed bottom-0 left-0 right-0 w-full">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-end space-x-2 mb-2">
+            <div className="flex-1">
+              <label className="text-xs text-gray-600">创造性 (0-2):</label>
               <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="输入消息..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={isLoading}
+                type="number"
+                min="0"
+                max="2"
+                step="0.1"
+                value={temperature}
+                onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
               />
-              <button
-                onClick={sendMessage}
-                disabled={isLoading || !input.trim()}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                发送
-              </button>
             </div>
+            <div className="flex-1">
+              <label className="text-xs text-gray-600">最大长度:</label>
+              <input
+                type="number"
+                min="100"
+                max="4000"
+                step="100"
+                value={maxTokens}
+                onChange={(e) => setMaxTokens(parseInt(e.target.value))}
+                className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+              />
+            </div>
+          </div>
+          <div className="flex space-x-2">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+              placeholder="输入消息..."
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isLoading}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={isLoading || !input.trim()}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              发送
+            </button>
           </div>
         </div>
       </div>

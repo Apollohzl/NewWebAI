@@ -11,11 +11,6 @@ interface Message {
   model?: string;
 }
 
-interface ChatHistory {
-  messages: Message[];
-  currentModel: string;
-}
-
 export default function AIChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -27,28 +22,11 @@ export default function AIChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // 加载聊天历史
+  // 初始化聊天历史为空
   useEffect(() => {
-    const saved = localStorage.getItem('ai-chat-history');
-    if (saved) {
-      try {
-        const history: ChatHistory = JSON.parse(saved);
-        setMessages(history.messages || []);
-        setCurrentModel(history.currentModel || 'openai');
-      } catch (e) {
-        console.error('Failed to load chat history:', e);
-      }
-    }
+    // 每次页面加载时聊天历史为空，不从 localStorage 恢复
+    setMessages([]);
   }, []);
-
-  // 保存聊天历史
-  const saveHistory = (newMessages: Message[], model: string) => {
-    const history: ChatHistory = {
-      messages: newMessages,
-      currentModel: model
-    };
-    localStorage.setItem('ai-chat-history', JSON.stringify(history));
-  };
 
   // 加载模型列表
   useEffect(() => {
@@ -114,7 +92,6 @@ export default function AIChatPage() {
 
         const updatedMessages = [...newMessages, assistantMessage];
         setMessages(updatedMessages);
-        saveHistory(updatedMessages, currentModel);
       } else {
         throw new Error(data.error?.message || '请求失败');
       }
@@ -129,41 +106,14 @@ export default function AIChatPage() {
       };
       const updatedMessages = [...newMessages, errorMessage];
       setMessages(updatedMessages);
-      saveHistory(updatedMessages, currentModel);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 清空历史
-  const clearHistory = () => {
-    if (confirm('确定要清空所有聊天历史吗？')) {
-      setMessages([]);
-      localStorage.removeItem('ai-chat-history');
-    }
-  };
-
-  // 导出历史
-  const exportHistory = () => {
-    const historyText = messages.map(m => 
-      `[${m.timestamp.toLocaleString()}] ${m.role === 'user' ? '用户' : 'AI'}(${m.model || currentModel}):\n${m.content}\n`
-    ).join('\n---\n\n');
-
-    const blob = new Blob([historyText], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `ai-chat-history-${new Date().toISOString().slice(0, 10)}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   // 切换模型
   const handleModelChange = (model: string) => {
     setCurrentModel(model);
-    saveHistory(messages, model);
   };
 
   return (
@@ -195,18 +145,6 @@ export default function AIChatPage() {
                 </option>
               ))}
             </select>
-            <button
-              onClick={exportHistory}
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              导出历史
-            </button>
-            <button
-              onClick={clearHistory}
-              className="px-3 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
-            >
-              清空历史
-            </button>
           </div>
         </div>
       </header>

@@ -190,7 +190,24 @@ export default function AIChatPage() {
                     {message.role === 'assistant' ? (
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]} 
-                        className="text-sm mb-2"
+                        components={{
+                          p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
+                          h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
+                          h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
+                          h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
+                          li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                          code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
+                          pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
+                          blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
+                          table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
+                          th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
+                          td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
+                          a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
+                          strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                          em: ({node, ...props}) => <em className="italic" {...props} />,
+                          ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                          ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                        }}
                       >
                         {message.content}
                       </ReactMarkdown>

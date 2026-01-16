@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
   id: string;
@@ -111,6 +113,19 @@ export default function AIChatPage() {
     }
   };
 
+  // 复制消息内容到剪贴板
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        // 可以添加一个提示，表示复制成功
+        console.log('内容已复制到剪贴板');
+      },
+      (err) => {
+        console.error('复制失败: ', err);
+      }
+    );
+  };
+
   // 切换模型
   const handleModelChange = (model: string) => {
     setCurrentModel(model);
@@ -166,17 +181,33 @@ export default function AIChatPage() {
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[70%] p-3 rounded-lg ${
+                    className={`max-w-[70%] p-3 rounded-lg relative ${
                       message.role === 'user'
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-black'
                     }`}
                   >
-                    <p className="text-sm">{message.content}</p>
+                    {message.role === 'assistant' ? (
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkGfm]} 
+                        className="text-sm mb-2"
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    ) : (
+                      <p className="text-sm">{message.content}</p>
+                    )}
                     <p className="text-xs mt-1 opacity-70">
                       {message.timestamp.toLocaleTimeString()}
                       {message.model && ` · ${message.model}`}
                     </p>
+                    <button
+                      onClick={() => copyToClipboard(message.content)}
+                      className="absolute bottom-1 right-1 text-xs opacity-50 hover:opacity-100"
+                      title="复制内容"
+                    >
+                      📋
+                    </button>
                   </div>
                 </div>
               ))

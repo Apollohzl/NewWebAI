@@ -164,77 +164,81 @@ export default function AIChatPage() {
         </div>
       </header>
 
-      {/* 消息列表 */}
-      <div className="flex-1 overflow-y-auto p-4 pb-24 flex flex-col-reverse">
-        <div className="max-w-4xl mx-auto w-full">
+      {/* 消息列表容器 */}
+      <div className="flex-1 overflow-hidden p-4">
+        <div className="max-w-4xl mx-auto w-full h-full flex flex-col">
           {messages.length === 0 ? (
-            <div className="text-center text-gray-500 mt-8">
-              <p className="text-lg">开始新的对话</p>
-              <p className="text-sm mt-2">当前模型：{currentModel}</p>
+            <div className="text-center text-gray-500 mt-8 flex-1 flex items-center justify-center">
+              <div>
+                <p className="text-lg">开始新的对话</p>
+                <p className="text-sm mt-2">当前模型：{currentModel}</p>
+              </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
+            <div className="flex-1 overflow-y-auto flex flex-col-reverse">
+              <div className="space-y-4 pb-24">
+                {messages.map((message) => (
                   <div
-                    className={`max-w-[70%] p-3 rounded-lg relative ${
-                      message.role === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-black'
-                    }`}
+                    key={message.id}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    {message.role === 'assistant' ? (
-                      <ReactMarkdown 
-                        remarkPlugins={[remarkGfm]} 
-                        components={{
-                          p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
-                          h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
-                          h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
-                          h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
-                          li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                          code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
-                          pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
-                          blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
-                          table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
-                          th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
-                          td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
-                          a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
-                          strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                          em: ({node, ...props}) => <em className="italic" {...props} />,
-                          ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                          ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
-                        }}
-                      >
-                        {message.content}
-                      </ReactMarkdown>
-                    ) : (
-                      <p className="text-sm">{message.content}</p>
-                    )}
-                    <p className="text-xs mt-1 opacity-70">
-                      {message.timestamp.toLocaleTimeString()}
-                      {message.model && ` · ${message.model}`}
-                    </p>
-                    <button
-                      onClick={() => copyToClipboard(message.content)}
-                      className="absolute bottom-1 right-1 text-xs opacity-50 hover:opacity-100"
-                      title="复制内容"
+                    <div
+                      className={`max-w-[70%] p-3 rounded-lg relative ${
+                        message.role === 'user'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-black'
+                      }`}
                     >
-                      📋
-                    </button>
+                      {message.role === 'assistant' ? (
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]} 
+                          components={{
+                            p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
+                            h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
+                            h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
+                            h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
+                            li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                            code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
+                            pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
+                            blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
+                            table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
+                            th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
+                            td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
+                            a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
+                            strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                            em: ({node, ...props}) => <em className="italic" {...props} />,
+                            ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                            ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
+                      ) : (
+                        <p className="text-sm">{message.content}</p>
+                      )}
+                      <p className="text-xs mt-1 opacity-70">
+                        {message.timestamp.toLocaleTimeString()}
+                        {message.model && ` · ${message.model}`}
+                      </p>
+                      <button
+                        onClick={() => copyToClipboard(message.content)}
+                        className="absolute bottom-1 right-1 text-xs opacity-50 hover:opacity-100"
+                        title="复制内容"
+                      >
+                        📋
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-100 text-black p-3 rounded-lg">
-                    <p className="text-sm">AI正在思考...</p>
+                ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-100 text-black p-3 rounded-lg">
+                      <p className="text-sm">AI正在思考...</p>
+                    </div>
                   </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
+                )}
+                <div ref={messagesEndRef} />
+              </div>
             </div>
           )}
         </div>

@@ -19,6 +19,7 @@ export default function AIDrawPage() {
   const [negativePrompt, setNegativePrompt] = useState('worst quality, blurry');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isVideo, setIsVideo] = useState<boolean>(false);
   const [translatedPrompt, setTranslatedPrompt] = useState('');
   const [enhance, setEnhance] = useState(false);
   const [safe, setSafe] = useState(false);
@@ -114,6 +115,7 @@ export default function AIDrawPage() {
 
       if (data.success && data.data) {
         setGeneratedImage(data.data.imageData);
+        setIsVideo(data.data.isVideo || false);
         setTranslatedPrompt(data.data.translatedPrompt || '');
       } else {
         throw new Error(data.error?.message || '生成失败');
@@ -126,13 +128,20 @@ export default function AIDrawPage() {
     }
   };
 
-  // 下载图像
+  // 下载媒体文件
   const downloadImage = () => {
     if (!generatedImage) return;
 
     const link = document.createElement('a');
     link.href = generatedImage;
-    link.download = `ai-generated-${Date.now()}.png`;
+    
+    // 根据内容类型设置正确的扩展名
+    if (isVideo) {
+      link.download = `ai-generated-${Date.now()}.mp4`;
+    } else {
+      link.download = `ai-generated-${Date.now()}.png`;
+    }
+    
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -371,41 +380,51 @@ export default function AIDrawPage() {
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-lg font-semibold text-black mb-4">预览</h2>
               
-              {generatedImage ? (
-                <div className="space-y-4">
-                  <img
-                    src={generatedImage}
-                    alt="Generated"
-                    className="w-full rounded-lg shadow-md"
-                  />
-                  
-                  {translatedPrompt && translatedPrompt !== prompt && (
-                    <div className="bg-blue-50 p-3 rounded text-sm">
-                      <p className="text-gray-700">
-                        <span className="font-medium">原始描述：</span>{prompt}
-                      </p>
-                      <p className="text-gray-700 mt-1">
-                        <span className="font-medium">翻译后：</span>{translatedPrompt}
-                      </p>
-                    </div>
-                  )}
-                  
-                  <button
-                    onClick={downloadImage}
-                    className="w-full py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                  >
-                    下载图像
-                  </button>
-                </div>
-              ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <div className="bg-gray-100 rounded-lg p-8">
-                    <p className="text-lg mb-2">尚未生成图像</p>
-                    <p className="text-sm">输入描述并点击生成按钮</p>
-                  </div>
-                </div>
-              )}
-            </div>
+                                {generatedImage ? (
+                              <div className="space-y-4">
+                                {isVideo ? (
+                                  <video
+                                    src={generatedImage}
+                                    controls
+                                    className="w-full rounded-lg shadow-md max-h-[600px]"
+                                    autoPlay={false}
+                                  >
+                                    您的浏览器不支持视频播放。
+                                  </video>
+                                ) : (
+                                  <img
+                                    src={generatedImage}
+                                    alt="Generated"
+                                    className="w-full rounded-lg shadow-md"
+                                  />
+                                )}
+                                
+                                {translatedPrompt && translatedPrompt !== prompt && (
+                                  <div className="bg-blue-50 p-3 rounded text-sm">
+                                    <p className="text-gray-700">
+                                      <span className="font-medium">原始描述：</span>{prompt}
+                                    </p>
+                                    <p className="text-gray-700 mt-1">
+                                      <span className="font-medium">翻译后：</span>{translatedPrompt}
+                                    </p>
+                                  </div>
+                                )}
+                                
+                                <button
+                                  onClick={downloadImage}
+                                  className="w-full py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                                >
+                                  下载{isVideo ? '视频' : '图像'}
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="text-center py-12 text-gray-500">
+                                <div className="bg-gray-100 rounded-lg p-8">
+                                  <p className="text-lg mb-2">尚未生成图像</p>
+                                  <p className="text-sm">输入描述并点击生成按钮</p>
+                                </div>
+                              </div>
+                            )}            </div>
           </div>
         </div>
       </div>

@@ -58,17 +58,18 @@ export async function GET(request: NextRequest) {
       }, { status: response.status });
     }
     
-    // 获取图像数据
-    const imageBuffer = await response.arrayBuffer();
-    const base64Image = Buffer.from(imageBuffer).toString('base64');
+    // 获取数据
+    const dataBuffer = await response.arrayBuffer();
+    const base64Data = Buffer.from(dataBuffer).toString('base64');
     const mimeType = response.headers.get('content-type') || 'image/png';
+    const isVideo = mimeType.includes('video') || mimeType.includes('mp4') || ['veo', 'seedance', 'seedance-pro'].includes(model);
     
     // 返回响应
     return Response.json({
       success: true,
       data: {
         imageUrl: imageUrl,
-        imageData: `data:${mimeType};base64,${base64Image}`,
+        imageData: `data:${mimeType};base64,${base64Data}`,
         prompt: prompt,
         translatedPrompt: translatedPrompt,
         model: model,
@@ -83,7 +84,8 @@ export async function GET(request: NextRequest) {
         duration: duration ? parseInt(duration) : undefined,
         aspectRatio: aspectRatio,
         audio: audio === 'true',
-        mimeType: mimeType
+        mimeType: mimeType,
+        isVideo: isVideo
       },
       timestamp: new Date().toISOString()
     });
@@ -159,17 +161,18 @@ export async function POST(request: NextRequest) {
       }, { status: response.status });
     }
     
-    // 获取图像数据
-    const imageBuffer = await response.arrayBuffer();
-    const base64Image = Buffer.from(imageBuffer).toString('base64');
+    // 获取数据
+    const dataBuffer = await response.arrayBuffer();
+    const base64Data = Buffer.from(dataBuffer).toString('base64');
     const mimeType = response.headers.get('content-type') || 'image/png';
+    const isVideo = mimeType.includes('video') || mimeType.includes('mp4') || ['veo', 'seedance', 'seedance-pro'].includes(model);
     
     // 返回响应
     return Response.json({
       success: true,
       data: {
         imageUrl: imageUrl,
-        imageData: `data:${mimeType};base64,${base64Image}`,
+        imageData: `data:${mimeType};base64,${base64Data}`,
         prompt: prompt,
         translatedPrompt: translatedPrompt,
         model: model,
@@ -185,7 +188,8 @@ export async function POST(request: NextRequest) {
         duration: duration,
         aspectRatio: aspectRatio,
         audio: audio,
-        mimeType: mimeType
+        mimeType: mimeType,
+        isVideo: isVideo
       },
       timestamp: new Date().toISOString(),
       method: 'POST'

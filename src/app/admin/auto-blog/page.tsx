@@ -24,6 +24,8 @@ export default function AutoBlogAdmin() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // 获取状态
   const fetchStatus = async () => {
@@ -80,7 +82,9 @@ export default function AutoBlogAdmin() {
   // 手动生成博客
   const generateBlog = async () => {
     setLoading(true);
+    setIsGenerating(true);
     setMessage('');
+    setPreviewData(null); // 清空之前的预览数据
     
     try {
       // 第一步：调用AI生成内容
@@ -125,24 +129,48 @@ export default function AutoBlogAdmin() {
         throw new Error('AI返回的内容不是有效的JSON格式');
       }
 
-      // 第二步：调用博客创建API
-      setMessage('正在创建博客...');
+      // 设置预览数据
+      setPreviewData(parsedData);
+      setMessage('AI生成内容成功，请预览并确认发布');
+      setMessageType('success');
+    } catch (error: any) {
+      console.error('生成博客失败:', error);
+      setMessage(error.message || '生成博客失败');
+      setMessageType('error');
+    } finally {
+      setLoading(false);
+      setIsGenerating(false);
+    }
+  };
+
+  // 确认发布博客
+  const confirmPublish = async () => {
+    if (!previewData) {
+      setMessage('没有预览数据可发布');
+      setMessageType('error');
+      return;
+    }
+
+    setLoading(true);
+    setMessage('正在发布博客...');
+
+    try {
       const createResponse = await fetch('/api/blog/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: parsedData.title,
-          content: parsedData.content,
-          category: parsedData.category || '生活',
-          excerpt: parsedData.excerpt || '',
-          tags: parsedData.tags || ['生活'],
+          title: previewData.title,
+          content: previewData.content,
+          category: previewData.category || '生活',
+          excerpt: previewData.excerpt || '',
+          tags: previewData.tags || ['生活'],
           author: 'hzliflow-kimiai',
           readTime: '1 分钟阅读',
           status: '正常',
           published: true,
-          keywords: parsedData.tags || ['生活']
+          keywords: previewData.tags || ['生活']
         }),
       });
 
@@ -152,12 +180,13 @@ export default function AutoBlogAdmin() {
         throw new Error(createData.error || '博客创建失败');
       }
 
-      setMessage('博客生成成功！');
+      setMessage('博客发布成功！');
       setMessageType('success');
+      setPreviewData(null); // 清空预览数据
       setTimeout(fetchStatus, 1000);
     } catch (error: any) {
-      console.error('生成博客失败:', error);
-      setMessage(error.message || '生成博客失败');
+      console.error('发布博客失败:', error);
+      setMessage(error.message || '发布博客失败');
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -176,6 +205,86 @@ export default function AutoBlogAdmin() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* 注入预览内容所需的样式 */}
+      <style>{`
+        .preview-content {
+          font-family: 'Segoe UI', system-ui, sans-serif;
+          line-height: 1.7;
+          color: #333;
+        }
+        .preview-content .post-title {
+          font-size: 2.5rem;
+          font-weight: 800;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin-bottom: 1.5rem;
+          border-left: 5px solid #667eea;
+          padding-left: 1rem;
+        }
+        .preview-content .section-title {
+          font-size: 1.5rem;
+          color: #2d3748;
+          border-bottom: 2px solid #e2e8f0;
+          padding-bottom: 0.5rem;
+          margin: 2rem 0 1rem;
+        }
+        .preview-content .feature-box {
+          background: linear-gradient(135deg, #f6f9ff 0%, #f0f4ff 100%);
+          border-radius: 12px;
+          padding: 1.5rem;
+          margin: 1.5rem 0;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .preview-content .code-block {
+          background: #1a202c;
+          color: #e2e8f0;
+          padding: 1.5rem;
+          border-radius: 8px;
+          font-family: 'Fira Code', monospace;
+          margin: 1.5rem 0;
+          overflow-x: auto;
+        }
+        .preview-content .tech-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1.5rem;
+          margin: 2rem 0;
+        }
+        .preview-content .tech-card {
+          background: white;
+          border-radius: 10px;
+          padding: 1.5rem;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+          transition: transform 0.3s ease;
+          border-top: 4px solid #4299e1;
+        }
+        .preview-content .tech-card:hover {
+          transform: translateY(-5px);
+        }
+        .preview-content .feature-list li {
+          padding: 0.5rem 0;
+          position: relative;
+          padding-left: 1.5rem;
+        }
+        .preview-content .feature-list li:before {
+          content: '⚡';
+          position: absolute;
+          left: 0;
+          color: #4299e1;
+        }
+        .preview-content .img-container {
+          text-align: center;
+          margin: 2rem 0;
+        }
+        .preview-content .tech-img {
+          max-width: 100%;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+      `}</style>
+      
       {/* 导航栏 */}
       <nav className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -253,8 +362,18 @@ export default function AutoBlogAdmin() {
                 disabled={loading}
                 className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
-                {loading ? '生成中...' : '手动生成博客'}
+                {isGenerating ? '生成中...' : '手动生成博客'}
               </button>
+              
+              {previewData && (
+                <button
+                  onClick={confirmPublish}
+                  disabled={loading}
+                  className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {loading ? '发布中...' : '确认发布'}
+                </button>
+              )}
             </div>
           </div>
 
@@ -264,6 +383,46 @@ export default function AutoBlogAdmin() {
               messageType === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
             }`}>
               {message}
+            </div>
+          )}
+
+          {/* 预览区域 */}
+          {previewData && (
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-black">内容预览</h2>
+                <button
+                  onClick={() => setPreviewData(null)}
+                  className="text-sm bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 transition"
+                >
+                  取消预览
+                </button>
+              </div>
+              <div className="border border-gray-200 rounded-lg p-6 bg-white">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-black">{previewData.title}</h3>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded">
+                      {previewData.category || '生活'}
+                    </span>
+                    {previewData.tags && previewData.tags.map((tag: string, index: number) => (
+                      <span key={index} className="px-2 py-1 bg-green-100 text-green-800 text-sm rounded">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="text-gray-600 mb-4">
+                  {previewData.excerpt}
+                </div>
+                <div className="border-t border-gray-200 pt-4">
+                  <h4 className="font-medium text-black mb-2">正文预览：</h4>
+                  <div 
+                    className="preview-content"
+                    dangerouslySetInnerHTML={{ __html: previewData.content }} 
+                  />
+                </div>
+              </div>
             </div>
           )}
 

@@ -2,16 +2,23 @@ import { NextRequest } from 'next/server';
 import { translateToEnglish } from '@/services/translate';
 
 const API_KEY = 'sk_lP8NdaqOKvbNPB8n1ApyB2UQcsVwcT7B';
-const BASE_URL = 'https://gen.pollinations.ai';
+const BASE_URL = 'https://image.pollinations.ai';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const prompt = searchParams.get('prompt');
-  const model = searchParams.get('model') || 'flux';
-  const width = searchParams.get('width') || '512';
-  const height = searchParams.get('height') || '512';
+  const model = searchParams.get('model') || 'zimage';
+  const width = searchParams.get('width') || '1024';
+  const height = searchParams.get('height') || '1024';
   const seed = searchParams.get('seed');
-  const nologo = searchParams.get('nologo') || 'true';
+  const enhance = searchParams.get('enhance') || 'false';
+  const negative_prompt = searchParams.get('negative_prompt') || 'worst quality, blurry';
+  const safe = searchParams.get('safe') || 'false';
+  const quality = searchParams.get('quality') || 'medium';
+  const transparent = searchParams.get('transparent') || 'false';
+  const duration = searchParams.get('duration');
+  const aspectRatio = searchParams.get('aspectRatio');
+  const audio = searchParams.get('audio') || 'false';
   
   // 检查必需参数
   if (!prompt) {
@@ -26,10 +33,18 @@ export async function GET(request: NextRequest) {
     const translatedPrompt = await translateToEnglish(prompt);
     
     // 构建图像生成URL
-    let imageUrl = `${BASE_URL}/image/${encodeURIComponent(translatedPrompt)}?model=${model}&width=${width}&height=${height}&nologo=${nologo}&key=${API_KEY}`;
+    let imageUrl = `${BASE_URL}/image/${encodeURIComponent(translatedPrompt)}?key=${API_KEY}&model=${model}&width=${width}&height=${height}&enhance=${enhance}&negative_prompt=${encodeURIComponent(negative_prompt)}&safe=${safe}&quality=${quality}&transparent=${transparent}`;
+    
     if (seed) {
       imageUrl += `&seed=${seed}`;
     }
+    if (duration) {
+      imageUrl += `&duration=${duration}`;
+    }
+    if (aspectRatio) {
+      imageUrl += `&aspectRatio=${aspectRatio}`;
+    }
+    imageUrl += `&audio=${audio}`;
     
     // 调用Pollinations AI生成图像
     const response = await fetch(imageUrl);
@@ -60,6 +75,14 @@ export async function GET(request: NextRequest) {
         width: parseInt(width),
         height: parseInt(height),
         seed: seed,
+        enhance: enhance === 'true',
+        negative_prompt: negative_prompt,
+        safe: safe === 'true',
+        quality: quality,
+        transparent: transparent === 'true',
+        duration: duration ? parseInt(duration) : undefined,
+        aspectRatio: aspectRatio,
+        audio: audio === 'true',
         mimeType: mimeType
       },
       timestamp: new Date().toISOString()
@@ -79,13 +102,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { 
       prompt, 
-      model = 'flux', 
-      width = 512, 
-      height = 512, 
+      model = 'zimage', 
+      width = 1024, 
+      height = 1024, 
       seed,
-      nologo = true,
-      style,
-      negative_prompt
+      enhance = false,
+      negative_prompt = 'worst quality, blurry',
+      safe = false,
+      quality = 'medium',
+      transparent = false,
+      duration,
+      aspectRatio,
+      audio = false
     } = body;
     
     // 检查必需参数
@@ -98,19 +126,20 @@ export async function POST(request: NextRequest) {
     
     // 自动翻译中文提示词为英文
     const translatedPrompt = await translateToEnglish(prompt);
-    const translatedNegativePrompt = negative_prompt ? await translateToEnglish(negative_prompt) : '';
+    const translatedNegativePrompt = negative_prompt ? await translateToEnglish(negative_prompt) : 'worst quality, blurry';
     
     // 构建图像生成URL
-    let imageUrl = `${BASE_URL}/image/${encodeURIComponent(translatedPrompt)}?model=${model}&width=${width}&height=${height}&nologo=${nologo}&key=${API_KEY}`;
+    let imageUrl = `${BASE_URL}/image/${encodeURIComponent(translatedPrompt)}?model=${model}&width=${width}&height=${height}&enhance=${enhance}&negative_prompt=${encodeURIComponent(translatedNegativePrompt)}&safe=${safe}&quality=${quality}&transparent=${transparent}&key=${API_KEY}`;
     if (seed) {
       imageUrl += `&seed=${seed}`;
     }
-    if (translatedNegativePrompt) {
-      imageUrl += `&negative_prompt=${encodeURIComponent(translatedNegativePrompt)}`;
+    if (duration) {
+      imageUrl += `&duration=${duration}`;
     }
-    if (style) {
-      imageUrl += `&style=${encodeURIComponent(style)}`;
+    if (aspectRatio) {
+      imageUrl += `&aspectRatio=${aspectRatio}`;
     }
+    imageUrl += `&audio=${audio}`;
     
     // 调用Pollinations AI生成图像
     const response = await fetch(imageUrl);
@@ -141,9 +170,15 @@ export async function POST(request: NextRequest) {
         width: width,
         height: height,
         seed: seed,
-        style: style,
+        enhance: enhance,
         negative_prompt: negative_prompt,
         translatedNegativePrompt: translatedNegativePrompt,
+        safe: safe,
+        quality: quality,
+        transparent: transparent,
+        duration: duration,
+        aspectRatio: aspectRatio,
+        audio: audio,
         mimeType: mimeType
       },
       timestamp: new Date().toISOString(),

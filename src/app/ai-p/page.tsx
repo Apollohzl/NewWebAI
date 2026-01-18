@@ -13,23 +13,26 @@ export default function AIDrawPage() {
   const router = useRouter();
   const [prompt, setPrompt] = useState('');
   const [models, setModels] = useState<ImageModel[]>([]);
-  const [selectedModel, setSelectedModel] = useState('flux');
+  const [selectedModel, setSelectedModel] = useState('zimage');
   const [selectedRatio, setSelectedRatio] = useState('1:1');
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [negativePrompt, setNegativePrompt] = useState('');
-  const [style, setStyle] = useState('');
-  const [noLogo, setNoLogo] = useState(true);
+  const [negativePrompt, setNegativePrompt] = useState('worst quality, blurry');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [translatedPrompt, setTranslatedPrompt] = useState('');
+  const [enhance, setEnhance] = useState(false);
+  const [safe, setSafe] = useState(false);
+  const [quality, setQuality] = useState('medium');
+  const [transparent, setTransparent] = useState(false);
+  const [seed, setSeed] = useState(0);
 
   // 预定义的分辨率选项
   const ratios = [
-    { label: '1:1 (512x512)', value: '1:1', width: 512, height: 512 },
-    { label: '16:9 (1024x576)', value: '16:9', width: 1024, height: 576 },
-    { label: '9:16 (576x1024)', value: '9:16', width: 576, height: 1024 },
-    { label: '4:3 (640x480)', value: '4:3', width: 640, height: 480 },
-    { label: '3:4 (480x640)', value: '3:4', width: 480, height: 640 }
+    { label: '1:1 (1024x1024)', value: '1:1', width: 1024, height: 1024 },
+    { label: '16:9 (1280x720)', value: '16:9', width: 1280, height: 720 },
+    { label: '9:16 (720x1280)', value: '9:16', width: 720, height: 1280 },
+    { label: '4:3 (1024x768)', value: '4:3', width: 1024, height: 768 },
+    { label: '3:4 (768x1024)', value: '3:4', width: 768, height: 1024 }
   ];
 
   // 加载模型列表
@@ -58,20 +61,34 @@ export default function AIDrawPage() {
     try {
       const ratio = ratios.find(r => r.value === selectedRatio)!;
       
+      const requestBody = {
+        prompt: prompt.trim(),
+        model: selectedModel,
+        width: ratio.width,
+        height: ratio.height,
+        negative_prompt: negativePrompt.trim() || 'worst quality, blurry',
+        enhance: enhance,
+        safe: safe,
+        quality: quality,
+        transparent: transparent,
+        seed: seed
+      };
+
+      // 如果是视频模型，添加相应参数
+      if (['veo', 'seedance', 'seedance-pro'].includes(selectedModel)) {
+        (requestBody as any).duration = 4; // 默认4秒
+        (requestBody as any).aspectRatio = selectedRatio.replace(':', '-'); // 转换为API需要的格式
+        if (selectedModel === 'veo') {
+          (requestBody as any).audio = false; // 默认无音频
+        }
+      }
+
       const response = await fetch('/api/ai-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          prompt: prompt.trim(),
-          model: selectedModel,
-          width: ratio.width,
-          height: ratio.height,
-          negative_prompt: negativePrompt.trim() || undefined,
-          style: style.trim() || undefined,
-          nologo: noLogo
-        })
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();
@@ -192,17 +209,80 @@ export default function AIDrawPage() {
               
               {showAdvanced && (
                 <div className="space-y-4">
-                  {/* 水印选项 */}
+                  {/* 增强选项 */}
                   <div>
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        checked={noLogo}
-                        onChange={(e) => setNoLogo(e.target.checked)}
+                        checked={enhance}
+                        onChange={(e) => setEnhance(e.target.checked)}
                         className="mr-2"
                       />
-                      <span className="text-sm text-black">去除水印</span>
+                      <span className="text-sm text-black">AI增强提示词</span>
                     </label>
+                    <p className="text-xs text-gray-500 mt-1">让AI改进您的提示词以获得更好的结果</p>
+                  </div>
+
+                  {/* 安全过滤 */}
+                  <div>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={safe}
+                        onChange={(e) => setSafe(e.target.checked)}
+                        className="mr-2"
+                      />
+                      <span className="text-sm text-black">启用安全内容过滤</span>
+                    </label>
+                  </div>
+
+                  {/* 透明背景 */}
+                  <div>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={transparent}
+                        onChange={(e) => setTransparent(e.target.checked)}
+                        className="mr-2"
+                      />
+                      <span className="text-sm text-black">透明背景</span>
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">（仅适用于gptimage模型）</p>
+                  </div>
+
+                  {/* 随机种子 */}
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">
+                      随机种子
+                    </label>
+                    <input
+                      type="number"
+                      value={seed}
+                      onChange={(e) => setSeed(parseInt(e.target.value) || 0)}
+                      min="-1"
+                      max="2147483647"
+                      placeholder="输入-1表示随机"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">使用相同的种子获得可重现的结果</p>
+                  </div>
+
+                  {/* 图像质量 */}
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">
+                      图像质量
+                    </label>
+                    <select
+                      value={quality}
+                      onChange={(e) => setQuality(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="low">低质量</option>
+                      <option value="medium">中等质量</option>
+                      <option value="high">高质量</option>
+                      <option value="hd">高清</option>
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">（仅适用于gptimage模型）</p>
                   </div>
 
                   {/* 负面描述 */}
@@ -220,20 +300,6 @@ export default function AIDrawPage() {
                     <p className="text-xs text-gray-500 mt-1">
                       支持中文输入
                     </p>
-                  </div>
-
-                  {/* 图像风格 */}
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-1">
-                      图像风格
-                    </label>
-                    <input
-                      type="text"
-                      value={style}
-                      onChange={(e) => setStyle(e.target.value)}
-                      placeholder="例如：realistic, artistic, anime..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
                   </div>
                 </div>
               )}

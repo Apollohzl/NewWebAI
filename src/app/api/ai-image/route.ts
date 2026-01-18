@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { translateToEnglish } from '@/services/translate';
 
 const API_KEY = 'sk_lP8NdaqOKvbNPB8n1ApyB2UQcsVwcT7B';
-const BASE_URL = 'https://image.pollinations.ai';
+const BASE_URL = 'https://pollinations.ai';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;

@@ -139,6 +139,12 @@ export async function POST(request: NextRequest) {
     if (aspectRatio) {
       imageUrl += `&aspectRatio=${aspectRatio}`;
     }
+    if (body['image[0]']) {
+      imageUrl += `&image[0]=${encodeURIComponent(body['image[0]'])}`;
+    }
+    if (body['image[1]']) {
+      imageUrl += `&image[1]=${encodeURIComponent(body['image[1]'])}`;
+    }
     imageUrl += `&audio=${audio}`;
     
     // 调用Pollinations AI生成图像

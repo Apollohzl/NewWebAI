@@ -25,6 +25,8 @@ export default function AIDrawPage() {
   const [quality, setQuality] = useState('medium');
   const [transparent, setTransparent] = useState(false);
   const [seed, setSeed] = useState(0);
+  const [firstFrameImage, setFirstFrameImage] = useState('');
+  const [lastFrameImage, setLastFrameImage] = useState('');
 
   // 预定义的分辨率选项
   const ratios = [
@@ -84,6 +86,17 @@ export default function AIDrawPage() {
           // 如果不是支持的比例，默认使用16:9
           (requestBody as any).aspectRatio = '16:9';
         }
+        
+        // 对于seedance模型，支持参考图像
+        if (selectedModel.startsWith('seedance')) {
+          if (firstFrameImage) {
+            (requestBody as any)['image[0]'] = firstFrameImage; // 第一帧
+          }
+          if (lastFrameImage) {
+            (requestBody as any)['image[1]'] = lastFrameImage; // 最后一帧
+          }
+        }
+        
         if (selectedModel === 'veo') {
           (requestBody as any).audio = false; // 默认无音频
         }
@@ -290,6 +303,38 @@ export default function AIDrawPage() {
                     </select>
                     <p className="text-xs text-gray-500 mt-1">（仅适用于gptimage模型）</p>
                   </div>
+
+                  {/* 对于seedance模型的参考图像 */}
+                  {selectedModel.startsWith('seedance') && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-black mb-1">
+                          第一帧参考图像 (可选)
+                        </label>
+                        <input
+                          type="text"
+                          value={firstFrameImage}
+                          onChange={(e) => setFirstFrameImage(e.target.value)}
+                          placeholder="输入图像URL作为第一帧参考..."
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">用于seedance模型的第一帧</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-black mb-1">
+                          最后一帧参考图像 (可选)
+                        </label>
+                        <input
+                          type="text"
+                          value={lastFrameImage}
+                          onChange={(e) => setLastFrameImage(e.target.value)}
+                          placeholder="输入图像URL作为最后一帧参考..."
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">用于seedance模型的最后一帧</p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* 负面描述 */}
                   <div>

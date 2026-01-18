@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
       const { title, content, category, excerpt, tags } = aiResponse;
       
       // 调用博客创建API
-      const blogResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog/create`, {
+      const blogResponse = await fetch('/api/blog/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
       const excerpt = extractExcerpt(content);
       
       // 调用博客创建API
-      const blogResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog/create`, {
+      const blogResponse = await fetch('/api/blog/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -77,7 +77,13 @@ export default function AIDrawPage() {
       // 如果是视频模型，添加相应参数
       if (['veo', 'seedance', 'seedance-pro'].includes(selectedModel)) {
         (requestBody as any).duration = 4; // 默认4秒
-        (requestBody as any).aspectRatio = selectedRatio.replace(':', '-'); // 转换为API需要的格式
+        // 视频模型只支持16:9或9:16比例
+        if (selectedRatio === '16:9' || selectedRatio === '9:16') {
+          (requestBody as any).aspectRatio = selectedRatio;
+        } else {
+          // 如果不是支持的比例，默认使用16:9
+          (requestBody as any).aspectRatio = '16:9';
+        }
         if (selectedModel === 'veo') {
           (requestBody as any).audio = false; // 默认无音频
         }

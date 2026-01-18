@@ -828,8 +828,139 @@ function AddApiModal({ darkMode, onClose, onSubmit }: { darkMode: boolean; onClo
 }
 
 function ToolsTab({ darkMode }: { darkMode: boolean }) {
+  const [updateInput, setUpdateInput] = useState('');
+  const [updateResult, setUpdateResult] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const generateUpdateMessage = async () => {
+    if (!updateInput.trim()) {
+      alert('请输入更新内容');
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      // 获取当前时间
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const dateStr = now.toLocaleDateString('zh-CN').replace(/\//g, '/');
+      const formattedTime = `${dateStr} ${timeStr}`;
+
+      // 确定问候语
+      const hour = now.getHours();
+      let greeting = '早上好';
+      if (hour >= 12 && hour < 18) {
+        greeting = '下午好';
+      } else if (hour >= 18) {
+        greeting = '晚上好';
+      }
+
+      // 构建提示词
+      const prompt = `你现在是一个智能网站更新提示小助手，你的任务是每次为用户提供一段不超过60字的更新语言提示，用户会提供给你更新的主要功能以及对应网址，要求你用可爱的俏皮一点童真一点的语气回话，输出格式是这样的（全部都是纯文本，不要使用md格式输出任何其他的无关信息）：【快去试一下新功能啦 - NewWebAI - 小黄の数字宇宙工作室】（换行）您好用户，早上/下午/晚上 好（换行）网站新推出了一个功能哟~快来体验叭：（网址）（换行）新功能介绍：（换行）- （功能介绍，语言要求已经提示过了，中间可以插上网址，不要用md格式，直接输出网址纯文本，这里可以添加更新介绍，支持换行，格式不变"\\n- 介绍"）...（换行）logData yyyy/mm/dd hh：mm：ss。示例：【快去试一下新功能啦 - NewWebAI - 小黄の数字宇宙工作室】\n\n您好用户 下午好，\n\n网站新推出了一个功能哟~快来体验叭：https://hzliflow.ken520.top/blog\n\n新功能介绍：\n\n- 新加了新的数据库\n\n- 添加了一个新功能->博客系统\n\n- 用户登录后可以访问https://hzliflow.ken520.top/blog，点击右下角的按钮进行编写文章哟！\n\nlogData 2026/1/3 14：54：46。好的，现在我将发送给你关于这次的更新信息：。\n\n目前时间：${formattedTime}；\n\n${updateInput}`;
+
+      const response = await fetch('/api/ai-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: prompt }],
+          model: 'deepseek',
+          temperature: 0.7,
+          max_tokens: 1000
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        setUpdateResult(data.data.message || '生成失败');
+      } else {
+        throw new Error(data.error?.message || '请求失败');
+      }
+    } catch (error: any) {
+      console.error('生成更新信息失败:', error);
+      setUpdateResult(`生成失败：${error.message}`);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(updateResult).then(
+      () => {
+        alert('已复制到剪贴板');
+      },
+      (err) => {
+        console.error('复制失败: ', err);
+        alert('复制失败');
+      }
+    );
+  };
+
   return (
     <div className="space-y-6">
+      {/* 更新信息工具 */}
+      <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-6 transition-colors duration-300`}>
+        <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-black'} mb-4`}>更新信息</h2>
+        <div className="space-y-4">
+          <div>
+            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              输入更新内容
+            </label>
+            <textarea
+              value={updateInput}
+              onChange={(e) => setUpdateInput(e.target.value)}
+              placeholder="请输入本次更新的主要功能，如：新增AI对话功能、优化页面布局等..."
+              className={`w-full px-4 py-2 rounded-lg border ${
+                darkMode 
+                  ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400' 
+                  : 'bg-white border-gray-300 text-black placeholder-gray-500'
+              } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              rows={4}
+            />
+          </div>
+          <div className="flex space-x-3">
+            <button
+              onClick={generateUpdateMessage}
+              disabled={isGenerating}
+              className={`px-4 py-2 rounded-lg ${
+                isGenerating 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-700'
+              } text-white transition-colors`}
+            >
+              {isGenerating ? '生成中...' : '生成'}
+            </button>
+          </div>
+          {updateResult && (
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  生成结果
+                </label>
+                <button
+                  onClick={copyToClipboard}
+                  className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                >
+                  复制
+                </button>
+              </div>
+              <div
+                className={`w-full p-4 rounded-lg border ${
+                  darkMode 
+                    ? 'bg-gray-800 border-gray-600 text-white' 
+                    : 'bg-white border-gray-300 text-black'
+                } whitespace-pre-wrap break-words max-h-60 overflow-y-auto`}
+              >
+                {updateResult}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 其他开发者工具 */}
       <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-6 transition-colors duration-300`}>
         <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-black'} mb-4`}>开发者工具</h2>
         <div className="space-y-3">

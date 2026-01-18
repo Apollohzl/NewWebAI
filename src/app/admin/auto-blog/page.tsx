@@ -27,6 +27,7 @@ export default function AutoBlogAdmin() {
   const [previewData, setPreviewData] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [temperature, setTemperature] = useState<number>(1.0); // 添加创造性参数状态
+  const [intervalMinutes, setIntervalMinutes] = useState<number>(60); // 添加间隔时间状态
 
   // 获取状态
   const fetchStatus = async () => {
@@ -37,6 +38,10 @@ export default function AutoBlogAdmin() {
       if (response.ok) {
         setStatus(data.scheduler);
         setRecentPosts(data.recentPosts || []);
+        // 如果有设置的间隔时间，更新本地状态
+        if (data.scheduler?.intervalMinutes) {
+          setIntervalMinutes(data.scheduler.intervalMinutes);
+        }
       } else {
         setMessage('获取状态失败');
         setMessageType('error');
@@ -58,7 +63,10 @@ export default function AutoBlogAdmin() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ 
+          action,
+          intervalMinutes: action === 'start' ? intervalMinutes : undefined // 只在启动时传递间隔时间
+        }),
       });
       
       const data = await response.json();
@@ -353,6 +361,42 @@ export default function AutoBlogAdmin() {
                 <span>创新</span>
               </div>
             </div>
+            
+            {/* 间隔时间设置 - 仅当定时器未运行时显示 */}
+            {!status?.isRunning && (
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="font-medium text-black">执行间隔: {intervalMinutes} 分钟</label>
+                  <span className="text-sm text-gray-600">范围: 10 - 1440 分钟 (10分钟到24小时)</span>
+                </div>
+                <input
+                  type="range"
+                  min="10"
+                  max="1440"
+                  step="10"
+                  value={intervalMinutes}
+                  onChange={(e) => setIntervalMinutes(parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>10分钟</span>
+                  <span>24小时</span>
+                </div>
+                <div className="mt-2 text-sm text-gray-600">
+                  <label>
+                    或手动输入: 
+                    <input
+                      type="number"
+                      min="10"
+                      max="1440"
+                      value={intervalMinutes}
+                      onChange={(e) => setIntervalMinutes(parseInt(e.target.value) || 60)}
+                      className="ml-2 w-20 px-2 py-1 border border-gray-300 rounded"
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
             
             <div className="flex flex-wrap gap-4">
               {!status?.isRunning ? (

@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 // 全局变量存储定时器
 let globalTimer: NodeJS.Timeout | null = null;
 let isRunning = false;
+let currentInterval = 60 * 60 * 1000; // 默认1小时
+let intervalMinutes = 60; // 默认60分钟
 
 // 执行博客生成任务
 async function generateBlog() {
@@ -33,24 +35,32 @@ async function generateBlog() {
 }
 
 // 启动定时器
-function startTimer() {
+function startTimer(minutes: number = 60) {
   if (isRunning) {
     console.log('定时器已在运行中');
     return;
   }
   
+  // 验证时间间隔
+  if (minutes < 10 || minutes > 1440) {
+    console.error('时间间隔必须在10-1440分钟之间');
+    return;
+  }
+  
+  intervalMinutes = minutes;
+  currentInterval = minutes * 60 * 1000; // 转换为毫秒
   isRunning = true;
   
   // 立即执行一次
   generateBlog();
   
-  // 设置每小时执行一次的定时器
+  // 设置定时器，使用用户指定的间隔时间
   globalTimer = setInterval(async () => {
     console.log('执行定时博客生成任务...');
     await generateBlog();
-  }, 60 * 60 * 1000); // 1小时 = 60分钟 * 60秒 * 1000毫秒
+  }, currentInterval);
   
-  console.log('✅ 自动博客生成定时器已启动，每小时执行一次');
+  console.log(`✅ 自动博客生成定时器已启动，每${minutes}分钟执行一次`);
 }
 
 // 停止定时器
@@ -67,21 +77,23 @@ function stopTimer() {
 function getTimerStatus() {
   return {
     isRunning,
-    nextRun: isRunning ? new Date(Date.now() + 60 * 60 * 1000).toISOString() : null,
-    interval: '1小时'
+    nextRun: isRunning ? new Date(Date.now() + currentInterval).toISOString() : null,
+    interval: `${intervalMinutes}分钟`,
+    intervalMinutes
   };
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { action } = await request.json();
+    const { action, intervalMinutes } = await request.json();
     
     switch (action) {
       case 'start':
-        startTimer();
+        // 如果提供了间隔时间，使用它；否则使用默认值
+        startTimer(intervalMinutes || 60);
         return NextResponse.json({
           success: true,
-          message: '自动博客生成定时器已启动',
+          message: `自动博客生成定时器已启动，每${intervalMinutes || 60}分钟执行一次`,
           status: getTimerStatus()
         });
         
@@ -95,10 +107,10 @@ export async function POST(request: NextRequest) {
         
       case 'restart':
         stopTimer();
-        setTimeout(() => startTimer(), 1000);
+        setTimeout(() => startTimer(intervalMinutes || 60), 1000);
         return NextResponse.json({
           success: true,
-          message: '自动博客生成定时器已重启',
+          message: `自动博客生成定时器已重启，每${intervalMinutes || 60}分钟执行一次`,
           status: getTimerStatus()
         });
         
@@ -134,11 +146,12 @@ export async function GET(request: NextRequest) {
       scheduler: getTimerStatus(),
       message: isRunning ? '定时器正在运行' : '定时器未运行',
       settings: {
-        interval: '1小时',
+        interval: `${intervalMinutes}分钟`,
+        intervalMinutes,
         action: 'POST /api/auto-blog/scheduler 启动定时器'
       },
       controls: {
-        start: 'POST /api/auto-blog/scheduler (action=start)',
+        start: 'POST /api/auto-blog/scheduler (action=start, intervalMinutes=?)',
         stop: 'POST /api/auto-blog/scheduler (action=stop)',
         restart: 'POST /api/auto-blog/scheduler (action=restart)',
         generate: 'POST /api/auto-blog/scheduler (action=generate)'

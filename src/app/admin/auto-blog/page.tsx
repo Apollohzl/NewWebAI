@@ -83,26 +83,81 @@ export default function AutoBlogAdmin() {
     setMessage('');
     
     try {
-      const response = await fetch('/api/auto-blog/scheduler', {
+      // 第一步：调用AI生成内容
+      setMessage('正在调用AI生成内容...');
+      const aiResponse = await fetch('/api/ai-chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ action: 'generate' }),
+        body: JSON.stringify({
+          messages: [{ 
+            role: 'user', 
+            content: `现在你是一个帖子智能编辑员，你每次输出都需要以json纯文本格式输出，禁止换行，禁止使用md格式。内容要求，需要提供category :  "文章类型分类，如音乐，艺术，生活"，excerpt :  "摘要"，tags :["标签1","标签2"]，title :  "标题"，content :  "创建一个html页面，不准使用js，页面好看一点，可以引入图片，只支持a标签跳转，你这个帖子是镶嵌在一个帖子页面里的一个容器里的，用来展示这个帖子的内容的所以请编写时不要修改其他的会影响其他东西的程序，里面的内容可以自己发挥，想些什么都可以，这是一个公开的帖子系统，面向的是全世界"。就是这几个值就行。content示例： <div class='blog-post'><style>.blog-post {font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.7; color: #333;}.post-title {font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1.5rem; border-left: 5px solid #667eea; padding-left: 1rem;}.section-title {font-size: 1.5rem; color: #2d3748; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; margin: 2rem 0 1rem;}.feature-box {background: linear-gradient(135deg, #f6f9ff 0%, #f0f4ff 100%); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);}.code-block {background: #1a202c; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; font-family: 'Fira Code', monospace; margin: 1.5rem 0; overflow-x: auto;}.tech-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin: 2rem 0;}.tech-card {background: white; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); transition: transform 0.3s ease; border-top: 4px solid #4299e1;}.tech-card:hover {transform: translateY(-5px);}.feature-list li {padding: 0.5rem 0; position: relative; padding-left: 1.5rem;}.feature-list li:before {content: '⚡'; position: absolute; left: 0; color: #4299e1;}.img-container {text-align: center; margin: 2rem 0;}.tech-img {max-width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);}</style><h1 class='post-title'>Next.js 15全栈开发指南：App Router、服务端组件与现代Web架构</h1><div class='img-container'><img src='https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&h=600&fit=crop' alt='Next.js开发界面' class='tech-img' width='800' height='400'></div><p>随着Next.js 15的发布，React全栈开发进入了新的时代。本次更新不仅带来了<strong>性能的显著提升</strong>，更重要的是<strong>开发体验的革命性改进</strong>，特别是对App Router的全面优化和服务端组件的成熟应用。</p><section><h2 class='section-title'>🚀 App Router的深度优化</h2><div class='feature-box'><p><strong>并行路由与拦截路由</strong>让复杂布局的实现变得简单。现在你可以轻松创建模态对话框、条件性布局和动态路由结构：</p><div class='code-block'>// 并行路由配置示例<br>export default function Layout({<br>  children,<br>  modal,<br>  analytics<br>}: {<br>  children: React.ReactNode<br>  modal: React.ReactNode<br>  analytics: React.ReactNode<br>}) {<br>  return (<br>    &lt;&gt;<br>      {children}<br>      {modal}<br>      &lt;aside&gt;{analytics}&lt;/aside&gt;<br>    &lt;/&gt;<br>  )<br>}</div></div><ul class='feature-list'><li>改进的加载状态管理，支持骨架屏和渐进式渲染</li><li>增强的错误边界处理，提供更友好的错误恢复体验</li><li>智能缓存策略，减少不必要的重新渲染</li></ul></section><section><h2 class='section-title'>🔧 服务端组件最佳实践</h2><p>Next.js 15进一步强化了服务端组件的地位，让开发者能够更自然地编写<em>服务端优先</em>的应用：</p><div class='tech-grid'><div class='tech-card'><h3>数据获取优化</h3><p>支持流式传输和渐进式数据加载，显著减少首次内容绘制时间</p></div><div class='tech-card'><h3>SEO增强</h3><p>自动生成语义化HTML结构，改善搜索引擎可访问性</p></div><div class='tech-card'><h3>性能监控</h3><p>内置性能指标跟踪，提供详细的Core Web Vitals报告</p></div></div></section><section><h2 class='section-title'>🎯 开发工具升级</h2><p>全新的开发服务器<strong>Turbopack</strong>现在达到稳定状态，提供：</p><ul class='feature-list'><li>热更新速度提升至3倍以上</li><li>内存使用减少50%</li><li>TypeScript编译时间优化70%</li></ul><p>结合React 19的新特性，如<code>useOptimistic</code>和<code>useActionState</code>，开发体验得到全面提升。</p></section><p class='feature-box'><strong>迁移建议：</strong>现有项目建议逐步迁移到App Router，优先从静态页面开始。新项目直接采用Next.js 15的全栈架构，充分利用服务端组件的性能优势。</p><p>Next.js 15标志着全栈开发的成熟，通过<em>简化的API</em>、<em>优化的性能</em>和<em>增强的开发工具</em>，为构建现代Web应用提供了完整的解决方案。</p></div>不要照抄我这个示例的内容和模板，请你写的内容不要再涉及技术之类的，可以多谈谈生活！`
+          }],
+          model: 'kimi',
+          temperature: 1.0,
+          max_tokens: 6000
+        })
       });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setMessage('博客生成成功！');
-        setMessageType('success');
-        setTimeout(fetchStatus, 1000);
-      } else {
-        setMessage(data.error || '生成失败');
-        setMessageType('error');
+
+      if (!aiResponse.ok) {
+        throw new Error('AI生成失败');
       }
-    } catch (error) {
-      setMessage('网络错误');
+
+      const aiData = await aiResponse.json();
+      if (!aiData.success || !aiData.data) {
+        throw new Error('AI返回数据格式错误');
+      }
+
+      // 解析AI返回的JSON数据
+      let aiResponseContent = aiData.data.message || aiData.data;
+      
+      // 移除可能的markdown代码块标记
+      const cleanResponse = aiResponseContent.replace(/```json\n?|```/g, '').trim();
+      
+      let parsedData;
+      try {
+        parsedData = JSON.parse(cleanResponse);
+      } catch (parseError) {
+        console.error('JSON解析失败:', parseError);
+        console.error('AI返回内容:', cleanResponse);
+        throw new Error('AI返回的内容不是有效的JSON格式');
+      }
+
+      // 第二步：调用博客创建API
+      setMessage('正在创建博客...');
+      const createResponse = await fetch('/api/blog/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: parsedData.title,
+          content: parsedData.content,
+          category: parsedData.category || '生活',
+          excerpt: parsedData.excerpt || '',
+          tags: parsedData.tags || ['生活'],
+          author: 'hzliflow-kimiai',
+          readTime: '1 分钟阅读',
+          status: '正常',
+          published: true,
+          keywords: parsedData.tags || ['生活']
+        }),
+      });
+
+      const createData = await createResponse.json();
+
+      if (!createResponse.ok || !createData.success) {
+        throw new Error(createData.error || '博客创建失败');
+      }
+
+      setMessage('博客生成成功！');
+      setMessageType('success');
+      setTimeout(fetchStatus, 1000);
+    } catch (error: any) {
+      console.error('生成博客失败:', error);
+      setMessage(error.message || '生成博客失败');
       setMessageType('error');
     } finally {
       setLoading(false);

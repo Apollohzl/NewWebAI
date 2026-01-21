@@ -9,7 +9,7 @@ export default function AIToolsPage() {
       description: '自动生成高质量文章、博客和营销内容',
       icon: <FaMagic className="text-3xl text-purple-600" />,
       category: '内容创作',
-      link: '/tools/content-generator'
+      link: '/ai-p'
     },
     {
       id: 2,
@@ -17,7 +17,7 @@ export default function AIToolsPage() {
       description: '24/7全自动化客服对话系统',
       icon: <FaComments className="text-3xl text-blue-600" />,
       category: '客户服务',
-      link: '/tools/chatbot'
+      link: '/ai-chat'
     },
     {
       id: 3,
@@ -25,7 +25,7 @@ export default function AIToolsPage() {
       description: '将复杂数据转化为直观的图表和报告',
       icon: <FaChartPie className="text-3xl text-green-600" />,
       category: '数据分析',
-      link: '/tools/visualizer'
+      link: '/ai-chat'
     },
     {
       id: 4,
@@ -33,7 +33,7 @@ export default function AIToolsPage() {
       description: '基于文本描述生成高质量图像',
       icon: <FaImage className="text-3xl text-pink-600" />,
       category: '创意设计',
-      link: '/tools/image-generator'
+      link: '/ai-p'
     },
     {
       id: 5,
@@ -41,7 +41,7 @@ export default function AIToolsPage() {
       description: '智能代码生成、审查和优化',
       icon: <FaCode className="text-3xl text-yellow-600" />,
       category: '开发工具',
-      link: '/tools/code-assistant'
+      link: '/ai-chat'
     },
     {
       id: 6,
@@ -49,7 +49,7 @@ export default function AIToolsPage() {
       description: '智能分析文本、图像和数据模式',
       icon: <FaRobot className="text-3xl text-red-600" />,
       category: '分析工具',
-      link: '/tools/analyzer'
+      link: '/ai-chat'
     }
   ];
 

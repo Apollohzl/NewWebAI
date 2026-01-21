@@ -1,5 +1,6 @@
 import { FaMagic, FaComments, FaChartPie, FaImage, FaCode, FaRobot } from 'react-icons/fa';
 import Link from 'next/link';
+import AdPlacement from '@/components/AdPlacement';
 
 export default function AIToolsPage() {
   const tools = [
@@ -48,20 +49,22 @@ export default function AIToolsPage() {
         </div>
       </nav>
 
-      {/* 标题区域 */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-black mb-6">
-            智能 <span className="text-blue-600">AI工具箱</span>
-          </h1>
-          <p className="text-xl text-black">
-            NewWebAI提供一整套AI驱动的专业工具，助力您的工作与创作
-          </p>
-        </div>
-
-        {/* 特性展示 */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              {/* 标题区域 */}
+              <div className="container mx-auto px-4 py-16">
+                <div className="text-center max-w-3xl mx-auto mb-16">
+                  <h1 className="text-4xl md:text-5xl font-bold text-black mb-6">
+                    智能 <span className="text-blue-600">AI工具箱</span>
+                  </h1>
+                  <p className="text-xl text-black">
+                    NewWebAI提供一整套AI驱动的专业工具，助力您的工作与创作
+                  </p>
+                </div>
+      
+                {/* 页面顶部广告 */}
+                <AdPlacement id="ezoic-pub-ad-placeholder-top" className="mb-8" />
+      
+                {/* 特性展示 */}
+                <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold text-black mb-6">强大的AI能力</h2>
               <p className="text-black mb-8">
@@ -115,7 +118,9 @@ export default function AIToolsPage() {
 
         {/* 工具列表 */}
         <div className="mb-16">
-                        <h2 className="text-3xl font-bold text-center text-black mb-12">我们的AI工具</h2>          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <h2 className="text-3xl font-bold text-center text-black mb-12">我们的AI工具</h2>
+                        <AdPlacement id="ezoic-pub-ad-placeholder-mid" className="mb-8" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {tools.map((tool) => (
               <Link href={tool.link} key={tool.id}>
                 <div 
@@ -142,6 +147,8 @@ export default function AIToolsPage() {
               </Link>
             ))}
           </div>
+          {/* 工具列表后的广告 */}
+          <AdPlacement id="ezoic-pub-ad-placeholder-after-tools" className="mt-8" />
         </div>
 
         {/* 应用场景 */}

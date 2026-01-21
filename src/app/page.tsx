@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { FaRobot, FaBlog, FaShoppingCart, FaChartLine, FaCogs, FaUsers, FaBars, FaTimes } from 'react-icons/fa';
 import AuthButtons from '@/components/AuthButtons';
+import AdPlacement from '@/components/AdPlacement';
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -115,6 +116,11 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* 主页广告位 */}
+      <div className="container mx-auto px-4 py-8">
+        <AdPlacement id="ezoic-pub-ad-placeholder-home-top" className="flex justify-center" />
+      </div>
 
       {/* AI功能介绍 */}
       <section className="py-16 bg-white">

@@ -13,43 +13,11 @@ export default function AIToolsPage() {
     },
     {
       id: 2,
-      title: '智能客服',
-      description: '24/7全自动化客服对话系统',
-      icon: <FaComments className="text-3xl text-blue-600" />,
-      category: '客户服务',
-      link: '/ai-chat'
-    },
-    {
-      id: 3,
-      title: '数据可视化',
-      description: '将复杂数据转化为直观的图表和报告',
-      icon: <FaChartPie className="text-3xl text-green-600" />,
-      category: '数据分析',
-      link: '/ai-chat'
-    },
-    {
-      id: 4,
       title: 'AI图像生成',
       description: '基于文本描述生成高质量图像',
       icon: <FaImage className="text-3xl text-pink-600" />,
       category: '创意设计',
       link: '/ai-p'
-    },
-    {
-      id: 5,
-      title: '代码助手',
-      description: '智能代码生成、审查和优化',
-      icon: <FaCode className="text-3xl text-yellow-600" />,
-      category: '开发工具',
-      link: '/ai-chat'
-    },
-    {
-      id: 6,
-      title: 'AI分析器',
-      description: '智能分析文本、图像和数据模式',
-      icon: <FaRobot className="text-3xl text-red-600" />,
-      category: '分析工具',
-      link: '/ai-chat'
     }
   ];
 
@@ -178,25 +146,7 @@ export default function AIToolsPage() {
 
         {/* 应用场景 */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-                        <h2 className="text-3xl font-bold text-center text-black mb-12">应用场景</h2>          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FaComments className="text-blue-600 text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold text-black mb-3">客户服务</h3>
-              <p className="text-black">
-                使用智能客服工具，提供24/7全天候客户服务，提升客户满意度
-              </p>
-            </div>
-            <div className="text-center p-6">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FaChartPie className="text-green-600 text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold text-black mb-3">数据分析</h3>
-              <p className="text-black">
-                利用AI分析工具处理复杂数据，生成可视化报告，辅助决策
-              </p>
-            </div>
+                        <h2 className="text-3xl font-bold text-center text-black mb-12">应用场景</h2>          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="text-center p-6">
               <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FaMagic className="text-purple-600 text-2xl" />
@@ -204,6 +154,15 @@ export default function AIToolsPage() {
               <h3 className="text-xl font-bold text-black mb-3">内容创作</h3>
               <p className="text-black">
                 借助AI内容生成工具，快速创建高质量文章、博客和营销内容
+              </p>
+            </div>
+            <div className="text-center p-6">
+              <div className="bg-pink-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FaImage className="text-pink-600 text-2xl" />
+              </div>
+              <h3 className="text-xl font-bold text-black mb-3">创意设计</h3>
+              <p className="text-black">
+                利用AI图像生成工具，将文本描述转化为高质量图像和创意作品
               </p>
             </div>
           </div>

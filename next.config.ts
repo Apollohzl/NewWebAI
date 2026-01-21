@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/ads.txt',
-        destination: 'https://srv.adstxtmanager.com/19390/hzliflow.ken520.top',
+        destination: 'https://srv.adstxtmanager.com/19390/ken520.top',
         permanent: true,
       },
     ]

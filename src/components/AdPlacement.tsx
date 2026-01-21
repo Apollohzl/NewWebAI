@@ -2,6 +2,18 @@
 
 import { useEffect } from 'react';
 
+// 扩展Window接口以包含Ezoic相关属性
+declare global {
+  interface Window {
+    ezstandalone?: {
+      cmd?: any[];
+    };
+    ezoicAds?: {
+      refresh?: () => void;
+    };
+  }
+}
+
 type AdPlacementProps = {
   id: string;
   className?: string;
@@ -14,8 +26,8 @@ const AdPlacement = ({ id, className = '', style }: AdPlacementProps) => {
     if (typeof window !== 'undefined' && window.ezstandalone) {
       window.ezstandalone.cmd = window.ezstandalone.cmd || [];
       window.ezstandalone.cmd.push(() => {
-        if ((window as any).ezoicAds && (window as any).ezoicAds.refresh) {
-          (window as any).ezoicAds.refresh();
+        if (window.ezoicAds && window.ezoicAds.refresh) {
+          window.ezoicAds.refresh();
         }
       });
     }

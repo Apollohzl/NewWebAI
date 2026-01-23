@@ -225,7 +225,7 @@ export default function Home() {
             <div>
               <h4 className="text-lg font-semibold mb-4">联系我们</h4>
               <ul className="space-y-2 text-black">
-                <li>邮箱: contact@newwebai.com</li>
+                <li>邮箱: 959855534@qq.com</li>
                 <li>网址: https://hzliflow.ken520.top/</li>
                 <li>公司: 小黄の数字宇宙工作室</li>
               </ul>

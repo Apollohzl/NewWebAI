@@ -34,6 +34,7 @@ export default function AutoBlogAdmin() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [temperature, setTemperature] = useState<number>(1.0); // 添加创造性参数状态
   const [intervalMinutes, setIntervalMinutes] = useState<number>(60); // 添加间隔时间状态
+  const [maxTokens, setMaxTokens] = useState<number>(6000); // 添加max_tokens参数状态
   const [selectedModel, setSelectedModel] = useState<string>('kimi'); // 添加模型选择状态
   const [models, setModels] = useState<Model[]>([]); // 添加模型列表状态
   const [conversationHistory, setConversationHistory] = useState<any[]>([]); // 添加对话历史状态
@@ -181,15 +182,34 @@ export default function AutoBlogAdmin() {
           ],
           model: selectedModel, // 使用用户选择的模型
           temperature: temperature, // 使用可调整的创造性参数
-          max_tokens: 6000
+          max_tokens: maxTokens // 使用用户选择的最大token数
         })
       });
 
+      const aiData = await aiResponse.json();
+      
       if (!aiResponse.ok) {
-        throw new Error('AI生成失败');
+        // 尝试从响应中提取详细的错误信息
+        let errorMessage = 'AI生成失败';
+        if (aiData && aiData.details) {
+          try {
+            const details = JSON.parse(aiData.details);
+            if (details.error && details.error.message) {
+              errorMessage = details.error.message;
+            } else {
+              errorMessage = JSON.stringify(details, null, 2);
+            }
+          } catch (parseError) {
+            errorMessage = aiData.details; // 如果解析失败，直接使用原始details
+          }
+        } else if (aiData && aiData.message) {
+          errorMessage = aiData.message;
+        } else {
+          errorMessage = `请求失败，状态码: ${aiResponse.status}`;
+        }
+        throw new Error(errorMessage);
       }
 
-      const aiData = await aiResponse.json();
       if (!aiData.success || !aiData.data) {
         throw new Error('AI返回数据格式错误');
       }
@@ -385,6 +405,40 @@ export default function AutoBlogAdmin() {
                   </option>
                 ))}
               </select>
+            </div>
+            
+            {/* max_tokens设置 */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <label className="font-medium text-black">最大Token数: {maxTokens}</label>
+                <span className="text-sm text-gray-600">范围: 1000 - 9000</span>
+              </div>
+              <input
+                type="range"
+                min="1000"
+                max="9000"
+                step="10"
+                value={maxTokens}
+                onChange={(e) => setMaxTokens(parseInt(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>1000</span>
+                <span>9000</span>
+              </div>
+              <div className="mt-2 text-sm text-gray-600">
+                <label>
+                  或手动输入: 
+                  <input
+                    type="number"
+                    min="1000"
+                    max="9000"
+                    value={maxTokens}
+                    onChange={(e) => setMaxTokens(parseInt(e.target.value) || 6000)}
+                    className="ml-2 w-20 px-2 py-1 border border-gray-300 rounded"
+                  />
+                </label>
+              </div>
             </div>
             
             {/* 间隔时间设置 - 仅当定时器未运行时显示 */}

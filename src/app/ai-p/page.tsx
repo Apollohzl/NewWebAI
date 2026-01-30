@@ -25,7 +25,7 @@ export default function AIDrawPage() {
   const [safe, setSafe] = useState(false);
   const [quality, setQuality] = useState('medium');
   const [transparent, setTransparent] = useState(false);
-  const [seed, setSeed] = useState(0);
+  const [seed, setSeed] = useState(-1); // 默认值改为-1，表示随机种子
   const [firstFrameImage, setFirstFrameImage] = useState('');
   const [lastFrameImage, setLastFrameImage] = useState('');
   const [videoDuration, setVideoDuration] = useState(4); // 默认4秒
@@ -119,11 +119,61 @@ export default function AIDrawPage() {
         setIsVideo(data.data.isVideo || false);
         setTranslatedPrompt(data.data.translatedPrompt || '');
       } else {
-        throw new Error(data.error?.message || '生成失败');
+        // 尝试从响应中提取详细的错误信息
+        let errorMessage = '生成失败';
+        if (data && data.details) {
+          try {
+            const details = JSON.parse(data.details);
+            if (details.error && details.error.message) {
+              errorMessage = details.error.message;
+            } else {
+              errorMessage = JSON.stringify(details, null, 2);
+            }
+          } catch (parseError) {
+            errorMessage = data.details; // 如果解析失败，直接使用原始details
+          }
+        } else if (data && data.message) {
+          errorMessage = data.message;
+        }
+        throw new Error(errorMessage);
       }
     } catch (error: any) {
       console.error('Generate error:', error);
-      alert(`生成失败：${error.message}`);
+      // 创建一个更友好的错误信息显示方式
+      const showErrorDetails = (errorDetails: string) => {
+        const newWindow = window.open('', '_blank', 'width=800,height=600');
+        if (newWindow) {
+          newWindow.document.write(`
+            <html>
+              <head>
+                <title>生成失败 - 详细错误信息</title>
+                <style>
+                  body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+                  .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                  .error-title { color: #d32f2f; margin-bottom: 15px; }
+                  .error-content { background: #f9f9f9; padding: 15px; border-radius: 4px; overflow-x: auto; max-height: 400px; }
+                  .close-btn { margin-top: 15px; padding: 10px 20px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; }
+                  .close-btn:hover { background: #1565c0; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <h2 class="error-title">生成失败</h2>
+                  <div class="error-content">
+                    <pre style="white-space: pre-wrap; word-break: break-word;">${errorDetails}</pre>
+                  </div>
+                  <button class="close-btn" onclick="window.close()">关闭窗口</button>
+                </div>
+              </body>
+            </html>
+          `);
+        } else {
+          // 如果无法打开新窗口，则使用传统alert
+          alert(`生成失败：${errorDetails}`);
+        }
+      };
+      
+      showErrorDetails(error.message);
     } finally {
       setIsGenerating(false);
     }

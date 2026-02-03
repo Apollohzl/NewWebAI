@@ -27,7 +27,9 @@ export default function AIDrawPage() {
   const [transparent, setTransparent] = useState(false);
   const [seed, setSeed] = useState(-1); // 默认值改为-1，表示随机种子
   const [firstFrameImage, setFirstFrameImage] = useState('');
+  const [firstFrameImagePreview, setFirstFrameImagePreview] = useState<string | null>(null);
   const [lastFrameImage, setLastFrameImage] = useState('');
+  const [lastFrameImagePreview, setLastFrameImagePreview] = useState<string | null>(null);
   const [videoDuration, setVideoDuration] = useState(4); // 默认4秒
 
   // 预定义的分辨率选项
@@ -343,7 +345,9 @@ export default function AIDrawPage() {
                       placeholder="输入-1表示随机"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <p className="text-xs text-gray-500 mt-1">使用相同的种子获得可重现的结果</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      使用相同的种子获得可重现的结果 {seed === -1 && '(当前为随机)'}
+                    </p>
                   </div>
 
                   {/* 图像质量 */}
@@ -400,10 +404,28 @@ export default function AIDrawPage() {
                             <input
                               type="text"
                               value={firstFrameImage}
-                              onChange={(e) => setFirstFrameImage(e.target.value)}
+                              onChange={(e) => {
+                                setFirstFrameImage(e.target.value);
+                                if (e.target.value) {
+                                  setFirstFrameImagePreview(e.target.value);
+                                } else {
+                                  setFirstFrameImagePreview(null);
+                                }
+                              }}
                               placeholder="输入图像URL作为第一帧参考..."
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
+                            {firstFrameImagePreview && (
+                              <div className="mt-2">
+                                <p className="text-xs text-gray-500">预览:</p>
+                                <img 
+                                  src={firstFrameImagePreview} 
+                                  alt="First frame preview" 
+                                  className="w-full h-24 object-contain border rounded mt-1"
+                                  onError={() => setFirstFrameImagePreview(null)}
+                                />
+                              </div>
+                            )}
                             <p className="text-xs text-gray-500 mt-1">用于seedance模型的第一帧</p>
                           </div>
                           <div>
@@ -413,10 +435,28 @@ export default function AIDrawPage() {
                             <input
                               type="text"
                               value={lastFrameImage}
-                              onChange={(e) => setLastFrameImage(e.target.value)}
+                              onChange={(e) => {
+                                setLastFrameImage(e.target.value);
+                                if (e.target.value) {
+                                  setLastFrameImagePreview(e.target.value);
+                                } else {
+                                  setLastFrameImagePreview(null);
+                                }
+                              }}
                               placeholder="输入图像URL作为最后一帧参考..."
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
+                            {lastFrameImagePreview && (
+                              <div className="mt-2">
+                                <p className="text-xs text-gray-500">预览:</p>
+                                <img 
+                                  src={lastFrameImagePreview} 
+                                  alt="Last frame preview" 
+                                  className="w-full h-24 object-contain border rounded mt-1"
+                                  onError={() => setLastFrameImagePreview(null)}
+                                />
+                              </div>
+                            )}
                             <p className="text-xs text-gray-500 mt-1">用于seedance模型的最后一帧</p>
                           </div>
                         </div>

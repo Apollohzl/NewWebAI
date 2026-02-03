@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/SimpleAuthContext";
 import '@/lib/autoBlogScheduler';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Google tag (gtag.js) */}
+        {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics GA_MEASUREMENT_ID={process.env.NEXT_PUBLIC_GA_ID} />}
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

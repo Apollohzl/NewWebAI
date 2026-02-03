@@ -1,6 +1,41 @@
 import { FaMagic, FaComments, FaChartPie, FaImage, FaCode, FaRobot } from 'react-icons/fa';
 import Link from 'next/link';
 import AdPlacement from '@/components/AdPlacement';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'AI 工具箱 - NewWebAI | 智能AI工具集',
+  description: 'NewWebAI提供一整套AI驱动的专业工具，包括AI内容生成器、AI图像生成、数据分析等，助力您的工作与创作。',
+  keywords: 'AI工具, 人工智能工具, AI生成器, AI图像生成, AI内容生成, 智能工具箱, AI应用',
+  openGraph: {
+    title: 'AI 工具箱 - NewWebAI | 智能AI工具集',
+    description: 'NewWebAI提供一整套AI驱动的专业工具，包括AI内容生成器、AI图像生成、数据分析等，助力您的工作与创作。',
+    type: 'website',
+    locale: 'zh_CN',
+    url: 'https://hzliflow.ken520.top/ai-tools',
+    siteName: 'NewWebAI',
+    images: [
+      {
+        url: 'https://hzliflow.ken520.top/logo.png',
+        width: 800,
+        height: 600,
+        alt: 'AI Tools Interface',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AI 工具箱 - NewWebAI | 智能AI工具集',
+    description: 'NewWebAI提供一整套AI驱动的专业工具，包括AI内容生成器、AI图像生成、数据分析等，助力您的工作与创作。',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: 'https://hzliflow.ken520.top/ai-tools',
+  },
+};
 
 export default function AIToolsPage() {
   const tools = [

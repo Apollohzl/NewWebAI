@@ -62,7 +62,7 @@ export default function ForgotPassword() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setCaptchaError('');
 
@@ -124,7 +124,7 @@ export default function ForgotPassword() {
             </div>
 
             {!isSubmitted ? (
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleFormSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-black mb-2">
                     邮箱地址

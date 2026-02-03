@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
   const message = searchParams.get('message');
   const model = searchParams.get('model') || 'openai';
   const sessionId = searchParams.get('sessionId');
+  const max_tokens = searchParams.get('max_tokens');
   
   // 检查必需参数
   if (!message) {
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
         model: model,
         messages: messages,
         temperature: 0.7,
-        max_tokens: 2000
+        max_tokens: max_tokens
       })
     });
     

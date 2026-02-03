@@ -215,38 +215,30 @@ export default function Login() {
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-black mb-2">
-                    验证码
-                  </label>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      value={captcha.answer}
-                      onChange={(e) => setCaptcha({...captcha, answer: e.target.value})}
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="请输入图中文字"
-                    />
-                    <img 
-                      src={captcha.url} 
-                      alt="验证码" 
-                      className="h-12 w-24 border border-gray-300 rounded cursor-pointer"
-                      onClick={fetchCaptcha}
-                    />
-                    <button 
-                      type="button" 
-                      onClick={fetchCaptcha}
-                      className="px-3 py-3 border border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200"
-                    >
-                      刷新
-                    </button>
-                  </div>
-                  {captchaError && (
-                    <p className="text-red-500 text-sm mt-1">{captchaError}</p>
-                  )}
-                </div>
-                <div className="flex justify-between items-center">
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="block text-sm font-medium text-black mb-2">
+                                      验证码
+                                    </label>
+                                    <div className="flex items-center space-x-2">
+                                      <input
+                                        type="text"
+                                        value={captcha.answer}
+                                        onChange={(e) => setCaptcha({...captcha, answer: e.target.value})}
+                                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="请输入图中文字"
+                                      />
+                                      <img 
+                                        src={captcha.url} 
+                                        alt="验证码" 
+                                        className="h-12 w-24 border border-gray-300 rounded cursor-pointer"
+                                        onClick={fetchCaptcha}
+                                      />
+                                    </div>
+                                    {captchaError && (
+                                      <p className="text-red-500 text-sm mt-1">{captchaError}</p>
+                                    )}
+                                  </div>                <div className="flex justify-between items-center">
                   <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
                     忘记密码？
                   </Link>

@@ -504,13 +504,6 @@ export default function Register() {
                           className="h-12 w-24 border border-gray-200 rounded cursor-pointer"
                           onClick={fetchCaptcha}
                         />
-                        <button 
-                          type="button" 
-                          onClick={fetchCaptcha}
-                          className="px-3 py-3 border border-gray-200 rounded-xl bg-gray-100 hover:bg-gray-200"
-                        >
-                          刷新
-                        </button>
                       </div>
                       {captchaError && (
                         <p className="text-red-500 text-sm mt-1">{captchaError}</p>

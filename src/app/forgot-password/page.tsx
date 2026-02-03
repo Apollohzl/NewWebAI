@@ -161,13 +161,6 @@ export default function ForgotPassword() {
                         className="h-12 w-24 border border-gray-300 rounded cursor-pointer"
                         onClick={fetchCaptcha}
                       />
-                      <button 
-                        type="button" 
-                        onClick={fetchCaptcha}
-                        className="px-3 py-3 border border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200"
-                      >
-                        刷新
-                      </button>
                     </div>
                     {captchaError && (
                       <p className="text-red-500 text-sm mt-1">{captchaError}</p>

@@ -9,12 +9,17 @@ import { useRouter } from 'next/navigation';
 export default function Login() {
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    rememberMe: false
+    password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [captcha, setCaptcha] = useState({
+    id: '',
+    url: '',
+    answer: ''
+  });
+  const [captchaError, setCaptchaError] = useState('');
   
   const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -25,6 +30,31 @@ export default function Login() {
       router.push('/');
     }
   }, [user, authLoading, router]);
+
+  // 获取验证码
+  const fetchCaptcha = async () => {
+    try {
+      const response = await fetch('https://v2.xxapi.cn/api/chineseCaptcha');
+      const data = await response.json();
+      if (data.code === 200) {
+        setCaptcha({
+          id: data.data.id,
+          url: data.data.url,
+          answer: ''
+        });
+        setCaptchaError('');
+      } else {
+        setCaptchaError('获取验证码失败');
+      }
+    } catch (error) {
+      setCaptchaError('获取验证码失败');
+    }
+  };
+
+  // 初始化时获取验证码
+  useEffect(() => {
+    fetchCaptcha();
+  }, []);
 
   // 如果正在加载认证状态，显示加载中
   if (authLoading) {
@@ -46,10 +76,34 @@ export default function Login() {
     }));
   };
 
+  const verifyCaptcha = async () => {
+    try {
+      const response = await fetch(`https://v2.xxapi.cn/api/chineseCaptcha?type=verify&id=${captcha.id}&answer=${captcha.answer}`);
+      const data = await response.json();
+      if (data.code === 200) {
+        return true;
+      } else {
+        setCaptchaError('验证码错误');
+        return false;
+      }
+    } catch (error) {
+      setCaptchaError('验证码验证失败');
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setCaptchaError('');
     setLoading(true);
+
+    // 首先验证验证码
+    const isCaptchaValid = await verifyCaptcha();
+    if (!isCaptchaValid) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const success = await login(formData.email, formData.password);
@@ -62,6 +116,10 @@ export default function Login() {
       setError('登录失败，请稍后重试');
     } finally {
       setLoading(false);
+      // 登录失败后重新获取验证码
+      if (!user) {
+        fetchCaptcha();
+      }
     }
   };
 
@@ -157,23 +215,42 @@ export default function Login() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="rememberMe"
-                    name="rememberMe"
-                    checked={formData.rememberMe}
-                    onChange={handleChange}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label htmlFor="rememberMe" className="ml-2 text-sm text-black">
-                    记住我
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-black mb-2">
+                    验证码
                   </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={captcha.answer}
+                      onChange={(e) => setCaptcha({...captcha, answer: e.target.value})}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="请输入图中文字"
+                    />
+                    <img 
+                      src={captcha.url} 
+                      alt="验证码" 
+                      className="h-12 w-24 border border-gray-300 rounded cursor-pointer"
+                      onClick={fetchCaptcha}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={fetchCaptcha}
+                      className="px-3 py-3 border border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200"
+                    >
+                      刷新
+                    </button>
+                  </div>
+                  {captchaError && (
+                    <p className="text-red-500 text-sm mt-1">{captchaError}</p>
+                  )}
                 </div>
-                <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
-                  忘记密码？
-                </Link>
+                <div className="flex justify-between items-center">
+                  <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                    忘记密码？
+                  </Link>
+                </div>
               </div>
 
               <button

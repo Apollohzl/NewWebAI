@@ -21,6 +21,12 @@ export default function Register() {
   const [currentStep, setCurrentStep] = useState(1);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [message, setMessage] = useState('');
+  const [captcha, setCaptcha] = useState({
+    id: '',
+    url: '',
+    answer: ''
+  });
+  const [captchaError, setCaptchaError] = useState('');
   
   const { register, user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -47,6 +53,31 @@ export default function Register() {
     }
   }, [formData.password]);
 
+  // 获取验证码
+  const fetchCaptcha = async () => {
+    try {
+      const response = await fetch('https://v2.xxapi.cn/api/chineseCaptcha');
+      const data = await response.json();
+      if (data.code === 200) {
+        setCaptcha({
+          id: data.data.id,
+          url: data.data.url,
+          answer: ''
+        });
+        setCaptchaError('');
+      } else {
+        setCaptchaError('获取验证码失败');
+      }
+    } catch (error) {
+      setCaptchaError('获取验证码失败');
+    }
+  };
+
+  // 初始化时获取验证码
+  useEffect(() => {
+    fetchCaptcha();
+  }, []);
+
   // 如果正在加载认证状态，显示加载中
   if (authLoading) {
     return (
@@ -67,10 +98,27 @@ export default function Register() {
     }));
   };
 
+  const verifyCaptcha = async () => {
+    try {
+      const response = await fetch(`https://v2.xxapi.cn/api/chineseCaptcha?type=verify&id=${captcha.id}&answer=${captcha.answer}`);
+      const data = await response.json();
+      if (data.code === 200) {
+        return true;
+      } else {
+        setCaptchaError('验证码错误');
+        return false;
+      }
+    } catch (error) {
+      setCaptchaError('验证码验证失败');
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setMessage('');
+    setCaptchaError('');
 
     // 基础验证
     if (!formData.username || !formData.email) {
@@ -97,6 +145,12 @@ export default function Register() {
     // 同意条款检查
     if (!formData.agreeTerms) {
       setError('请同意服务条款和隐私政策');
+      return;
+    }
+
+    // 验证验证码
+    const isCaptchaValid = await verifyCaptcha();
+    if (!isCaptchaValid) {
       return;
     }
 
@@ -131,6 +185,8 @@ export default function Register() {
       setError('注册失败，请稍后重试');
     } finally {
       setLoading(false);
+      // 注册失败后重新获取验证码
+      fetchCaptcha();
     }
   };
 
@@ -426,6 +482,40 @@ export default function Register() {
                       和
                       <Link href="/privacy" className="text-blue-600 hover:text-blue-700 font-medium ml-1">隐私政策</Link>
                     </label>
+                  </div>
+
+                  {/* 验证码 */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        验证码
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          value={captcha.answer}
+                          onChange={(e) => setCaptcha({...captcha, answer: e.target.value})}
+                          className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all"
+                          placeholder="请输入图中文字"
+                        />
+                        <img 
+                          src={captcha.url} 
+                          alt="验证码" 
+                          className="h-12 w-24 border border-gray-200 rounded cursor-pointer"
+                          onClick={fetchCaptcha}
+                        />
+                        <button 
+                          type="button" 
+                          onClick={fetchCaptcha}
+                          className="px-3 py-3 border border-gray-200 rounded-xl bg-gray-100 hover:bg-gray-200"
+                        >
+                          刷新
+                        </button>
+                      </div>
+                      {captchaError && (
+                        <p className="text-red-500 text-sm mt-1">{captchaError}</p>
+                      )}
+                    </div>
                   </div>
 
                   {/* 提交按钮 */}

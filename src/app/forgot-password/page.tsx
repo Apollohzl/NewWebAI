@@ -1,18 +1,82 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { FaRobot, FaArrowLeft } from 'react-icons/fa';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [captcha, setCaptcha] = useState({
+    id: '',
+    url: '',
+    answer: ''
+  });
+  const [captchaError, setCaptchaError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // 这里先不实现逻辑，后面再讨论
     console.log('重置密码请求:', email);
     setIsSubmitted(true);
+  };
+
+  // 获取验证码
+  const fetchCaptcha = async () => {
+    try {
+      const response = await fetch('https://v2.xxapi.cn/api/chineseCaptcha');
+      const data = await response.json();
+      if (data.code === 200) {
+        setCaptcha({
+          id: data.data.id,
+          url: data.data.url,
+          answer: ''
+        });
+        setCaptchaError('');
+      } else {
+        setCaptchaError('获取验证码失败');
+      }
+    } catch (error) {
+      setCaptchaError('获取验证码失败');
+    }
+  };
+
+  // 初始化时获取验证码
+  React.useEffect(() => {
+    fetchCaptcha();
+  }, []);
+
+  const verifyCaptcha = async () => {
+    try {
+      const response = await fetch(`https://v2.xxapi.cn/api/chineseCaptcha?type=verify&id=${captcha.id}&answer=${captcha.answer}`);
+      const data = await response.json();
+      if (data.code === 200) {
+        return true;
+      } else {
+        setCaptchaError('验证码错误');
+        return false;
+      }
+    } catch (error) {
+      setCaptchaError('验证码验证失败');
+      return false;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCaptchaError('');
+
+    // 验证验证码
+    const isCaptchaValid = await verifyCaptcha();
+    if (!isCaptchaValid) {
+      return;
+    }
+
+    // 这里先不实现逻辑，后面再讨论
+    console.log('重置密码请求:', email);
+    setIsSubmitted(true);
+    // 重置验证码
+    fetchCaptcha();
   };
 
   return (
@@ -75,6 +139,40 @@ export default function ForgotPassword() {
                     placeholder="请输入注册时使用的邮箱地址"
                     required
                   />
+                </div>
+
+                {/* 验证码 */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      验证码
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="text"
+                        value={captcha.answer}
+                        onChange={(e) => setCaptcha({...captcha, answer: e.target.value})}
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="请输入图中文字"
+                      />
+                      <img 
+                        src={captcha.url} 
+                        alt="验证码" 
+                        className="h-12 w-24 border border-gray-300 rounded cursor-pointer"
+                        onClick={fetchCaptcha}
+                      />
+                      <button 
+                        type="button" 
+                        onClick={fetchCaptcha}
+                        className="px-3 py-3 border border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200"
+                      >
+                        刷新
+                      </button>
+                    </div>
+                    {captchaError && (
+                      <p className="text-red-500 text-sm mt-1">{captchaError}</p>
+                    )}
+                  </div>
                 </div>
 
                 <button

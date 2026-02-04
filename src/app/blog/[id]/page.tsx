@@ -22,6 +22,8 @@ export default function BlogPostPage() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [currentPostIndex, setCurrentPostIndex] = useState<number>(-1);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -43,8 +45,47 @@ export default function BlogPostPage() {
       }
     };
 
+    const fetchAllPosts = async () => {
+      try {
+        const response = await fetch('/api/blog');
+        const data = await response.json();
+        
+        if (response.ok) {
+          // 按创建时间排序，最新的在前
+          const sortedPosts = data.posts.sort((a: BlogPost, b: BlogPost) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          setPosts(sortedPosts);
+        }
+      } catch (error) {
+        console.error('获取博客列表失败:', error);
+      }
+    };
+
     fetchPost();
+    fetchAllPosts();
   }, [params?.id]);
+
+  useEffect(() => {
+    if (post && posts.length > 0) {
+      const index = posts.findIndex(p => p.objectId === post.objectId);
+      setCurrentPostIndex(index);
+    }
+  }, [post, posts]);
+
+  const getPreviousPost = () => {
+    if (currentPostIndex > 0) {
+      return posts[currentPostIndex - 1];
+    }
+    return null;
+  };
+
+  const getNextPost = () => {
+    if (currentPostIndex < posts.length - 1) {
+      return posts[currentPostIndex + 1];
+    }
+    return null;
+  };
   
   // 加载状态
   if (loading) {
@@ -123,10 +164,42 @@ export default function BlogPostPage() {
           />
         </div>
 
-        <div className="mt-12 text-center">
-          <Link href="/blog" className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
-            返回博客列表
-          </Link>
+        <div className="mt-12 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex-1 w-full">
+            {getPreviousPost() ? (
+              <Link 
+                href={`/blog/${getPreviousPost()?.objectId}`}
+                className="w-full inline-block bg-gray-200 text-black px-6 py-3 rounded-lg hover:bg-gray-300 transition text-center"
+              >
+                {`← 上一篇: ${getPreviousPost()?.title ? (getPreviousPost()?.title as string).substring(0, 20) + ((getPreviousPost()?.title as string).length > 20 ? '...' : '') : ''}`}
+              </Link>
+            ) : (
+              <div className="w-full inline-block bg-gray-100 text-gray-400 px-6 py-3 rounded-lg text-center cursor-not-allowed">
+                ← 上一篇: 没有了
+              </div>
+            )}
+          </div>
+          
+          <div className="w-full sm:w-auto">
+            <Link href="/blog" className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition text-center">
+              返回博客列表
+            </Link>
+          </div>
+          
+          <div className="flex-1 w-full">
+            {getNextPost() ? (
+              <Link 
+                href={`/blog/${getNextPost()?.objectId}`}
+                className="w-full inline-block bg-gray-200 text-black px-6 py-3 rounded-lg hover:bg-gray-300 transition text-center"
+              >
+                {`下一篇: ${getNextPost()?.title ? (getNextPost()?.title as string).substring(0, 20) + ((getNextPost()?.title as string).length > 20 ? '...' : '') : ''} →`}
+              </Link>
+            ) : (
+              <div className="w-full inline-block bg-gray-100 text-gray-400 px-6 py-3 rounded-lg text-center cursor-not-allowed">
+                下一篇: 没有了 →
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import AdComponent from '@/components/AdComponent';
 
 interface ImageModel {
   id: string;
@@ -218,6 +219,11 @@ export default function AIDrawPage() {
           <div className="w-20"></div>
         </div>
       </header>
+
+      {/* 自定义广告位 */}
+      <div className="max-w-4xl mx-auto px-4 py-4">
+        <AdComponent />
+      </div>
 
       <div className="max-w-4xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

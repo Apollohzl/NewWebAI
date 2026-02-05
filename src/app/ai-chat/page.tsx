@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import AdComponent from '@/components/AdComponent';
 
 interface Message {
   id: string;
@@ -163,6 +164,11 @@ export default function AIChatPage() {
           </div>
         </div>
       </header>
+
+      {/* 自定义广告位 */}
+      <div className="max-w-4xl mx-auto px-4 py-4">
+        <AdComponent />
+      </div>
 
       {/* 消息列表容器 */}
       <div className="flex-1 overflow-hidden p-4">

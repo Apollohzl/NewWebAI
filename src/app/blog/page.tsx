@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import AdComponent from '@/components/AdComponent';
 
 interface BlogPost {
   objectId: string;
@@ -93,6 +94,11 @@ export default function BlogPage() {
         <p className="text-xl text-center text-black max-w-2xl mx-auto mb-12">
           探索人工智能、Web开发和技术创新的最新动态
         </p>
+
+        {/* 自定义广告位 */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <AdComponent />
+        </div>
 
         {/* 搜索栏 */}
         <div className="max-w-2xl mx-auto mb-8">

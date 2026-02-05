@@ -2,36 +2,36 @@
   {
     "id": 1,
     "title": "我的AI视频教程",
-    "url": "https://example.com/ai-video-tutorial",
-    "cover": "/ad-placeholder-1.jpg",
+    "url": "https://mp.weixin.qq.com/s/hN3Vm-U2pTdIhi5DMEXh4w",
+    "cover": "/adsimg/ad-placeholder-1.jpg",
     "description": "深度学习AI应用开发视频教程"
   },
   {
     "id": 2,
     "title": "AI应用开发指南",
-    "url": "https://example.com/ai-app-guide",
-    "cover": "/ad-placeholder-2.jpg",
+    "url": "https://mp.weixin.qq.com/s/hN3Vm-U2pTdIhi5DMEXh4w",
+    "cover": "/adsimg/ad-placeholder-1.jpg",
     "description": "从零开始构建AI应用的完整指南"
   },
   {
     "id": 3,
     "title": "机器学习实战课程",
-    "url": "https://example.com/ml-course",
-    "cover": "/ad-placeholder-3.jpg",
+    "url": "https://mp.weixin.qq.com/s/hN3Vm-U2pTdIhi5DMEXh4w",
+    "cover": "/adsimg/ad-placeholder-1.jpg",
     "description": "机器学习实战项目，包含代码和案例"
   },
   {
     "id": 4,
     "title": "数据科学工具箱",
-    "url": "https://example.com/data-science-tools",
-    "cover": "/ad-placeholder-4.jpg",
+    "url": "https://mp.weixin.qq.com/s/hN3Vm-U2pTdIhi5DMEXh4w",
+    "cover": "/adsimg/ad-placeholder-1.jpg",
     "description": "数据科学家必备的工具和技巧"
   },
   {
     "id": 5,
     "title": "Python编程进阶",
-    "url": "https://example.com/python-advanced",
-    "cover": "/ad-placeholder-5.jpg",
+    "url": "https://mp.weixin.qq.com/s/hN3Vm-U2pTdIhi5DMEXh4w",
+    "cover": "/adsimg/ad-placeholder-1.jpg",
     "description": "Python高级编程技巧和最佳实践"
   }
 ]

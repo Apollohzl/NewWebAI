@@ -2,12 +2,8 @@ import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    // 从环境变量获取API密钥
-    const apiKey = process.env.POLLINATIONS_API_KEY;
-
-    if (!apiKey) {
-      return Response.json({ error: 'API key not configured' }, { status: 400 });
-    }
+    // 直接使用硬编码的API密钥
+    const apiKey = 'sk_lP8NdaqOKvbNPB8n1ApyB2UQcsVwcT7B';
 
     // 向pollinations API请求余额
     const response = await fetch('https://gen.pollinations.ai/account/balance', {

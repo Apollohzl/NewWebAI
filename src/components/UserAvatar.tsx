@@ -19,13 +19,12 @@ export default function UserAvatar() {
       return '/user0.svg';
     }
     
-    // 如果是LeanCloud URL，确保正确格式
+    // 如果是绝对URL，直接返回
     if (user.avatar.startsWith('http')) {
       return user.avatar;
     }
     
-    // 如果是相对路径，添加LeanCloud域名前缀（如果需要）
-    // 这里可能需要根据您的LeanCloud配置调整
+    // 如果是相对路径，直接返回（我们的上传功能保存相对路径）
     return user.avatar;
   };
   

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { leancloudRequest } from '@/lib/leancloud';
+import { getBlogPostById } from '@/lib/blogDatabase';
 
 export async function GET(
   request: NextRequest,
@@ -9,9 +9,9 @@ export async function GET(
     const { id } = await context.params;
 
     // 查询指定的博客文章
-    const response = await leancloudRequest(`/classes/BlogPosts/${id}`);
+    const post = await getBlogPostById(id);
     
-    if (!response.objectId) {
+    if (!post) {
       return NextResponse.json(
         { error: '博客文章不存在' },
         { status: 404 }
@@ -19,7 +19,7 @@ export async function GET(
     }
 
     return NextResponse.json({
-      post: response
+      post
     });
   } catch (error: any) {
     console.error('获取博客文章失败:', error);

@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LeanCloudUser, initLeanCloud, leancloudRequest } from '@/lib/leancloud';
-import jwt from 'jsonwebtoken';
+import { findUserByEmail, addUser } from '@/lib/userDatabase';
+import bcrypt from 'bcrypt';
 
 export async function POST(request: NextRequest) {
   try {
-    // 初始化LeanCloud
-    initLeanCloud();
-    console.log('LeanCloud初始化完成');
-    
     const { username, email, password } = await request.json();
     console.log('收到注册请求:', { username, email });
 
@@ -27,34 +23,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 使用LeanCloud的邮箱验证注册
+    // 检查用户是否已存在
+    const existingUser = await findUserByEmail(email);
+    if (existingUser) {
+      return NextResponse.json(
+        { error: '该邮箱已被注册' },
+        { status: 409 }
+      );
+    }
+
+    // 加密密码
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 创建新用户
     try {
-      // 先创建用户
-      const userData = {
+      const newUser = await addUser({
         username,
         email,
-        password
-      };
-
-      // 使用LeanCloud REST API直接创建用户
-      const response = await leancloudRequest('/users', {
-        method: 'POST',
-        body: JSON.stringify(userData),
+        password: hashedPassword,
+        avatar: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
 
-      console.log('用户创建成功:', response);
+      console.log('用户创建成功:', newUser.id);
       
-      // LeanCloud在注册用户时会自动发送验证邮件（如果在控制台配置了邮件模板）
-      console.log('用户注册成功，LeanCloud应该会自动发送验证邮件');
+      // 返回用户信息（移除密码）
+      const { password: _, ...userWithoutPassword } = newUser;
       
       return NextResponse.json({
-        message: '注册成功！请查看邮箱并点击验证链接完成验证',
-        user: {
-          id: response.objectId,
-          username: response.username,
-          email: response.email,
-        },
-        needEmailVerification: true
+        message: '注册成功！',
+        user: userWithoutPassword,
+        needEmailVerification: false // 暂时不需要邮箱验证
       });
     } catch (error: any) {
       console.error('注册失败:', error);

@@ -32,6 +32,7 @@ export default function AIDrawPage() {
   const [lastFrameImage, setLastFrameImage] = useState('');
   const [lastFrameImagePreview, setLastFrameImagePreview] = useState<string | null>(null);
   const [videoDuration, setVideoDuration] = useState(4); // 默认4秒
+  const [balance, setBalance] = useState<number | null>(null);
 
   // 预定义的分辨率选项
   const ratios = [
@@ -55,6 +56,36 @@ export default function AIDrawPage() {
         }
       })
       .catch(error => console.error('Failed to load models:', error));
+  }, []);
+
+  // 获取花粉余额
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const response = await fetch('/api/account/balance', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setBalance(data.balance);
+        }
+      } catch (error) {
+        console.error('Failed to fetch balance:', error);
+      }
+    };
+
+    // 立即获取一次余额
+    fetchBalance();
+
+    // 设置定时器，每30秒更新一次余额
+    const intervalId = setInterval(fetchBalance, 30000);
+
+    // 清理定时器
+    return () => clearInterval(intervalId);
   }, []);
 
   // 生成图像
@@ -215,6 +246,10 @@ export default function AIDrawPage() {
           <div className="flex items-center space-x-2">
             <img src="/logo.png" alt="NewWebAI" className="h-7 w-7" />
             <h1 className="text-2xl font-bold text-black">AI 绘画</h1>
+          </div>
+          {/* 花粉余额显示 */}
+          <div className="text-sm text-gray-600">
+            当前花粉余额：{balance !== null ? balance : '--'}
           </div>
           <div className="w-20"></div>
         </div>

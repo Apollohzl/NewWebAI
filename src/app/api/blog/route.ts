@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { leancloudRequest } from '@/lib/leancloud';
+import { getBlogPosts as getBlogPostsFromDB, createBlogPost } from '@/lib/blogDatabase';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,40 +9,55 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
+    const author = searchParams.get('author') || '';
 
-    // 构建查询条件
-    let query = {};
+    // 注意：MongoDB的完整文本搜索需要预先建立文本索引
+    // 在实际应用中，您可能需要在数据库设置中创建相应的索引
+    const skip = (page - 1) * limit;
+    
+    // 这里简化处理，实际应用中可能需要更复杂的搜索逻辑
+    const db = await (await import('@/lib/mongodb')).connectToDatabase();
+    let query: any = {};
+    
     if (search) {
-      query = {
-        $or: [
-          { title: { $regex: search, $options: 'i' } },
-          { content: { $regex: search, $options: 'i' } },
-          { excerpt: { $regex: search, $options: 'i' } }
-        ]
-      };
+      query.$text = { $search: search }; // 需要在数据库中创建文本索引
     }
     if (category) {
-      query = { ...query, category };
+      query.category = category;
+    }
+    if (author) {
+      query.author = author;
     }
 
-    // 构建查询参数
-    const queryParams = new URLSearchParams({
-      where: JSON.stringify(query),
-      order: '-createdAt',
-      limit: limit.toString(),
-      skip: ((page - 1) * limit).toString(),
-      count: '1'
-    });
+    // 计算总数
+    const total = await db.collection('blog_posts').countDocuments(query);
 
-    // 查询LeanCloud
-    const response = await leancloudRequest(`/classes/BlogPosts?${queryParams}`);
+    // 获取文章列表
+    let postsQuery = db.collection('blog_posts').find(query);
     
-    // 获取总数和文章列表
-    const total = response.count || 0;
-    const posts = response.results || [];
+    if (search) {
+      // 如果有搜索词，使用文本搜索排序
+      postsQuery = postsQuery.sort({ score: { $meta: 'textScore' } });
+    } else {
+      // 否则按创建时间排序
+      postsQuery = postsQuery.sort({ createdAt: -1 });
+    }
+    
+    const posts = await postsQuery
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    // 转换为前端需要的格式
+    const formattedPosts = posts.map(post => ({
+      ...post,
+      id: post._id.toString(),
+      objectId: post._id.toString(),
+      _id: undefined // 避免返回内部ID
+    }));
 
     return NextResponse.json({
-      posts: posts,
+      posts: formattedPosts,
       pagination: {
         current: page,
         total: Math.ceil(total / limit),
@@ -80,18 +95,22 @@ export async function POST(request: NextRequest) {
       category: category || '技术',
       tags: tags || [],
       author: author || 'NewWebAI团队',
-      status: 'published',
+      published: true, // 默认发布
       readTime: Math.ceil(content.length / 500) + ' 分钟阅读'
     };
 
-    const response = await leancloudRequest('/classes/BlogPosts', {
-      method: 'POST',
-      body: JSON.stringify(blogPost),
-    });
+    const newPost = await createBlogPost(blogPost);
+
+    if (!newPost) {
+      return NextResponse.json(
+        { error: '创建博客文章失败' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       message: '博客文章创建成功',
-      post: response
+      post: newPost
     });
   } catch (error: any) {
     console.error('创建博客文章失败:', error);

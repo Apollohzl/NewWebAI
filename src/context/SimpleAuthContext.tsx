@@ -76,10 +76,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         setUser(data.user);
         setToken(data.token);
-        setSessionToken(data.sessionToken);
+        // 现在的API不再返回sessionToken
+        setSessionToken(null);
         // 保存到localStorage
         localStorage.setItem('token', data.token);
-        localStorage.setItem('sessionToken', data.sessionToken);
+        localStorage.removeItem('sessionToken'); // 清除旧的sessionToken
         localStorage.setItem('user', JSON.stringify(data.user));
         return true;
       } else {

@@ -1,54 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { leancloudRequest } from '@/lib/leancloud';
+import { findUserById } from '@/lib/userDatabase';
+import jwt from 'jsonwebtoken';
 
 export async function GET(request: NextRequest) {
   try {
-    // 首先尝试从Authorization header获取session token
+    // 从请求头获取token
     const authHeader = request.headers.get('authorization');
-    let sessionToken = authHeader?.replace('Bearer ', '');
-
-    // 如果header中没有，尝试从cookie获取
-    if (!sessionToken) {
-      const cookies = request.cookies;
-      sessionToken = cookies.get('session_token')?.value;
+    const token = authHeader?.replace('Bearer ', '');
+    
+    if (!token) {
+      return NextResponse.json({ user: null, authenticated: false });
     }
 
-    if (!sessionToken) {
-      return NextResponse.json({ 
-        authenticated: false,
-        message: '未登录' 
-      });
-    }
-
-    // 使用LeanCloud的session验证
+    // 验证JWT token
+    let decoded: any;
     try {
-      const response = await leancloudRequest('/users/me', {
-        headers: {
-          'X-LC-Session': sessionToken,
-        },
-      });
-
-      return NextResponse.json({
-        authenticated: true,
-        user: {
-          objectId: response.objectId,
-          username: response.username,
-          email: response.email,
-          name: response.name || response.username
-        }
-      });
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
     } catch (error) {
-      // LeanCloud session验证失败
-      return NextResponse.json({ 
-        authenticated: false,
-        message: '会话已过期' 
-      });
+      return NextResponse.json({ user: null, authenticated: false });
     }
-  } catch (error) {
-    console.error('检查登录状态错误:', error);
-    return NextResponse.json(
-      { error: '服务器错误' },
-      { status: 500 }
-    );
+
+    // 根据token中的用户ID查找用户
+    const user = await findUserById(decoded.userId);
+    
+    if (!user) {
+      return NextResponse.json({ user: null, authenticated: false });
+    }
+
+    // 返回用户信息（移除密码）
+    const { password: _, ...userWithoutPassword } = user;
+
+    return NextResponse.json({
+      user: userWithoutPassword,
+      authenticated: true
+    });
+  } catch (error: any) {
+    console.error('检查用户状态失败:', error);
+    return NextResponse.json({ 
+      user: null, 
+      authenticated: false,
+      error: error.message 
+    });
   }
 }

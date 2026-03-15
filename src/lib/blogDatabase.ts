@@ -27,9 +27,18 @@ export async function getBlogPosts(limit: number = 10, skip: number = 0): Promis
     
     // 为保持兼容性，添加objectId字段
     return posts.map(post => ({
-      ...post,
       id: post._id.toString(),
-      objectId: post._id.toString()
+      objectId: post._id.toString(),
+      title: post.title || '',
+      content: post.content || '',
+      category: post.category || '',
+      author: post.author || '',
+      readTime: post.readTime || '',
+      createdAt: post.createdAt || new Date().toISOString(),
+      updatedAt: post.updatedAt || new Date().toISOString(),
+      tags: post.tags || [],
+      published: post.published || false,
+      excerpt: post.excerpt
     })) as BlogPost[];
   } catch (error) {
     console.error('获取博客文章失败:', error);
@@ -42,10 +51,17 @@ export async function getBlogPostById(id: string): Promise<BlogPost | null> {
   try {
     const db = await connectToDatabase();
     // 尝试作为ObjectId查找，也尝试作为字符串查找
-    let post = await db.collection('blog_posts').findOne({ _id: new (await import('mongodb')).ObjectId(id) });
-    
-    if (!post) {
-      post = await db.collection('blog_posts').findOne({ _id: id });
+    let post;
+    try {
+      post = await db.collection('blog_posts').findOne({ _id: new (await import('mongodb')).ObjectId(id) });
+    } catch (error) {
+      // 如果ObjectId转换失败，尝试作为字符串查找
+      try {
+        post = await db.collection('blog_posts').findOne({ _id: new (await import('mongodb')).ObjectId(id) });
+      } catch {
+        // 如果两种方式都失败，返回null
+        return null;
+      }
     }
     
     if (!post) {
@@ -53,9 +69,18 @@ export async function getBlogPostById(id: string): Promise<BlogPost | null> {
     }
     
     return {
-      ...post,
       id: post._id.toString(),
-      objectId: post._id.toString()
+      objectId: post._id.toString(),
+      title: post.title || '',
+      content: post.content || '',
+      category: post.category || '',
+      author: post.author || '',
+      readTime: post.readTime || '',
+      createdAt: post.createdAt || new Date().toISOString(),
+      updatedAt: post.updatedAt || new Date().toISOString(),
+      tags: post.tags || [],
+      published: post.published || false,
+      excerpt: post.excerpt
     } as BlogPost;
   } catch (error) {
     console.error('获取博客文章失败:', error);
@@ -106,9 +131,18 @@ export async function updateBlogPost(id: string, updates: Partial<BlogPost>): Pr
     }
     
     return {
-      ...result,
       id: result._id.toString(),
-      objectId: result._id.toString()
+      objectId: result._id.toString(),
+      title: result.title || '',
+      content: result.content || '',
+      category: result.category || '',
+      author: result.author || '',
+      readTime: result.readTime || '',
+      createdAt: result.createdAt || new Date().toISOString(),
+      updatedAt: result.updatedAt || new Date().toISOString(),
+      tags: result.tags || [],
+      published: result.published || false,
+      excerpt: result.excerpt
     } as BlogPost;
   } catch (error) {
     console.error('更新博客文章失败:', error);
@@ -123,7 +157,7 @@ export async function deleteBlogPost(id: string): Promise<boolean> {
     const result = await db.collection('blog_posts').deleteOne({ 
       $or: [
         { _id: new (await import('mongodb')).ObjectId(id) },
-        { _id: id }
+        { _id: new (await import('mongodb')).ObjectId(id) }  // 移除字符串ID比较，只使用ObjectId
       ]
     });
     
@@ -144,9 +178,18 @@ export async function getBlogPostsByAuthor(author: string, limit: number = 10): 
       .toArray();
     
     return posts.map(post => ({
-      ...post,
       id: post._id.toString(),
-      objectId: post._id.toString()
+      objectId: post._id.toString(),
+      title: post.title || '',
+      content: post.content || '',
+      category: post.category || '',
+      author: post.author || '',
+      readTime: post.readTime || '',
+      createdAt: post.createdAt || new Date().toISOString(),
+      updatedAt: post.updatedAt || new Date().toISOString(),
+      tags: post.tags || [],
+      published: post.published || false,
+      excerpt: post.excerpt
     })) as BlogPost[];
   } catch (error) {
     console.error('获取作者博客文章失败:', error);

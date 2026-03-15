@@ -78,7 +78,17 @@ export async function getUsers(): Promise<User[]> {
   try {
     const db = await connectToDatabase();
     const users = await db.collection('users').find({}).toArray();
-    return users as User[];
+    return users.map(user => ({
+      id: user._id.toString(),
+      username: user.username || '',
+      email: user.email || '',
+      password: user.password || '',
+      avatar: user.avatar,
+      role: user.role || 'user',
+      isActive: user.isActive || false,
+      createdAt: user.createdAt || new Date().toISOString(),
+      updatedAt: user.updatedAt || new Date().toISOString(),
+    })) as User[];
   } catch (error) {
     console.error('获取用户列表失败:', error);
     return [];

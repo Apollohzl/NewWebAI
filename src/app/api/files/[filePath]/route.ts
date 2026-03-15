@@ -4,12 +4,11 @@ import { join } from 'path';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ filePath: string[] }> }
+  { params }: { params: Promise<{ filePath: string }> }
 ) {
   try {
-    // 从URL参数构建文件路径
-    const filePathArray = await params.filePath;
-    const filePath = filePathArray.join('/');
+    // 从URL参数获取文件路径
+    const { filePath } = await params;
     
     // 防止路径遍历攻击
     if (filePath.includes('..') || filePath.startsWith('/')) {

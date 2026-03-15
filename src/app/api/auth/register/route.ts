@@ -41,9 +41,9 @@ export async function POST(request: NextRequest) {
         username,
         email,
         password: hashedPassword,
-        avatar: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        avatar: undefined,
+        role: 'user', // 默认角色
+        isActive: true, // 默认激活
       });
 
       console.log('用户创建成功:', newUser.id);

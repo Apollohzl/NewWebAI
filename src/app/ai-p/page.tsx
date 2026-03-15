@@ -113,7 +113,7 @@ export default function AIDrawPage() {
       };
 
       // 如果是视频模型，添加相应参数
-      if (['veo', 'seedance', 'seedance-pro'].includes(selectedModel)) {
+      if (['veo', 'seedance', 'seedance-pro','grok-video'].includes(selectedModel)) {
         (requestBody as any).duration = videoDuration; // 使用用户选择的持续时间
         // 视频模型只支持16:9或9:16比例
         if (selectedRatio === '16:9' || selectedRatio === '9:16') {

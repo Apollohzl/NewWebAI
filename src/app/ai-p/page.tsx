@@ -32,6 +32,7 @@ export default function AIDrawPage() {
   const [lastFrameImage, setLastFrameImage] = useState('');
   const [lastFrameImagePreview, setLastFrameImagePreview] = useState<string | null>(null);
   const [videoDuration, setVideoDuration] = useState(4); // 默认4秒
+  const [enableAudio, setEnableAudio] = useState(false); // 默认禁用音频
   const [balance, setBalance] = useState<number | null>(null);
 
   // 预定义的分辨率选项
@@ -133,8 +134,8 @@ export default function AIDrawPage() {
           }
         }
         
-        if (selectedModel === 'veo') {
-          (requestBody as any).audio = false; // 默认无音频
+        if (selectedModel === 'veo' || selectedModel === 'grok-video' || selectedModel.startsWith('ltx')) {
+          (requestBody as any).audio = enableAudio; // 使用用户选择的音频设置
         }
       }
 
@@ -410,7 +411,7 @@ export default function AIDrawPage() {
                   </div>
 
                   {/* 对于视频模型的视频设置 */}
-                  {['veo', 'seedance', 'seedance-pro'].includes(selectedModel) && (
+                  {['veo', 'seedance', 'seedance-pro', 'grok-video'].includes(selectedModel) && (
                     <div className="space-y-3">
                       <div>
                         <label className="block text-sm font-medium text-black mb-1">
@@ -500,6 +501,22 @@ export default function AIDrawPage() {
                             )}
                             <p className="text-xs text-gray-500 mt-1">用于seedance模型的最后一帧</p>
                           </div>
+                        </div>
+                      )}
+                      
+                      {/* 音频设置 - 适用于支持音频的视频模型 */}
+                      {(selectedModel === 'veo' || selectedModel === 'grok-video' || selectedModel.startsWith('ltx')) && (
+                        <div>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={enableAudio}
+                              onChange={(e) => setEnableAudio(e.target.checked)}
+                              className="mr-2"
+                            />
+                            <span className="text-sm text-black">启用音频</span>
+                          </label>
+                          <p className="text-xs text-gray-500 mt-1">为视频生成音频（仅适用于支持的模型）</p>
                         </div>
                       )}
                     </div>

@@ -2,18 +2,23 @@ import { MongoClient, Db } from 'mongodb';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
+// 如果没有提供MONGODB_URI，抛出错误或使用替代方案
 if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+  console.warn('警告: MONGODB_URI 环境变量未设置，某些功能可能无法正常工作');
 }
 
 let cachedDb: Db | null = null;
 
 export async function connectToDatabase() {
+  if (!MONGODB_URI) {
+    throw new Error('数据库连接需要MONGODB_URI环境变量。请在.env.local文件中设置此变量。');
+  }
+  
   if (cachedDb) {
     return cachedDb;
   }
 
-  const client = new MongoClient(MONGODB_URI!);
+  const client = new MongoClient(MONGODB_URI);
   await client.connect();
   
   const db = client.db('newwebai'); // 使用newwebai数据库

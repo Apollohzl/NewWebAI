@@ -116,6 +116,9 @@ export default function AIChatPage() {
           );
         };
 
+        // 延迟1.5秒后再开始显示流式响应，让用户体验更自然
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
         while (true) {
           const { done, value } = await reader.read();
           

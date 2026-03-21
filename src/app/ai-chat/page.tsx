@@ -78,26 +78,96 @@ export default function AIChatPage() {
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
           model: currentModel,
           temperature: temperature,
-          max_tokens: maxTokens
+          max_tokens: maxTokens,
+          stream: true
         })
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`请求失败，状态码: ${response.status}`);
+      }
 
-      if (data.success && data.data) {
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
+      // 处理流式响应
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let assistantContent = '';
+      
+      // 创建一个空的assistant消息
+      const assistantMessageId = (Date.now() + 1).toString();
+      const assistantMessage: Message = {
+        id: assistantMessageId,
+        role: 'assistant',
+        content: '',
+        timestamp: new Date(),
+        model: currentModel
+      };
+      
+      const messagesWithAssistant = [...newMessages, assistantMessage];
+      setMessages(messagesWithAssistant);
+
+      if (reader) {
+        const updateMessage = (content: string) => {
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === assistantMessageId 
+                ? { ...msg, content } 
+                : msg
+            )
+          );
+        };
+
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+          
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+          
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('data: ')) {
+              const dataStr = trimmedLine.slice(6);
+              
+              // 跳过空数据
+              if (!dataStr || dataStr === '[DONE]') continue;
+              
+              try {
+                const data = JSON.parse(dataStr);
+                
+                // 检查choices数组并提取内容
+                if (data.choices && data.choices.length > 0) {
+                  const delta = data.choices[0].delta;
+                  if (delta && delta.content) {
+                    assistantContent += delta.content;
+                    updateMessage(assistantContent);
+                  }
+                  
+                  // 检查是否完成
+                  if (data.choices[0].finish_reason) {
+                    break;
+                  }
+                }
+              } catch (e) {
+                console.error('解析流式数据失败:', e);
+              }
+            }
+          }
+        }
+      }
+      
+      // 如果内容为空，添加错误消息
+      if (!assistantContent) {
+        const errorMessage: Message = {
+          id: (Date.now() + 2).toString(),
           role: 'assistant',
-          content: data.data.message || '抱歉，我无法回答这个问题。',
+          content: '抱歉，我无法回答这个问题。',
           timestamp: new Date(),
           model: currentModel
         };
-
-        const updatedMessages = [...newMessages, assistantMessage];
-        setMessages(updatedMessages);
-      } else {
-        throw new Error(data.error?.message || '请求失败');
+        setMessages(prev => [...prev, errorMessage]);
       }
+      
     } catch (error: any) {
       console.error('Chat error:', error);
       const errorMessage: Message = {

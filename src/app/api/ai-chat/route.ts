@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, model = 'openai', sessionId, messages, temperature = 0.7, max_tokens = 2000 } = body;
+    const { message, model = 'openai', sessionId, messages, temperature = 0.7, max_tokens = 2000, stream = true } = body;
     
     // 检查必需参数
     if (!message && !messages) {
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
         messages: finalMessages,
         temperature: temperature,
         max_tokens: max_tokens,
-        stream: false
+        stream: stream
       })
     });
     
@@ -124,6 +124,43 @@ export async function POST(request: NextRequest) {
       }, { status: response.status });
     }
     
+    // 如果是流式响应
+    if (stream) {
+      // 创建可读流
+      const stream = new ReadableStream({
+        async start(controller) {
+          const reader = response.body!.getReader();
+          const decoder = new TextDecoder();
+          
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              
+              if (done) {
+                controller.close();
+                break;
+              }
+              
+              const chunk = decoder.decode(value, { stream: true });
+              controller.enqueue(new TextEncoder().encode(chunk));
+            }
+          } catch (error) {
+            console.error('Stream error:', error);
+            controller.error(error);
+          }
+        }
+      });
+      
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    }
+    
+    // 非流式响应
     const data = await response.json();
     
     // 返回响应

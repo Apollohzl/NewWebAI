@@ -27,13 +27,31 @@ export default function AIChatPage() {
   const [currentModel, setCurrentModel] = useState('openai');
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(1000);
+  const [balance, setBalance] = useState<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  // 获取余额
+  const fetchBalance = async () => {
+    try {
+      const response = await fetch('https://hzliflow.ken520.top/api/account/balance');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.balance !== undefined) {
+          setBalance(data.balance);
+        }
+      }
+    } catch (error) {
+      console.error('获取余额失败:', error);
+    }
+  };
 
   // 初始化聊天历史为空
   useEffect(() => {
     // 每次页面加载时聊天历史为空，不从 localStorage 恢复
     setMessages([]);
+    // 获取初始余额
+    fetchBalance();
   }, []);
 
   // 加载模型列表
@@ -241,6 +259,8 @@ export default function AIChatPage() {
       setMessages(updatedMessages);
     } finally {
       setIsLoading(false);
+      // 发送消息后更新余额
+      fetchBalance();
     }
   };
 
@@ -279,7 +299,10 @@ export default function AIChatPage() {
               <h1 className="text-xl font-semibold text-black">AI 对话</h1>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
+            <div className="text-sm text-gray-600">
+              余额：<span className="font-semibold">{balance.toFixed(2)}</span>
+            </div>
             <select
               value={currentModel}
               onChange={(e) => handleModelChange(e.target.value)}

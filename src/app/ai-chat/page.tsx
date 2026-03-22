@@ -89,7 +89,7 @@ export default function AIChatPage() {
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input.trim(),
+      content: input.trim()+"\n**系统级数据**:#Time:"+Date.now().toString(),
       timestamp: new Date(),
       model: currentModel
     };

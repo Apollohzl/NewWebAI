@@ -238,14 +238,31 @@ export default function AIChatPage() {
                     console.log('- currentSubContent 长度:', currentSubContent.length);
                     console.log('- currentSubContent 前100字符:', currentSubContent.substring(0, 1000));
                     console.log('- currentSubContent 后100字符:', currentSubContent.substring(Math.max(0, currentSubContent.length - 1000)));
-                    console.log('- 是否包含<P|>:', currentSubContent.includes('<P|>'));
+                    
+                    // 详细的字符检查
+                    const pIndex = currentSubContent.indexOf('<P');
+                    console.log('- 找到<P位置:', pIndex);
+                    if (pIndex !== -1) {
+                      console.log('- <P|>附近字符:', Array.from(currentSubContent.substring(pIndex, pIndex + 5)).map(c => `${c}(${c.charCodeAt(0)})`).join(' '));
+                    }
+                    
+                    // 检查不同的编码形式
+                    console.log('- 包含<P|>:', currentSubContent.includes('<P|>'));
+                    console.log('- 包含&lt;P|&gt;:', currentSubContent.includes('&lt;P|&gt;'));
+                    console.log('- 包含转义形式:', currentSubContent.includes('<P'));
                     
                     // 尝试多种格式匹配
                     let pTagMatch = null;
                     
                     // 标准格式：<P|'prompt''negative''model''size'>
                     pTagMatch = currentSubContent.match(/<P\|'([^']*)'([^']*)'([^']*)'([^']*)'>/);
-                    if (pTagMatch) console.log('匹配到标准格式');
+                    if (pTagMatch) console.log('✅ 匹配到标准格式');
+                    
+                    // HTML转义格式：&lt;P|...&gt;
+                    if (!pTagMatch) {
+                      pTagMatch = currentSubContent.match(/&lt;P\|'([^']*)'([^']*)'([^']*)'([^']*)'&gt;/);
+                      if (pTagMatch) console.log('✅ 匹配到HTML转义格式');
+                    }
                     
                     // 宽松格式1：<P|'prompt'negative''model''size'>
                     if (!pTagMatch) {
@@ -256,18 +273,46 @@ export default function AIChatPage() {
                     // 宽松格式2：使用[\s\S]匹配任意字符包括换行符
                     if (!pTagMatch) {
                       pTagMatch = currentSubContent.match(/<P\|'([^']*)'([^']*)'([^']*)'([^']*)'>/);
-                      if (pTagMatch) console.log('匹配到宽松格式2');
+                      if (pTagMatch) console.log('✅ 匹配到宽松格式2');
+                    }
+                    
+                    // 手动解析后备方案
+                    if (!pTagMatch) {
+                      console.log('🔧 尝试手动解析...');
+                      const pStart = currentSubContent.indexOf('<P');
+                      if (pStart !== -1) {
+                        const afterP = currentSubContent.substring(pStart);
+                        console.log('- <P之后的内容:', afterP.substring(0, 50));
+                        
+                        // 尝试找到完整的结束 >
+                        let quoteCount = 0;
+                        let endPos = -1;
+                        for (let i = pStart; i < currentSubContent.length; i++) {
+                          if (currentSubContent[i] === "'") {
+                            quoteCount++;
+                          }
+                          if (currentSubContent[i] === '>' && quoteCount >= 8) {
+                            endPos = i;
+                            break;
+                          }
+                        }
+                        
+                        if (endPos !== -1) {
+                          const pTagContent = currentSubContent.substring(pStart, endPos + 1);
+                          console.log('- 手动找到<P>标签:', pTagContent);
+                          
+                          // 手动提取参数
+                          const matches = pTagContent.match(/'([^']*)'/g);
+                          if (matches && matches.length >= 4) {
+                            const params = matches.map(m => m.slice(1, -1));
+                            pTagMatch = [pTagContent, ...params];
+                            console.log('- 手动提取参数成功:', params);
+                          }
+                        }
+                      }
                     }
                     
                     console.log('最终匹配结果:', pTagMatch);
-                    
-                    // 如果没有匹配到但包含<P|>，输出调试信息
-                    if (!pTagMatch && currentSubContent.includes('<P|')) {
-                      console.log('⚠️ 包含<P|>但正则匹配失败！');
-                      const pIndex = currentSubContent.indexOf('<P|');
-                      console.log('<P|>起始位置:', pIndex);
-                      console.log('附近内容:', currentSubContent.substring(Math.max(0, pIndex - 20), Math.min(currentSubContent.length, pIndex + 100)));
-                    }
                     
                     if (pTagMatch) {
                       console.log("✅ 找到<P>标识符:", pTagMatch);

@@ -17,6 +17,14 @@ interface Message {
   thinking?: string;
   timestamp: Date;
   model?: string;
+  // 多段式对话支持
+  subMessages?: Array<{
+    id: string;
+    content: string;
+    type: 'text' | 'image';
+    imageData?: string;
+    imageError?: string;
+  }>;
 }
 
 export default function AIChatPage() {
@@ -102,6 +110,7 @@ export default function AIChatPage() {
           model: currentModel,
           temperature: temperature,
           max_tokens: maxTokens,
+          system:"**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端只会使用一个小卡片显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多个小卡片，模拟更真实的AI聊天，注意要合理分段。\n**新功能-AI图片生成**：用户可以让你绘画，你要理解用户的绘画要求然后使用<P>标识符绘画，注意调用<P>标识符绘画一次图片生成将会在一个小卡片内，所以你无需添加<N>标识符。<P>标识符使用方法：<P'这里是生成的图片的画面描述提示词''这里是negative_prompt的内容''这是AI绘画模型选择【gptimage，flux，zimage，klein，imagen-4，flux-2-dev，grok-imagine，dirtberry，dirtberry-pro】''图片高度x图片宽度选择【1024x1024，1280x720，720x1280，1024x768，768x1024】'>",
           stream: true
         })
       });
@@ -118,18 +127,20 @@ export default function AIChatPage() {
       let finalContent = '';
       let hasAddedAssistantMessage = false;
       let usesReasoningField = false; // 标记是否使用reasoning_content字段
+      let subMessages: Array<{id: string, content: string, type: 'text' | 'image', imageData?: string, imageError?: string}> = [];
+      let currentSubContent = '';
       
       // 延迟1.5秒后再开始显示流式响应，让用户体验更自然
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       if (reader) {
         const assistantMessageId = (Date.now() + 1).toString();
         
-        const updateMessage = (content: string, thinking?: string) => {
+        const updateMessage = (content: string, thinking?: string, subs?: Array<{id: string, content: string, type: 'text' | 'image', imageData?: string, imageError?: string}>) => {
           setMessages(prev => 
             prev.map(msg => 
               msg.id === assistantMessageId 
-                ? { ...msg, content, thinking } 
+                ? { ...msg, content, thinking, subMessages: subs } 
                 : msg
             )
           );
@@ -187,7 +198,7 @@ export default function AIChatPage() {
                   if (delta && delta.content) {
                     if (usesReasoningField) {
                       // 如果使用reasoning_content字段，content就是最终回复
-                      finalContent += delta.content;
+                      currentSubContent += delta.content;
                     } else {
                       // 方式2: 使用文本标记方式
                       fullContent += delta.content;
@@ -202,22 +213,131 @@ export default function AIChatPage() {
                           startIndex + THINKING_START_MARKER.length, 
                           endIndex
                         ).trim();
-                        finalContent = fullContent.substring(endIndex + THINKING_END_MARKER.length).trim();
+                        currentSubContent = fullContent.substring(endIndex + THINKING_END_MARKER.length).trim();
                       } else if (startIndex !== -1) {
                         // 只有开始标识，没有结束标识，全部作为思考内容
                         thinkingContent = fullContent.substring(startIndex + THINKING_START_MARKER.length).trim();
-                        finalContent = '';
+                        currentSubContent = '';
                       } else {
                         // 没有开始标识，全部作为最终内容
                         thinkingContent = '';
-                        finalContent = fullContent.trim();
+                        currentSubContent = fullContent.trim();
                       }
                     }
                     
+                    // 处理<N>标识符（多段式对话）
+                    while (currentSubContent.includes('<N>')) {
+                      const [before, after] = currentSubContent.split('<N>', 2);
+                      if (before) {
+                        subMessages.push({
+                          id: Date.now().toString() + Math.random(),
+                          content: before,
+                          type: 'text'
+                        });
+                      }
+                      currentSubContent = after || '';
+                    }
+                    
+                    // 处理<P>标识符（AI图片生成）
+                    const pTagMatch = currentSubContent.match(/<P'([^']*)'([^']*)'([^']*)'([^']*)'>/);
+                    if (pTagMatch) {
+                      const [, prompt, negativePrompt, model, size] = pTagMatch;
+                      const [width, height] = size.split('x').map(Number);
+                      
+                      // 移除<P>标识符
+                      currentSubContent = currentSubContent.replace(pTagMatch[0], '');
+                      
+                      // 创建图片子消息
+                      const imageSubMessage = {
+                        id: Date.now().toString() + Math.random(),
+                        content: '',
+                        type: 'image' as const,
+                        imageData: undefined as string | undefined,
+                        imageError: undefined as string | undefined
+                      };
+                      subMessages.push(imageSubMessage);
+                      
+                      // 异步请求AI图片生成
+                      fetch('https://hzliflow.ken520.top/api/ai-image', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          prompt: prompt,
+                          model: model,
+                          width: width,
+                          height: height,
+                          negative_prompt: negativePrompt,
+                          enhance: false,
+                          safe: false,
+                          quality: 'hd',
+                          transparent: false,
+                          seed: -1
+                        })
+                      })
+                      .then(res => res.json())
+                      .then(data => {
+                        if (data.data && data.data.imageData) {
+                          // 更新图片数据
+                          setMessages(prev => 
+                            prev.map(msg => 
+                              msg.id === assistantMessageId 
+                                ? { 
+                                    ...msg, 
+                                    subMessages: msg.subMessages?.map(sub => 
+                                      sub.id === imageSubMessage.id 
+                                        ? { ...sub, imageData: data.data.imageData } 
+                                        : sub
+                                    )
+                                  } 
+                                : msg
+                            )
+                          );
+                        } else {
+                          // 图片请求失败
+                          setMessages(prev => 
+                            prev.map(msg => 
+                              msg.id === assistantMessageId 
+                                ? { 
+                                    ...msg, 
+                                    subMessages: msg.subMessages?.map(sub => 
+                                      sub.id === imageSubMessage.id 
+                                        ? { ...sub, imageError: '图片请求失败：未知错误' } 
+                                        : sub
+                                    )
+                                  } 
+                                : msg
+                            )
+                          );
+                        }
+                      })
+                      .catch(error => {
+                        console.error('AI图片生成失败:', error);
+                        // 图片请求失败
+                        setMessages(prev => 
+                          prev.map(msg => 
+                            msg.id === assistantMessageId 
+                              ? { 
+                                  ...msg, 
+                                  subMessages: msg.subMessages?.map(sub => 
+                                    sub.id === imageSubMessage.id 
+                                      ? { ...sub, imageError: `图片请求失败：${error.message}` } 
+                                      : sub
+                                  )
+                                } 
+                              : msg
+                          )
+                        );
+                      });
+                    }
+                    
+                    finalContent = currentSubContent;
+                    
                     // 只有在有内容时才添加assistant消息
-                    if (finalContent || thinkingContent) {
+                    if (finalContent || thinkingContent || subMessages.length > 0) {
                       addAssistantMessage();
-                      updateMessage(finalContent, thinkingContent);
+                      updateMessage(finalContent, thinkingContent, subMessages);
                     }
                   }
                   
@@ -368,29 +488,103 @@ export default function AIChatPage() {
                           )}
                           {/* 最终回复内容 */}
                           <div className={`p-3 ${message.thinking ? '' : 'rounded-lg'}`}>
-                            <ReactMarkdown 
-                              remarkPlugins={[remarkGfm]} 
-                              components={{
-                                p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
-                                h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
-                                h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
-                                h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
-                                li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                                code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
-                                pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
-                                blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
-                                table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
-                                th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
-                                td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
-                                a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
-                                strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                                em: ({node, ...props}) => <em className="italic" {...props} />,
-                                ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                                ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
-                              }}
-                            >
-                              {message.content}
-                            </ReactMarkdown>
+                            {/* 显示主要内容 */}
+                            {message.content && (
+                              <ReactMarkdown 
+                                remarkPlugins={[remarkGfm]} 
+                                components={{
+                                  p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
+                                  h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
+                                  h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
+                                  h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
+                                  li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                                  code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
+                                  pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
+                                  blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
+                                  table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
+                                  th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
+                                  td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
+                                  a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
+                                  strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                  em: ({node, ...props}) => <em className="italic" {...props} />,
+                                  ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                                  ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                                }}
+                              >
+                                {message.content}
+                              </ReactMarkdown>
+                            )}
+                            
+                            {/* 显示子消息（多段式对话和图片） */}
+                            {message.subMessages && message.subMessages.length > 0 && (
+                              <div className="mt-3 space-y-3">
+                                {message.subMessages.map((sub) => (
+                                  <div key={sub.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                    {sub.type === 'text' ? (
+                                      <div className="p-3">
+                                        <ReactMarkdown 
+                                          remarkPlugins={[remarkGfm]} 
+                                          components={{
+                                            p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
+                                            h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
+                                            h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
+                                            h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
+                                            li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                                            code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
+                                            pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
+                                            blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
+                                            table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
+                                            th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
+                                            td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
+                                            a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
+                                            strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                            em: ({node, ...props}) => <em className="italic" {...props} />,
+                                            ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                                            ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                                          }}
+                                        >
+                                          {sub.content}
+                                        </ReactMarkdown>
+                                      </div>
+                                    ) : sub.type === 'image' ? (
+                                      <div className="p-3 bg-gray-50">
+                                        {sub.imageData ? (
+                                          <img 
+                                            src={sub.imageData} 
+                                            alt="AI生成的图片" 
+                                            className="max-w-full h-auto cursor-pointer rounded hover:opacity-90 transition-opacity"
+                                            onClick={() => {
+                                              // 图片点击放大功能
+                                              if (sub.imageData) {
+                                                const win = window.open('');
+                                                if (win) {
+                                                  win.document.write(`
+                                                    <html>
+                                                      <head><title>图片预览</title></head>
+                                                      <body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f0f0f0;">
+                                                        <img src="${sub.imageData}" style="max-width:100%;max-height:100vh;cursor:pointer;" onclick="window.close()">
+                                                      </body>
+                                                    </html>
+                                                  `);
+                                                }
+                                              }
+                                            }}
+                                          />
+                                        ) : sub.imageError ? (
+                                          <div className="text-red-600 text-sm">
+                                            {sub.imageError}
+                                          </div>
+                                        ) : (
+                                          <div className="text-gray-500 text-sm">
+                                            正在生成图片...
+                                          </div>
+                                        )}
+                                      </div>
+                                    ) : null}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </>
                       ) : (

@@ -230,22 +230,11 @@ export default function AIChatPage() {
                       }
                     }
                     
-                    // 处理<N>标识符（多段式对话）
-                    console.log('处理<N>前 currentSubContent:', currentSubContent.substring(0, 100));
-                    while (currentSubContent.includes('<N>')) {
-                      const [before, after] = currentSubContent.split('<N>', 2);
-                      if (before) {
-                        subMessages.push({
-                          id: Date.now().toString() + Math.random(),
-                          content: before,
-                          type: 'text'
-                        });
-                      }
-                      currentSubContent = after || '';
-                    }
+                    // 🔧 重要：先处理<P>标识符，再处理<N>标识符
+                    // 这样可以确保<P>标签不会被<N>处理破坏
                     
                     // 处理<P>标识符（AI图片生成）
-                    console.log('检查<P>标识符前完整状态:');
+                    console.log('🔍 检查<P>标识符前完整状态:');
                     console.log('- currentSubContent 长度:', currentSubContent.length);
                     console.log('- currentSubContent 前100字符:', currentSubContent.substring(0, 100));
                     console.log('- currentSubContent 后100字符:', currentSubContent.substring(Math.max(0, currentSubContent.length - 100)));
@@ -371,6 +360,23 @@ export default function AIChatPage() {
                           )
                         );
                       });
+                    }
+                    
+                    // 处理<N>标识符（多段式对话）
+                    console.log('🔄 处理<N>标识符');
+                    console.log('- 处理前 currentSubContent 长度:', currentSubContent.length);
+                    while (currentSubContent.includes('<N>')) {
+                      const [before, after] = currentSubContent.split('<N>', 2);
+                      console.log('- 找到<N>，before长度:', before?.length, 'after长度:', after?.length);
+                      if (before) {
+                        subMessages.push({
+                          id: Date.now().toString() + Math.random(),
+                          content: before,
+                          type: 'text'
+                        });
+                      }
+                      currentSubContent = after || '';
+                      console.log('- 处理后 currentSubContent 长度:', currentSubContent.length);
                     }
                     
                     finalContent = currentSubContent;

@@ -225,42 +225,12 @@ export default function AIChatPage() {
                         console.log('提取最终内容后 currentSubContent 长度:', currentSubContent.length);
                       }
                     }
-                                        
-                                        // 处理<N>标识符（多段式对话）- 新的逻辑
-                                        console.log('🔄 处理<N>分段');
-                                        
-                                        // 将content按照<N>分割成多个segment
-                                        const segments: Array<{ id: string, content: string }> = [];
-                                        
-                                        if (currentSubContent.includes('<N>')) {
-                                          // 有<N>标识符，进行分段
-                                          const parts = currentSubContent.split('<N>');
-                                          for (const part of parts) {
-                                            const trimmedPart = part.trim();
-                                            if (trimmedPart) {
-                                              segments.push({
-                                                id: Date.now().toString() + Math.random(),
-                                                content: trimmedPart
-                                              });
-                                            }
-                                          }
-                                          console.log('- 分段完成，共', segments.length, '个分段');
-                                        } else {
-                                          // 没有<N>标识符，整个内容作为一个分段
-                                          segments.push({
-                                            id: Date.now().toString() + Math.random(),
-                                            content: currentSubContent.trim()
-                                          });
-                                          console.log('- 无<N>标识符，作为单个分段处理');
-                                        }
-                                        
-                                        // 清空currentSubContent，因为内容已经保存到segments中了
-                                        currentSubContent = '';
-                                        finalContent = '';                    
-                    // 只有在有内容时才添加assistant消息
-                    if (segments.length > 0 || thinkingContent) {
+                    
+                    // 只在有内容时才更新UI（流式显示）
+                    if (currentSubContent || thinkingContent) {
                       addAssistantMessage();
-                      updateMessage(finalContent, thinkingContent, segments);
+                      // 这里传递空数组，因为分段处理在完成后进行
+                      updateMessage(currentSubContent, thinkingContent, []);
                     }
                   }
                   
@@ -415,100 +385,6 @@ export default function AIChatPage() {
                             {message.segments && message.segments.length > 0 ? (
                               <>
                                 {message.segments.map((segment, index) => (
-                                  <div key={segment.id} className={index > 0 ? 'mt-4 pt-4 border-t border-gray-200' : ''}>
-                                    <ReactMarkdown 
-                                      remarkPlugins={[remarkGfm]} 
-                                      components={{
-                                        p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
-                                        h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
-                                        h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
-                                        h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
-                                        li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                                        code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
-                                        pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
-                                        blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
-                                        table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
-                                        th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
-                                        td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
-                                        a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
-                                        strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                                        em: ({node, ...props}) => <em className="italic" {...props} />,
-                                        ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                                        ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
-                                      }}
-                                    >
-                                      {segment.content}
-                                    </ReactMarkdown>
-                                    
-                                    {/* 只有在最后一个分段时显示时间、模型和复制按钮 */}
-                                    {index === (message.segments?.length || 1) - 1 && (
-                                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
-                                        <p className="text-xs opacity-70">
-                                          {message.timestamp.toLocaleTimeString()}
-                                          {message.model && ` · ${message.model}`}
-                                        </p>
-                                        <button
-                                          onClick={() => {
-                                            // 复制所有分段的内容
-                                            const allContent = (message.segments || []).map(s => s.content).join('\n\n');
-                                            navigator.clipboard.writeText(allContent).then(
-                                              () => console.log('内容已复制到剪贴板'),
-                                              (err) => console.error('复制失败: ', err)
-                                            );
-                                          }}
-                                          className="text-xs opacity-50 hover:opacity-100"
-                                          title="复制全部内容"
-                                        >
-                                          📋
-                                        </button>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </>
-                            ) : (
-                              /* 单段显示（没有<N>标识符的情况） */
-                              <>
-                                {message.content && (
-                                  <ReactMarkdown 
-                                    remarkPlugins={[remarkGfm]} 
-                                    components={{
-                                      p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
-                                      h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
-                                      h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
-                                      h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
-                                      li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                                      code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
-                                      pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
-                                      blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
-                                      table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
-                                      th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
-                                      td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
-                                      a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
-                                      strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                                      em: ({node, ...props}) => <em className="italic" {...props} />,
-                                      ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                                      ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
-                                    }}
-                                  >
-                                    {message.content}
-                                  </ReactMarkdown>
-                                )}
-                                <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
-                                  <p className="text-xs opacity-70">
-                                    {message.timestamp.toLocaleTimeString()}
-                                    {message.model && ` · ${message.model}`}
-                                  </p>
-                                  <button
-                                    onClick={() => copyToClipboard(message.content)}
-                                    className="text-xs opacity-50 hover:opacity-100"
-                                    title="复制内容"
-                                  >
-                                    📋
-                                  </button>
-                                </div>
-                              </>
-                            )}
                           </div>
                         </>
                       ) : (

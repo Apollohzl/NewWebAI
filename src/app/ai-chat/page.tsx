@@ -94,7 +94,6 @@ export default function AIChatPage() {
       let fullContent = '';
       let thinkingContent = '';
       let finalContent = '';
-      let isInThinking = false;
       
       // 创建一个空的assistant消息
       const assistantMessageId = (Date.now() + 1).toString();
@@ -149,25 +148,16 @@ export default function AIChatPage() {
                   if (delta && delta.content) {
                     fullContent += delta.content;
                     
-                    // 检查是否在思考状态
-                    if (delta.content.includes('我需要') || delta.content.includes('根据') || delta.content.includes('我应该') || 
-                        delta.content.includes('让我') || delta.content.includes('我会') || 
-                        (fullContent.length > 0 && !fullContent.includes('---'))) {
-                      isInThinking = true;
-                    }
-                    
                     // 检查是否有分隔线
-                    if (delta.content.includes('---')) {
-                      isInThinking = false;
+                    if (fullContent.includes('---')) {
                       // 分隔思考和最终内容
                       const parts = fullContent.split('---');
                       if (parts.length >= 2) {
                         thinkingContent = parts[0].trim();
                         finalContent = parts.slice(1).join('---').trim();
                       }
-                    } else if (isInThinking) {
-                      thinkingContent = fullContent;
                     } else {
+                      // 还没有分隔线，全部作为最终内容显示
                       finalContent = fullContent;
                     }
                     

@@ -650,19 +650,25 @@ export default function AIChatPage() {
             </div>
           </div>
           <div className="flex space-x-2">
-            <input
-              type="text"
+            <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              placeholder="输入消息..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
+              placeholder="输入消息...（Shift+Enter换行）"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               disabled={isLoading}
+              rows={2}
+              style={{ minHeight: '40px', maxHeight: '200px' }}
             />
             <button
               onClick={sendMessage}
               disabled={isLoading || !input.trim()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed self-end"
             >
               发送
             </button>

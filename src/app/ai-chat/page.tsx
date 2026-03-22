@@ -125,7 +125,11 @@ export default function AIChatPage() {
       let hasAddedAssistantMessage = false;
       let usesReasoningField = false; // 标记是否使用reasoning_content字段
       let segments: Array<{id: string, content: string}> = [];
-      let currentSubContent = '';
+      
+      // 新增变量：用于实时处理流式内容
+      let hasStartedMainContent = false; // 标记是否开始处理主要内容
+      let sh = ''; // 存储当前要展示到界面的文本
+      let shid = ''; // 存储当前展示的文本的div的id
       
       // 延迟1.5秒后再开始显示流式响应，让用户体验更自然
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -186,20 +190,29 @@ export default function AIChatPage() {
                     usesReasoningField = true;
                     thinkingContent += delta.reasoning_content;
                     
-                    // 有思考内容就添加assistant消息
+                    // A. 思考内容：显示在界面的思考过程中
                     addAssistantMessage();
-                    updateMessage(finalContent, thinkingContent);
+                    updateMessage('', thinkingContent, []);
                   }
                   
-                  // 处理回答内容
+                  // B. 主要内容：处理流式输出的主要内容
                   if (delta && delta.content) {
                     console.log('收到内容chunk:', delta.content);
+                    
                     if (usesReasoningField) {
-                      // 如果使用reasoning_content字段，content就是最终回复
-                      currentSubContent += delta.content;
-                      console.log('当前累积内容:', currentSubContent);
+                      // 使用reasoning_content字段的方式
+                      // 第一次获取到主要内容时，初始化变量
+                      if (!hasStartedMainContent) {
+                        hasStartedMainContent = true;
+                        shid = Date.now().toString();
+                        sh = '';
+                        console.log('🔄 开始处理主要内容');
+                      }
+                      // 拼接到sh
+                      sh += delta.content;
+                      console.log('当前sh内容:', sh);
                     } else {
-                      // 方式2: 使用文本标记方式
+                      // 使用文本标记方式
                       fullContent += delta.content;
                       console.log('当前fullContent:', fullContent);
                       
@@ -213,24 +226,64 @@ export default function AIChatPage() {
                           startIndex + THINKING_START_MARKER.length, 
                           endIndex
                         ).trim();
-                        currentSubContent = fullContent.substring(endIndex + THINKING_END_MARKER.length).trim();
+                        sh = fullContent.substring(endIndex + THINKING_END_MARKER.length).trim();
+                        
+                        // 第一次获取到主要内容时，初始化变量
+                        if (!hasStartedMainContent && sh) {
+                          hasStartedMainContent = true;
+                          shid = Date.now().toString();
+                          console.log('🔄 开始处理主要内容');
+                        }
                       } else if (startIndex !== -1) {
                         // 只有开始标识，没有结束标识，全部作为思考内容
                         thinkingContent = fullContent.substring(startIndex + THINKING_START_MARKER.length).trim();
-                        currentSubContent = '';
+                        sh = '';
                       } else {
-                        // 没有开始标识，全部作为最终内容
+                        // 没有开始标识，全部作为主要内容
                         thinkingContent = '';
-                        currentSubContent = fullContent.trim();
-                        console.log('提取最终内容后 currentSubContent 长度:', currentSubContent.length);
+                        sh = fullContent.trim();
+                        
+                        // 第一次获取到主要内容时，初始化变量
+                        if (!hasStartedMainContent && sh) {
+                          hasStartedMainContent = true;
+                          shid = Date.now().toString();
+                          console.log('🔄 开始处理主要内容');
+                        }
                       }
                     }
                     
-                    // 只在有内容时才更新UI（流式显示）
-                    if (currentSubContent || thinkingContent) {
+                    // 判断sh里面有没有<N>，如果有的话就拆出来进行分段
+                    if (sh.includes('<N>')) {
+                      console.log('✅ 发现<N>标识符，开始分段');
+                      const parts = sh.split('<N>');
+                      segments = [];
+                      
+                      for (const part of parts) {
+                        const trimmedPart = part.trim();
+                        if (trimmedPart) {
+                          segments.push({
+                            id: Date.now().toString() + Math.random(),
+                            content: trimmedPart
+                          });
+                        }
+                      }
+                      
+                      console.log('- 分段完成，共', segments.length, '个分段');
+                      
+                      // 更新消息，显示分段内容
                       addAssistantMessage();
-                      // 这里传递空数组，因为分段处理在完成后进行
-                      updateMessage(currentSubContent, thinkingContent, []);
+                      updateMessage('', thinkingContent, segments);
+                      
+                      // 清空sh，因为内容已经保存到segments中了
+                      sh = '';
+                      // 更新shid
+                      shid = Date.now().toString();
+                    } else {
+                      // 没有<N>标识符，直接更新显示sh的内容
+                      if (hasStartedMainContent && sh) {
+                        addAssistantMessage();
+                        updateMessage(sh, thinkingContent, []);
+                      }
                     }
                   }
                   
@@ -244,6 +297,17 @@ export default function AIChatPage() {
               }
             }
           }
+        }
+        
+        // 流式完成后，如果还有剩余内容没有分段（没有<N>），创建单个分段
+        if (hasStartedMainContent && sh && !sh.includes('<N>') && segments.length === 0) {
+          console.log('🔄 流式完成，创建最后一个分段');
+          segments.push({
+            id: shid,
+            content: sh.trim()
+          });
+          addAssistantMessage();
+          updateMessage('', thinkingContent, segments);
         }
       }
       
@@ -385,6 +449,56 @@ export default function AIChatPage() {
                             {message.segments && message.segments.length > 0 ? (
                               <>
                                 {message.segments.map((segment, index) => (
+                                  <div key={segment.id} className={index > 0 ? 'mt-4 pt-4 border-t border-gray-200' : ''}>
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                      {segment.content}
+                                    </ReactMarkdown>
+                                    
+                                    {/* 只在最后一个分段显示时间和模型信息 */}
+                                    {index === (message.segments?.length || 1) - 1 && (
+                                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
+                                        <p className="text-xs opacity-70">
+                                          {message.timestamp.toLocaleTimeString()}
+                                          {message.model && ` · ${message.model}`}
+                                        </p>
+                                        <button
+                                          onClick={() => {
+                                            const allContent = (message.segments || []).map(s => s.content).join('\n\n');
+                                            navigator.clipboard.writeText(allContent);
+                                          }}
+                                          className="text-xs opacity-50 hover:opacity-100"
+                                          title="复制全部内容"
+                                        >
+                                          📋
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </>
+                            ) : (
+                              /* 单段式对话显示 */
+                              <>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                  {message.content}
+                                </ReactMarkdown>
+                                
+                                {/* 显示时间和模型信息 */}
+                                <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
+                                  <p className="text-xs opacity-70">
+                                    {message.timestamp.toLocaleTimeString()}
+                                    {message.model && ` · ${message.model}`}
+                                  </p>
+                                  <button
+                                    onClick={() => copyToClipboard(message.content)}
+                                    className="text-xs opacity-50 hover:opacity-100"
+                                    title="复制内容"
+                                  >
+                                    📋
+                                  </button>
+                                </div>
+                              </>
+                            )}
                           </div>
                         </>
                       ) : (

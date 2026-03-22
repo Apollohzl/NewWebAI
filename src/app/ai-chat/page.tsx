@@ -98,22 +98,14 @@ export default function AIChatPage() {
       let fullContent = '';
       let thinkingContent = '';
       let finalContent = '';
+      let hasAddedAssistantMessage = false;
       
-      // 创建一个空的assistant消息
-      const assistantMessageId = (Date.now() + 1).toString();
-      const assistantMessage: Message = {
-        id: assistantMessageId,
-        role: 'assistant',
-        content: '',
-        thinking: '',
-        timestamp: new Date(),
-        model: currentModel
-      };
-      
-      const messagesWithAssistant = [...newMessages, assistantMessage];
-      setMessages(messagesWithAssistant);
+      // 延迟1.5秒后再开始显示流式响应，让用户体验更自然
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       if (reader) {
+        const assistantMessageId = (Date.now() + 1).toString();
+        
         const updateMessage = (content: string, thinking?: string) => {
           setMessages(prev => 
             prev.map(msg => 
@@ -124,8 +116,20 @@ export default function AIChatPage() {
           );
         };
 
-        // 延迟1.5秒后再开始显示流式响应，让用户体验更自然
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        const addAssistantMessage = () => {
+          if (!hasAddedAssistantMessage) {
+            const assistantMessage: Message = {
+              id: assistantMessageId,
+              role: 'assistant',
+              content: finalContent,
+              thinking: thinkingContent,
+              timestamp: new Date(),
+              model: currentModel
+            };
+            setMessages(prev => [...prev, assistantMessage]);
+            hasAddedAssistantMessage = true;
+          }
+        };
 
         while (true) {
           const { done, value } = await reader.read();
@@ -173,7 +177,11 @@ export default function AIChatPage() {
                       finalContent = fullContent.trim();
                     }
                     
-                    updateMessage(finalContent, thinkingContent);
+                    // 只有在有内容时才添加assistant消息
+                    if (finalContent || thinkingContent) {
+                      addAssistantMessage();
+                      updateMessage(finalContent, thinkingContent);
+                    }
                   }
                   
                   // 检查是否完成
@@ -189,8 +197,8 @@ export default function AIChatPage() {
         }
       }
       
-      // 如果内容为空，添加错误消息
-      if (!finalContent) {
+      // 如果没有添加任何assistant消息且内容为空，添加错误消息
+      if (!hasAddedAssistantMessage && !finalContent && !thinkingContent) {
         const errorMessage: Message = {
           id: (Date.now() + 2).toString(),
           role: 'assistant',

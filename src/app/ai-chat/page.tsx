@@ -7,8 +7,8 @@ import remarkGfm from 'remark-gfm';
 import AdComponent from '@/components/AdComponent';
 
 // 🔧 思考内容标识符配置 - 在这里修改思考内容的开始和结束标识
-const THINKING_START_MARKER = '思考过程';  // 思考内容的开始标识
-const THINKING_END_MARKER = '---';         // 思考内容的结束标识（之后的内容为最终回复）
+const THINKING_START_MARKER = '<think>';  // 思考内容的开始标识
+const THINKING_END_MARKER = '</think>';         // 思考内容的结束标识（之后的内容为最终回复）
 
 interface Message {
   id: string;

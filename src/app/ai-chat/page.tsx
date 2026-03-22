@@ -86,7 +86,7 @@ export default function AIChatPage() {
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input.trim()+"\n**系统级数据**:Time:"+Date.now().toString()+"**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端只会使用一个小卡片显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多个小卡片，模拟更真实的AI聊天，注意要合理分段。\n**新功能-AI图片生成**：用户可以让你绘画，你要理解用户的绘画要求然后使用<P>标识符绘画。<P>标识符使用方法：<P|'这里是生成的图片的画面描述提示词'|'这里是negative_prompt的内容'|'这是AI绘画模型选择【gptimage，flux，zimage，klein，imagen-4，flux-2-dev，grok-imagine，dirtberry，dirtberry-pro】'|'图片高度x图片宽度选择【1024x1024，1280x720，720x1280，1024x768，768x1024】'>。\n\n**重要规则**：在使用<P>标识符前后必须都加上<N>标识符！例如：<N><P|'一只可爱的小猫'|'ugly, blurry'|'flux'|'1024x1024'P><N>这样可以确保图片在独立的卡片中显示，不影响其他内容的显示。",
+      content: input.trim(),
       timestamp: new Date(),
       model: currentModel
     };

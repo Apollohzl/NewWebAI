@@ -278,7 +278,7 @@ export default function AIDrawPage() {
                 rows={4}
               />
               <p className="text-xs text-gray-500 mt-1">
-                支持中文输入，将自动翻译成英文
+                由https://enter.pollinations.ai/提供服务
               </p>
             </div>
 

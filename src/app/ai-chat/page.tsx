@@ -89,7 +89,7 @@ export default function AIChatPage() {
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input.trim()+"\n**系统级数据**:Time:"+Date.now().toString()+"**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端只会使用一个小卡片显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多个小卡片，模拟更真实的AI聊天，注意要合理分段。\n**新功能-AI图片生成**：用户可以让你绘画，你要理解用户的绘画要求然后使用<P>标识符绘画。<P>标识符使用方法：<P|'这里是生成的图片的画面描述提示词'|'这里是negative_prompt的内容'|'这是AI绘画模型选择【gptimage，flux，zimage，klein，imagen-4，flux-2-dev，grok-imagine，dirtberry，dirtberry-pro】'|'图片高度x图片宽度选择【1024x1024，1280x720，720x1280，1024x768，768x1024】'>。\n\n**重要规则**：在使用<P>标识符前后必须都加上<N>标识符！例如：<N><P|'一只可爱的小猫'|'ugly, blurry'|'flux'|'1024x1024'><N>这样可以确保图片在独立的卡片中显示，不影响其他内容的显示。",
+      content: input.trim()+"\n**系统级数据**:Time:"+Date.now().toString()+"**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端只会使用一个小卡片显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多个小卡片，模拟更真实的AI聊天，注意要合理分段。\n**新功能-AI图片生成**：用户可以让你绘画，你要理解用户的绘画要求然后使用<P>标识符绘画。<P>标识符使用方法：<P|'这里是生成的图片的画面描述提示词'|'这里是negative_prompt的内容'|'这是AI绘画模型选择【gptimage，flux，zimage，klein，imagen-4，flux-2-dev，grok-imagine，dirtberry，dirtberry-pro】'|'图片高度x图片宽度选择【1024x1024，1280x720，720x1280，1024x768，768x1024】'>。\n\n**重要规则**：在使用<P>标识符前后必须都加上<N>标识符！例如：<N><P|'一只可爱的小猫'|'ugly, blurry'|'flux'|'1024x1024'P><N>这样可以确保图片在独立的卡片中显示，不影响其他内容的显示。",
       timestamp: new Date(),
       model: currentModel
     };
@@ -110,7 +110,7 @@ export default function AIChatPage() {
           model: currentModel,
           temperature: temperature,
           max_tokens: maxTokens,
-          system:"**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端只会使用一个小卡片显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多个小卡片，模拟更真实的AI聊天，注意要合理分段。\n**新功能-AI图片生成**：用户可以让你绘画，你要理解用户的绘画要求然后使用<P>标识符绘画。<P>标识符使用方法：<P|'这里是生成的图片的画面描述提示词'|'这里是negative_prompt的内容'|'这是AI绘画模型选择【gptimage，flux，zimage，klein，imagen-4，flux-2-dev，grok-imagine，dirtberry，dirtberry-pro】'|'图片高度x图片宽度选择【1024x1024，1280x720，720x1280，1024x768，768x1024】'>。\n\n**重要规则**：在使用<P>标识符前后必须都加上<N>标识符！例如：<N><P|'一只可爱的小猫'|'ugly, blurry'|'flux'|'1024x1024'><N>这样可以确保图片在独立的卡片中显示，不影响其他内容的显示。",
+          system:"**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端只会使用一个小卡片显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多个小卡片，模拟更真实的AI聊天，注意要合理分段。\n**新功能-AI图片生成**：用户可以让你绘画，你要理解用户的绘画要求然后使用<P>标识符绘画。<P>标识符使用方法：<P|'这里是生成的图片的画面描述提示词'|'这里是negative_prompt的内容'|'这是AI绘画模型选择【gptimage，flux，zimage，klein，imagen-4，flux-2-dev，grok-imagine，dirtberry，dirtberry-pro】'|'图片高度x图片宽度选择【1024x1024，1280x720，720x1280，1024x768，768x1024】'>。\n\n**重要规则**：在使用<P>标识符前后必须都加上<N>标识符！例如：<N><P|'一只可爱的小猫'|'ugly, blurry'|'flux'|'1024x1024'P><N>这样可以确保图片在独立的卡片中显示，不影响其他内容的显示。",
           stream: true
         })
       });
@@ -233,94 +233,64 @@ export default function AIChatPage() {
                     // 🔧 重要：先处理<P>标识符，再处理<N>标识符
                     // 这样可以确保<P>标签不会被<N>处理破坏
                     
-                    // 处理<P>标识符（AI图片生成）
-                    console.log('🔍 检查<P>标识符前完整状态:');
-                    console.log('- currentSubContent 长度:', currentSubContent.length);
-                    console.log('- currentSubContent 前100字符:', currentSubContent.substring(0, 1000));
-                    console.log('- currentSubContent 后100字符:', currentSubContent.substring(Math.max(0, currentSubContent.length - 1000)));
+                    // 处理<P>标识符（AI图片生成）- 使用新的逻辑
+                    console.log('🔍 开始处理<P>标识符...');
+                    console.log('- 当前内容长度:', currentSubContent.length);
                     
-                    // 详细的字符检查
-                    const pIndex = currentSubContent.indexOf('<P');
-                    console.log('- 找到<P位置:', pIndex);
-                    if (pIndex !== -1) {
-                      console.log('- <P|>附近字符:', Array.from(currentSubContent.substring(pIndex, pIndex + 5)).map(c => `${c}(${c.charCodeAt(0)})`).join(' '));
-                    }
+                    // 新格式：<N><P|'prompt'|'negative'|'model'|'size'P><N>
+                    // 逻辑：获取所有<N>之间的内容，检查是否包含<P和P>，然后提取<P和P>之间的内容
                     
-                    // 检查不同的编码形式
-                    console.log('- 包含<P|>:', currentSubContent.includes('<P|>'));
-                    console.log('- 包含&lt;P|&gt;:', currentSubContent.includes('&lt;P|&gt;'));
-                    console.log('- 包含转义形式:', currentSubContent.includes('<P'));
+                    const imageCommands = [];
                     
-                    // 尝试多种格式匹配
-                    let pTagMatch = null;
+                    // 分割所有<N>之间的内容
+                    const nSegments = currentSubContent.split('<N>');
+                    console.log('- 找到<N>分段数:', nSegments.length);
                     
-                    // 标准格式：<P|'prompt''negative''model''size'>
-                    pTagMatch = currentSubContent.match(/<P\|'([^']*)'([^']*)'([^']*)'([^']*)'>/);
-                    if (pTagMatch) console.log('✅ 匹配到标准格式');
-                    
-                    // HTML转义格式：&lt;P|...&gt;
-                    if (!pTagMatch) {
-                      pTagMatch = currentSubContent.match(/&lt;P\|'([^']*)'([^']*)'([^']*)'([^']*)'&gt;/);
-                      if (pTagMatch) console.log('✅ 匹配到HTML转义格式');
-                    }
-                    
-                    // 宽松格式1：<P|'prompt'negative''model''size'>
-                    if (!pTagMatch) {
-                      pTagMatch = currentSubContent.match(/<P\|'([^']*)'([^']+)'([^']+)'([^']+)'>/);
-                      if (pTagMatch) console.log('匹配到宽松格式1');
-                    }
-                    
-                    // 宽松格式2：使用[\s\S]匹配任意字符包括换行符
-                    if (!pTagMatch) {
-                      pTagMatch = currentSubContent.match(/<P\|'([^']*)'([^']*)'([^']*)'([^']*)'>/);
-                      if (pTagMatch) console.log('✅ 匹配到宽松格式2');
-                    }
-                    
-                    // 手动解析后备方案
-                    if (!pTagMatch) {
-                      console.log('🔧 尝试手动解析...');
-                      const pStart = currentSubContent.indexOf('<P');
-                      if (pStart !== -1) {
-                        const afterP = currentSubContent.substring(pStart);
-                        console.log('- <P之后的内容:', afterP.substring(0, 50));
+                    for (let i = 0; i < nSegments.length; i++) {
+                      const segment = nSegments[i].trim();
+                      console.log(`- 检查分段${i}:`, segment.substring(0, 50));
+                      
+                      // 检查是否包含<P和P>
+                      if (segment.includes('<P') && segment.includes('P>')) {
+                        const pStart = segment.indexOf('<P');
+                        const pEnd = segment.indexOf('P>', pStart);
                         
-                        // 尝试找到完整的结束 >
-                        let quoteCount = 0;
-                        let endPos = -1;
-                        for (let i = pStart; i < currentSubContent.length; i++) {
-                          if (currentSubContent[i] === "'") {
-                            quoteCount++;
-                          }
-                          if (currentSubContent[i] === '>' && quoteCount >= 8) {
-                            endPos = i;
-                            break;
-                          }
-                        }
-                        
-                        if (endPos !== -1) {
-                          const pTagContent = currentSubContent.substring(pStart, endPos + 1);
-                          console.log('- 手动找到<P>标签:', pTagContent);
+                        if (pStart !== -1 && pEnd !== -1) {
+                          const pContent = segment.substring(pStart, pEnd + 2);
+                          console.log('- 找到<P内容:', pContent);
                           
-                          // 手动提取参数
-                          const matches = pTagContent.match(/'([^']*)'/g);
-                          if (matches && matches.length >= 4) {
-                            const params = matches.map(m => m.slice(1, -1));
-                            pTagMatch = [pTagContent, ...params];
-                            console.log('- 手动提取参数成功:', params);
+                          // 正则表达式验证和提取参数
+                          const pMatch = pContent.match(/<P\|'([^']*)'([^']*)'([^']*)'([^']*)'P>/);
+                          if (pMatch) {
+                            const [, prompt, negativePrompt, model, size] = pMatch;
+                            console.log('✅ 成功提取参数:', { prompt: prompt.substring(0, 30) + '...', negativePrompt: negativePrompt.substring(0, 20) + '...', model, size });
+                            
+                            // 解析尺寸
+                            const [width, height] = size.split('x').map(Number);
+                            
+                            imageCommands.push({
+                              prompt,
+                              negativePrompt,
+                              model,
+                              width,
+                              height,
+                              fullMatch: pMatch[0]
+                            });
+                            
+                            // 从currentSubContent中移除这个完整的<P>命令
+                            currentSubContent = currentSubContent.replace(`<N>${pContent}<N>`, '');
+                          } else {
+                            console.log('❌ 正则匹配失败，内容:', pContent);
                           }
                         }
                       }
                     }
                     
-                    console.log('最终匹配结果:', pTagMatch);
+                    console.log('- 总共找到图片命令数:', imageCommands.length);
                     
-                    if (pTagMatch) {
-                      console.log("✅ 找到<P>标识符:", pTagMatch);
-                      const [, prompt, negativePrompt, model, size] = pTagMatch;
-                      const [width, height] = size.split('x').map(Number);
-                      
-                      // 移除<P>标识符
-                      currentSubContent = currentSubContent.replace(pTagMatch[0], '');
+                    // 处理所有找到的图片命令
+                    for (const cmd of imageCommands) {
+                      const { prompt, negativePrompt, model, width, height } = cmd;
                       
                       // 创建图片子消息
                       const imageSubMessage = {

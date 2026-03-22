@@ -89,7 +89,7 @@ export default function AIChatPage() {
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input.trim()+"\n**系统级数据**:Time:"+Date.now().toString()+"system核心：**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端只会使用一个小卡片显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多个小卡片，模拟更真实的AI聊天，注意要合理分段。\n**新功能-AI图片生成**：用户可以让你绘画，你要理解用户的绘画要求然后使用<P>标识符绘画，注意调用<P>标识符绘画一次图片生成将会在一个小卡片内，所以你无需添加<N>标识符。<P>标识符使用方法：<P'这里是生成的图片的画面描述提示词''这里是negative_prompt的内容''这是AI绘画模型选择【gptimage，flux，zimage，klein，imagen-4，flux-2-dev，grok-imagine，dirtberry，dirtberry-pro】''图片高度x图片宽度选择【1024x1024，1280x720，720x1280，1024x768，768x1024】'>",
+      content: input.trim()+"\n**系统级数据**:Time:"+Date.now().toString()+"system核心：**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端只会使用一个小卡片显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多个小卡片，模拟更真实的AI聊天，注意要合理分段。\n**新功能-AI图片生成**：用户可以让你绘画，你要理解用户的绘画要求然后使用<P>标识符绘画，注意调用<P>标识符绘画一次图片生成将会在一个小卡片内，所以你无需添加<N>标识符。<P>标识符使用方法：<P|'这里是生成的图片的画面描述提示词'|'这里是negative_prompt的内容'|'这是AI绘画模型选择【gptimage，flux，zimage，klein，imagen-4，flux-2-dev，grok-imagine，dirtberry，dirtberry-pro】'|'图片高度x图片宽度选择【1024x1024，1280x720，720x1280，1024x768，768x1024】'>",
       timestamp: new Date(),
       model: currentModel
     };
@@ -110,7 +110,7 @@ export default function AIChatPage() {
           model: currentModel,
           temperature: temperature,
           max_tokens: maxTokens,
-          system:"**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端只会使用一个小卡片显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多个小卡片，模拟更真实的AI聊天，注意要合理分段。\n**新功能-AI图片生成**：用户可以让你绘画，你要理解用户的绘画要求然后使用<P>标识符绘画，注意调用<P>标识符绘画一次图片生成将会在一个小卡片内，所以你无需添加<N>标识符。<P>标识符使用方法：<P'这里是生成的图片的画面描述提示词''这里是negative_prompt的内容''这是AI绘画模型选择【gptimage，flux，zimage，klein，imagen-4，flux-2-dev，grok-imagine，dirtberry，dirtberry-pro】''图片高度x图片宽度选择【1024x1024，1280x720，720x1280，1024x768，768x1024】'>",
+          system:"**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端只会使用一个小卡片显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多个小卡片，模拟更真实的AI聊天，注意要合理分段。\n**新功能-AI图片生成**：用户可以让你绘画，你要理解用户的绘画要求然后使用<P>标识符绘画，注意调用<P>标识符绘画一次图片生成将会在一个小卡片内，所以你无需添加<N>标识符。<P>标识符使用方法：<P|'这里是生成的图片的画面描述提示词'|'这里是negative_prompt的内容'|'这是AI绘画模型选择【gptimage，flux，zimage，klein，imagen-4，flux-2-dev，grok-imagine，dirtberry，dirtberry-pro】'|'图片高度x图片宽度选择【1024x1024，1280x720，720x1280，1024x768，768x1024】'>",
           stream: true
         })
       });
@@ -239,7 +239,7 @@ export default function AIChatPage() {
                     }
                     
                     // 处理<P>标识符（AI图片生成）
-                    const pTagMatch = currentSubContent.match(/<P'([^']*)'([^']*)'([^']*)'([^']*)'>/);
+                    const pTagMatch = currentSubContent.match(/<P\|'([^']*)'([^']*)'([^']*)'([^']*)'>/);
                     if (pTagMatch) {
                       const [, prompt, negativePrompt, model, size] = pTagMatch;
                       const [width, height] = size.split('x').map(Number);

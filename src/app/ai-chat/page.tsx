@@ -6,6 +6,10 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import AdComponent from '@/components/AdComponent';
 
+// 🔧 思考内容标识符配置 - 在这里修改思考内容的开始和结束标识
+const THINKING_START_MARKER = '思考过程';  // 思考内容的开始标识
+const THINKING_END_MARKER = '---';         // 思考内容的结束标识（之后的内容为最终回复）
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -148,18 +152,25 @@ export default function AIChatPage() {
                   if (delta && delta.content) {
                     fullContent += delta.content;
                     
-                    // 检查是否有分隔线
-                    if (fullContent.includes('---')) {
-                      // 分隔思考和最终内容
-                      const parts = fullContent.split('---');
-                      if (parts.length >= 2) {
-                        thinkingContent = parts[0].trim();
-                        finalContent = parts.slice(1).join('---').trim();
-                      }
-                    } else {
-                      // 还没有分隔线，全部作为思考内容显示
-                      thinkingContent = fullContent;
+                    // 提取思考内容和最终回复
+                    const startIndex = fullContent.indexOf(THINKING_START_MARKER);
+                    const endIndex = fullContent.indexOf(THINKING_END_MARKER);
+                    
+                    if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+                      // 找到了开始和结束标识
+                      thinkingContent = fullContent.substring(
+                        startIndex + THINKING_START_MARKER.length, 
+                        endIndex
+                      ).trim();
+                      finalContent = fullContent.substring(endIndex + THINKING_END_MARKER.length).trim();
+                    } else if (startIndex !== -1) {
+                      // 只有开始标识，没有结束标识，全部作为思考内容
+                      thinkingContent = fullContent.substring(startIndex + THINKING_START_MARKER.length).trim();
                       finalContent = '';
+                    } else {
+                      // 没有开始标识，全部作为最终内容
+                      thinkingContent = '';
+                      finalContent = fullContent.trim();
                     }
                     
                     updateMessage(finalContent, thinkingContent);

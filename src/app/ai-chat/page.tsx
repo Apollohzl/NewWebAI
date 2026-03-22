@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -413,22 +413,83 @@ export default function AIChatPage() {
           ) : (
             <div className="flex-1 overflow-y-auto flex flex-col-reverse">
               <div className="space-y-4 pb-24">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
+                {messages.map((message) => {
+                  // 如果是assistant消息且有segments，将思考内容和每个分段渲染为独立的消息卡片
+                  if (message.role === 'assistant' && message.segments && message.segments.length > 0) {
+                    return (
+                      <React.Fragment key={message.id}>
+                        {/* 思考内容作为第一个独立卡片 */}
+                        {message.thinking && (
+                          <div className="flex justify-start">
+                            <div className="max-w-[70%] rounded-lg relative bg-white border border-gray-200">
+                              <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg">
+                                <div className="text-xs text-gray-500 mb-2 font-semibold">🤔 思考过程</div>
+                                <ReactMarkdown 
+                                  remarkPlugins={[remarkGfm]} 
+                                  components={{
+                                    p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2" {...props} />,
+                                    li: ({node, ...props}) => <li className="mb-1 text-sm text-gray-700" {...props} />,
+                                    code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
+                                  }}
+                                >
+                                  {message.thinking}
+                                </ReactMarkdown>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {/* 每个分段作为独立卡片 */}
+                        {message.segments.map((segment, index) => (
+                          <div key={segment.id} className="flex justify-start">
+                            <div className="max-w-[70%] rounded-lg relative bg-white border border-gray-200">
+                              <div className="p-3 rounded-lg">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                  {segment.content}
+                                </ReactMarkdown>
+                                
+                                {/* 只在最后一个分段显示时间和模型信息 */}
+                                {index === (message.segments?.length || 0) - 1 && (
+                                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
+                                    <p className="text-xs opacity-70">
+                                      {message.timestamp.toLocaleTimeString()}
+                                      {message.model && ` · ${message.model}`}
+                                    </p>
+                                    <button
+                                      onClick={() => {
+                                        const allContent = (message.segments || []).map(s => s.content).join('\n\n');
+                                        navigator.clipboard.writeText(allContent);
+                                      }}
+                                      className="text-xs opacity-50 hover:opacity-100"
+                                      title="复制全部内容"
+                                    >
+                                      📋
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </React.Fragment>
+                    );
+                  }
+                  
+                  // 普通消息（用户消息或单段assistant消息）
+                  return (
                     <div
-                      className={`max-w-[70%] rounded-lg relative ${
-                        message.role === 'user'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-white border border-gray-200'
-                      }`}
+                      key={message.id}
+                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      {message.role === 'assistant' ? (
-                        <>
-                          {/* 思考内容板块 */}
-                          {message.thinking && (
+                      <div
+                        className={`max-w-[70%] rounded-lg relative ${
+                          message.role === 'user'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white border border-gray-200'
+                        }`}
+                      >
+                        {message.role === 'assistant' && message.thinking ? (
+                          <>
+                            {/* 思考内容板块 */}
                             <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg">
                               <div className="text-xs text-gray-500 mb-2 font-semibold">🤔 思考过程</div>
                               <ReactMarkdown 
@@ -442,73 +503,37 @@ export default function AIChatPage() {
                                 {message.thinking}
                               </ReactMarkdown>
                             </div>
-                          )}
-                          {/* 最终回复内容 - 支持多段式对话 */}
-                          <div className={`p-3 ${message.thinking ? '' : 'rounded-lg'}`}>
-                            {/* 显示多段式对话 */}
-                            {message.segments && message.segments.length > 0 ? (
-                              <>
-                                {message.segments.map((segment, index) => (
-                                  <div key={segment.id} className={index > 0 ? 'mt-4 pt-4 border-t border-gray-200' : ''}>
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                      {segment.content}
-                                    </ReactMarkdown>
-                                    
-                                    {/* 只在最后一个分段显示时间和模型信息 */}
-                                    {index === (message.segments?.length || 1) - 1 && (
-                                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
-                                        <p className="text-xs opacity-70">
-                                          {message.timestamp.toLocaleTimeString()}
-                                          {message.model && ` · ${message.model}`}
-                                        </p>
-                                        <button
-                                          onClick={() => {
-                                            const allContent = (message.segments || []).map(s => s.content).join('\n\n');
-                                            navigator.clipboard.writeText(allContent);
-                                          }}
-                                          className="text-xs opacity-50 hover:opacity-100"
-                                          title="复制全部内容"
-                                        >
-                                          📋
-                                        </button>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </>
-                            ) : (
-                              /* 单段式对话显示 */
-                              <>
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                  {message.content}
-                                </ReactMarkdown>
-                                
-                                {/* 显示时间和模型信息 */}
-                                <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
-                                  <p className="text-xs opacity-70">
-                                    {message.timestamp.toLocaleTimeString()}
-                                    {message.model && ` · ${message.model}`}
-                                  </p>
-                                  <button
-                                    onClick={() => copyToClipboard(message.content)}
-                                    className="text-xs opacity-50 hover:opacity-100"
-                                    title="复制内容"
-                                  >
-                                    📋
-                                  </button>
-                                </div>
-                              </>
-                            )}
+                            {/* 最终回复内容 */}
+                            <div className="p-3 rounded-lg">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {message.content}
+                              </ReactMarkdown>
+                              
+                              {/* 显示时间和模型信息 */}
+                              <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
+                                <p className="text-xs opacity-70">
+                                  {message.timestamp.toLocaleTimeString()}
+                                  {message.model && ` · ${message.model}`}
+                                </p>
+                                <button
+                                  onClick={() => copyToClipboard(message.content)}
+                                  className="text-xs opacity-50 hover:opacity-100"
+                                  title="复制内容"
+                                >
+                                  📋
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="p-3">
+                            <p className="text-sm">{message.content}</p>
                           </div>
-                        </>
-                      ) : (
-                        <div className="p-3">
-                          <p className="text-sm">{message.content}</p>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {isLoading && (
                   <div className="flex justify-start">
                     <div className="bg-gray-100 text-black p-3 rounded-lg">

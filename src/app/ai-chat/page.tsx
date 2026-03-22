@@ -129,6 +129,7 @@ export default function AIChatPage() {
       let usesReasoningField = false; // 标记是否使用reasoning_content字段
       let subMessages: Array<{id: string, content: string, type: 'text' | 'image', imageData?: string, imageError?: string}> = [];
       let currentSubContent = '';
+      let lastProcessedLength = 0; // 记录上次处理的长度，确保不重复处理
       
       // 延迟1.5秒后再开始显示流式响应，让用户体验更自然
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -196,12 +197,15 @@ export default function AIChatPage() {
                   
                   // 处理回答内容
                   if (delta && delta.content) {
+                    console.log('收到内容chunk:', delta.content);
                     if (usesReasoningField) {
                       // 如果使用reasoning_content字段，content就是最终回复
                       currentSubContent += delta.content;
+                      console.log('当前累积内容:', currentSubContent);
                     } else {
                       // 方式2: 使用文本标记方式
                       fullContent += delta.content;
+                      console.log('当前fullContent:', fullContent);
                       
                       // 提取思考内容和最终回复
                       const startIndex = fullContent.indexOf(THINKING_START_MARKER);
@@ -239,8 +243,14 @@ export default function AIChatPage() {
                     }
                     
                     // 处理<P>标识符（AI图片生成）
+                    console.log('检查<P>标识符, 当前内容长度:', currentSubContent.length, '内容:', currentSubContent.substring(currentSubContent.length - 10));
                     // 尝试匹配标准格式：<P|'prompt''negative''model''size'>
                     let pTagMatch = currentSubContent.match(/<P\|'([^']*)'([^']*)'([^']*)'([^']*)'>/);
+                    if (!pTagMatch) {
+                      // 尝试匹配宽松格式：<P|'prompt'negative''model''size'>
+                      pTagMatch = currentSubContent.match(/<P\|'([^']*)'([^']+)'([^']+)'([^']+)'>/);
+                    }
+                    console.log('正则匹配结果:', pTagMatch);
                     if (!pTagMatch) {
                       // 尝试匹配宽松格式：<P|'prompt'negative''model''size'>
                       pTagMatch = currentSubContent.match(/<P\|'([^']*)'([^']+)'([^']+)'([^']+)'>/);

@@ -157,8 +157,9 @@ export default function AIChatPage() {
                         finalContent = parts.slice(1).join('---').trim();
                       }
                     } else {
-                      // 还没有分隔线，全部作为最终内容显示
-                      finalContent = fullContent;
+                      // 还没有分隔线，全部作为思考内容显示
+                      thinkingContent = fullContent;
+                      finalContent = '';
                     }
                     
                     updateMessage(finalContent, thinkingContent);

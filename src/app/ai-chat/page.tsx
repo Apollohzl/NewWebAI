@@ -17,13 +17,10 @@ interface Message {
   thinking?: string;
   timestamp: Date;
   model?: string;
-  // 多段式对话支持
-  subMessages?: Array<{
+  // 多段式对话支持 - 只存储文本分段
+  segments?: Array<{
     id: string;
     content: string;
-    type: 'text' | 'image';
-    imageData?: string;
-    imageError?: string;
   }>;
 }
 
@@ -127,9 +124,8 @@ export default function AIChatPage() {
       let finalContent = '';
       let hasAddedAssistantMessage = false;
       let usesReasoningField = false; // 标记是否使用reasoning_content字段
-      let subMessages: Array<{id: string, content: string, type: 'text' | 'image', imageData?: string, imageError?: string}> = [];
+      let segments: Array<{id: string, content: string}> = [];
       let currentSubContent = '';
-      let lastProcessedLength = 0; // 记录上次处理的长度，确保不重复处理
       
       // 延迟1.5秒后再开始显示流式响应，让用户体验更自然
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -137,11 +133,11 @@ export default function AIChatPage() {
       if (reader) {
         const assistantMessageId = (Date.now() + 1).toString();
         
-        const updateMessage = (content: string, thinking?: string, subs?: Array<{id: string, content: string, type: 'text' | 'image', imageData?: string, imageError?: string}>) => {
+        const updateMessage = (content: string, thinking?: string, segs?: Array<{id: string, content: string}>) => {
           setMessages(prev => 
             prev.map(msg => 
               msg.id === assistantMessageId 
-                ? { ...msg, content, thinking, subMessages: subs } 
+                ? { ...msg, content, thinking, segments: segs } 
                 : msg
             )
           );
@@ -229,177 +225,42 @@ export default function AIChatPage() {
                         console.log('提取最终内容后 currentSubContent 长度:', currentSubContent.length);
                       }
                     }
-                    
-                    // 🔧 重要：先处理<P>标识符，再处理<N>标识符
-                    // 这样可以确保<P>标签不会被<N>处理破坏
-                    
-                    // 处理<P>标识符（AI图片生成）- 使用新的逻辑
-                    console.log('🔍 开始处理<P>标识符...');
-                    console.log('- 当前内容长度:', currentSubContent.length);
-                    
-                    // 新格式：<N><P|'prompt'|'negative'|'model'|'size'P><N>
-                    // 逻辑：获取所有<N>之间的内容，检查是否包含<P和P>，然后提取<P和P>之间的内容
-                    
-                    const imageCommands = [];
-                    
-                    // 分割所有<N>之间的内容
-                    const nSegments = currentSubContent.split('<N>');
-                    console.log('- 找到<N>分段数:', nSegments.length);
-                    
-                    for (let i = 0; i < nSegments.length; i++) {
-                      const segment = nSegments[i].trim();
-                      console.log(`- 检查分段${i}:`, segment.substring(0, 50));
-                      
-                      // 检查是否包含<P和P>
-                      if (segment.includes('<P') && segment.includes('P>')) {
-                        const pStart = segment.indexOf('<P');
-                        const pEnd = segment.indexOf('P>', pStart);
-                        
-                        if (pStart !== -1 && pEnd !== -1) {
-                          const pContent = segment.substring(pStart, pEnd + 2);
-                          console.log('- 找到<P内容:', pContent);
-                          
-                          // 正则表达式验证和提取参数
-                          const pMatch = pContent.match(/<P\|'([^']*)'([^']*)'([^']*)'([^']*)'P>/);
-                          if (pMatch) {
-                            const [, prompt, negativePrompt, model, size] = pMatch;
-                            console.log('✅ 成功提取参数:', { prompt: prompt.substring(0, 30) + '...', negativePrompt: negativePrompt.substring(0, 20) + '...', model, size });
-                            
-                            // 解析尺寸
-                            const [width, height] = size.split('x').map(Number);
-                            
-                            imageCommands.push({
-                              prompt,
-                              negativePrompt,
-                              model,
-                              width,
-                              height,
-                              fullMatch: pMatch[0]
-                            });
-                            
-                            // 从currentSubContent中移除这个完整的<P>命令
-                            currentSubContent = currentSubContent.replace(`<N>${pContent}<N>`, '');
-                          } else {
-                            console.log('❌ 正则匹配失败，内容:', pContent);
-                          }
-                        }
-                      }
-                    }
-                    
-                    console.log('- 总共找到图片命令数:', imageCommands.length);
-                    
-                    // 处理所有找到的图片命令
-                    for (const cmd of imageCommands) {
-                      const { prompt, negativePrompt, model, width, height } = cmd;
-                      
-                      // 创建图片子消息
-                      const imageSubMessage = {
-                        id: Date.now().toString() + Math.random(),
-                        content: '',
-                        type: 'image' as const,
-                        imageData: undefined as string | undefined,
-                        imageError: undefined as string | undefined
-                      };
-                      subMessages.push(imageSubMessage);
-                      
-                      // 异步请求AI图片生成
-                      fetch('https://hzliflow.ken520.top/api/ai-image', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                          prompt: prompt,
-                          model: model,
-                          width: width,
-                          height: height,
-                          negative_prompt: negativePrompt,
-                          enhance: false,
-                          safe: false,
-                          quality: 'hd',
-                          transparent: false,
-                          seed: -1
-                        })
-                      })
-                      .then(res => res.json())
-                      .then(data => {
-                        if (data.data && data.data.imageData) {
-                          // 更新图片数据
-                          setMessages(prev => 
-                            prev.map(msg => 
-                              msg.id === assistantMessageId 
-                                ? { 
-                                    ...msg, 
-                                    subMessages: msg.subMessages?.map(sub => 
-                                      sub.id === imageSubMessage.id 
-                                        ? { ...sub, imageData: data.data.imageData } 
-                                        : sub
-                                    )
-                                  } 
-                                : msg
-                            )
-                          );
-                        } else {
-                          // 图片请求失败
-                          setMessages(prev => 
-                            prev.map(msg => 
-                              msg.id === assistantMessageId 
-                                ? { 
-                                    ...msg, 
-                                    subMessages: msg.subMessages?.map(sub => 
-                                      sub.id === imageSubMessage.id 
-                                        ? { ...sub, imageError: '图片请求失败：未知错误' } 
-                                        : sub
-                                    )
-                                  } 
-                                : msg
-                            )
-                          );
-                        }
-                      })
-                      .catch(error => {
-                        console.error('AI图片生成失败:', error);
-                        // 图片请求失败
-                        setMessages(prev => 
-                          prev.map(msg => 
-                            msg.id === assistantMessageId 
-                              ? { 
-                                  ...msg, 
-                                  subMessages: msg.subMessages?.map(sub => 
-                                    sub.id === imageSubMessage.id 
-                                      ? { ...sub, imageError: `图片请求失败：${error.message}` } 
-                                      : sub
-                                  )
-                                } 
-                              : msg
-                          )
-                        );
-                      });
-                    }
-                    
-                    // 处理<N>标识符（多段式对话）
-                    console.log('🔄 处理<N>标识符');
-                    console.log('- 处理前 currentSubContent 长度:', currentSubContent.length);
-                    while (currentSubContent.includes('<N>')) {
-                      const [before, after] = currentSubContent.split('<N>', 2);
-                      console.log('- 找到<N>，before长度:', before?.length, 'after长度:', after?.length);
-                      if (before) {
-                        subMessages.push({
-                          id: Date.now().toString() + Math.random(),
-                          content: before,
-                          type: 'text'
-                        });
-                      }
-                      currentSubContent = after || '';
-                      console.log('- 处理后 currentSubContent 长度:', currentSubContent.length);
-                    }
-                    
-                    finalContent = currentSubContent;
-                    
+                                        
+                                        // 处理<N>标识符（多段式对话）- 新的逻辑
+                                        console.log('🔄 处理<N>分段');
+                                        
+                                        // 将content按照<N>分割成多个segment
+                                        const segments: Array<{ id: string, content: string }> = [];
+                                        
+                                        if (currentSubContent.includes('<N>')) {
+                                          // 有<N>标识符，进行分段
+                                          const parts = currentSubContent.split('<N>');
+                                          for (const part of parts) {
+                                            const trimmedPart = part.trim();
+                                            if (trimmedPart) {
+                                              segments.push({
+                                                id: Date.now().toString() + Math.random(),
+                                                content: trimmedPart
+                                              });
+                                            }
+                                          }
+                                          console.log('- 分段完成，共', segments.length, '个分段');
+                                        } else {
+                                          // 没有<N>标识符，整个内容作为一个分段
+                                          segments.push({
+                                            id: Date.now().toString() + Math.random(),
+                                            content: currentSubContent.trim()
+                                          });
+                                          console.log('- 无<N>标识符，作为单个分段处理');
+                                        }
+                                        
+                                        // 清空currentSubContent，因为内容已经保存到segments中了
+                                        currentSubContent = '';
+                                        finalContent = '';                    
                     // 只有在有内容时才添加assistant消息
-                    if (finalContent || thinkingContent || subMessages.length > 0) {
+                    if (segments.length > 0 || thinkingContent) {
                       addAssistantMessage();
-                      updateMessage(finalContent, thinkingContent, subMessages);
+                      updateMessage(finalContent, thinkingContent, segments);
                     }
                   }
                   
@@ -548,104 +409,105 @@ export default function AIChatPage() {
                               </ReactMarkdown>
                             </div>
                           )}
-                          {/* 最终回复内容 */}
+                          {/* 最终回复内容 - 支持多段式对话 */}
                           <div className={`p-3 ${message.thinking ? '' : 'rounded-lg'}`}>
-                            {/* 显示主要内容 */}
-                            {message.content && (
-                              <ReactMarkdown 
-                                remarkPlugins={[remarkGfm]} 
-                                components={{
-                                  p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
-                                  h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
-                                  h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
-                                  h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
-                                  li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                                  code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
-                                  pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
-                                  blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
-                                  table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
-                                  th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
-                                  td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
-                                  a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
-                                  strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                                  em: ({node, ...props}) => <em className="italic" {...props} />,
-                                  ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                                  ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
-                                }}
-                              >
-                                {message.content}
-                              </ReactMarkdown>
-                            )}
-                            
-                            {/* 显示子消息（多段式对话和图片） */}
-                            {message.subMessages && message.subMessages.length > 0 && (
-                              <div className="mt-3 space-y-3">
-                                {message.subMessages.map((sub) => (
-                                  <div key={sub.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                                    {sub.type === 'text' ? (
-                                      <div className="p-3">
-                                        <ReactMarkdown 
-                                          remarkPlugins={[remarkGfm]} 
-                                          components={{
-                                            p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
-                                            h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
-                                            h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
-                                            h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
-                                            li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                                            code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
-                                            pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
-                                            blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
-                                            table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
-                                            th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
-                                            td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
-                                            a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
-                                            strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                                            em: ({node, ...props}) => <em className="italic" {...props} />,
-                                            ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                                            ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                            {/* 显示多段式对话 */}
+                            {message.segments && message.segments.length > 0 ? (
+                              <>
+                                {message.segments.map((segment, index) => (
+                                  <div key={segment.id} className={index > 0 ? 'mt-4 pt-4 border-t border-gray-200' : ''}>
+                                    <ReactMarkdown 
+                                      remarkPlugins={[remarkGfm]} 
+                                      components={{
+                                        p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
+                                        h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
+                                        h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
+                                        h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
+                                        li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                                        code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
+                                        pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
+                                        blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
+                                        table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
+                                        th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
+                                        td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
+                                        a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
+                                        strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                        em: ({node, ...props}) => <em className="italic" {...props} />,
+                                        ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                                        ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                                      }}
+                                    >
+                                      {segment.content}
+                                    </ReactMarkdown>
+                                    
+                                    {/* 只有在最后一个分段时显示时间、模型和复制按钮 */}
+                                    {index === (message.segments?.length || 1) - 1 && (
+                                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
+                                        <p className="text-xs opacity-70">
+                                          {message.timestamp.toLocaleTimeString()}
+                                          {message.model && ` · ${message.model}`}
+                                        </p>
+                                        <button
+                                          onClick={() => {
+                                            // 复制所有分段的内容
+                                            const allContent = (message.segments || []).map(s => s.content).join('\n\n');
+                                            navigator.clipboard.writeText(allContent).then(
+                                              () => console.log('内容已复制到剪贴板'),
+                                              (err) => console.error('复制失败: ', err)
+                                            );
                                           }}
+                                          className="text-xs opacity-50 hover:opacity-100"
+                                          title="复制全部内容"
                                         >
-                                          {sub.content}
-                                        </ReactMarkdown>
+                                          📋
+                                        </button>
                                       </div>
-                                    ) : sub.type === 'image' ? (
-                                      <div className="p-3 bg-gray-50">
-                                        {sub.imageData ? (
-                                          <img 
-                                            src={sub.imageData} 
-                                            alt="AI生成的图片" 
-                                            className="max-w-full h-auto cursor-pointer rounded hover:opacity-90 transition-opacity"
-                                            onClick={() => {
-                                              // 图片点击放大功能
-                                              if (sub.imageData) {
-                                                const win = window.open('');
-                                                if (win) {
-                                                  win.document.write(`
-                                                    <html>
-                                                      <head><title>图片预览</title></head>
-                                                      <body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f0f0f0;">
-                                                        <img src="${sub.imageData}" style="max-width:100%;max-height:100vh;cursor:pointer;" onclick="window.close()">
-                                                      </body>
-                                                    </html>
-                                                  `);
-                                                }
-                                              }
-                                            }}
-                                          />
-                                        ) : sub.imageError ? (
-                                          <div className="text-red-600 text-sm">
-                                            {sub.imageError}
-                                          </div>
-                                        ) : (
-                                          <div className="text-gray-500 text-sm">
-                                            正在生成图片...
-                                          </div>
-                                        )}
-                                      </div>
-                                    ) : null}
+                                    )}
                                   </div>
                                 ))}
-                              </div>
+                              </>
+                            ) : (
+                              /* 单段显示（没有<N>标识符的情况） */
+                              <>
+                                {message.content && (
+                                  <ReactMarkdown 
+                                    remarkPlugins={[remarkGfm]} 
+                                    components={{
+                                      p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
+                                      h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
+                                      h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
+                                      h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
+                                      li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                                      code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
+                                      pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
+                                      blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
+                                      table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
+                                      th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
+                                      td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
+                                      a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
+                                      strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                      em: ({node, ...props}) => <em className="italic" {...props} />,
+                                      ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                                      ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                                    }}
+                                  >
+                                    {message.content}
+                                  </ReactMarkdown>
+                                )}
+                                <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
+                                  <p className="text-xs opacity-70">
+                                    {message.timestamp.toLocaleTimeString()}
+                                    {message.model && ` · ${message.model}`}
+                                  </p>
+                                  <button
+                                    onClick={() => copyToClipboard(message.content)}
+                                    className="text-xs opacity-50 hover:opacity-100"
+                                    title="复制内容"
+                                  >
+                                    📋
+                                  </button>
+                                </div>
+                              </>
                             )}
                           </div>
                         </>
@@ -654,17 +516,6 @@ export default function AIChatPage() {
                           <p className="text-sm">{message.content}</p>
                         </div>
                       )}
-                      <p className="text-xs mt-1 opacity-70">
-                        {message.timestamp.toLocaleTimeString()}
-                        {message.model && ` · ${message.model}`}
-                      </p>
-                      <button
-                        onClick={() => copyToClipboard(message.content)}
-                        className="absolute bottom-1 right-1 text-xs opacity-50 hover:opacity-100"
-                        title="复制内容"
-                      >
-                        📋
-                      </button>
                     </div>
                   </div>
                 ))}

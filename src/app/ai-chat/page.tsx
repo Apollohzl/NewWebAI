@@ -10,6 +10,7 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  thinking?: string;
   timestamp: Date;
   model?: string;
 }
@@ -90,7 +91,10 @@ export default function AIChatPage() {
       // 处理流式响应
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
-      let assistantContent = '';
+      let fullContent = '';
+      let thinkingContent = '';
+      let finalContent = '';
+      let isInThinking = false;
       
       // 创建一个空的assistant消息
       const assistantMessageId = (Date.now() + 1).toString();
@@ -98,6 +102,7 @@ export default function AIChatPage() {
         id: assistantMessageId,
         role: 'assistant',
         content: '',
+        thinking: '',
         timestamp: new Date(),
         model: currentModel
       };
@@ -106,11 +111,11 @@ export default function AIChatPage() {
       setMessages(messagesWithAssistant);
 
       if (reader) {
-        const updateMessage = (content: string) => {
+        const updateMessage = (content: string, thinking?: string) => {
           setMessages(prev => 
             prev.map(msg => 
               msg.id === assistantMessageId 
-                ? { ...msg, content } 
+                ? { ...msg, content, thinking } 
                 : msg
             )
           );
@@ -142,8 +147,31 @@ export default function AIChatPage() {
                 if (data.choices && data.choices.length > 0) {
                   const delta = data.choices[0].delta;
                   if (delta && delta.content) {
-                    assistantContent += delta.content;
-                    updateMessage(assistantContent);
+                    fullContent += delta.content;
+                    
+                    // 检查是否在思考状态
+                    if (delta.content.includes('我需要') || delta.content.includes('根据') || delta.content.includes('我应该') || 
+                        delta.content.includes('让我') || delta.content.includes('我会') || 
+                        (fullContent.length > 0 && !fullContent.includes('---'))) {
+                      isInThinking = true;
+                    }
+                    
+                    // 检查是否有分隔线
+                    if (delta.content.includes('---')) {
+                      isInThinking = false;
+                      // 分隔思考和最终内容
+                      const parts = fullContent.split('---');
+                      if (parts.length >= 2) {
+                        thinkingContent = parts[0].trim();
+                        finalContent = parts.slice(1).join('---').trim();
+                      }
+                    } else if (isInThinking) {
+                      thinkingContent = fullContent;
+                    } else {
+                      finalContent = fullContent;
+                    }
+                    
+                    updateMessage(finalContent, thinkingContent);
                   }
                   
                   // 检查是否完成
@@ -160,7 +188,7 @@ export default function AIChatPage() {
       }
       
       // 如果内容为空，添加错误消息
-      if (!assistantContent) {
+      if (!finalContent) {
         const errorMessage: Message = {
           id: (Date.now() + 2).toString(),
           role: 'assistant',
@@ -262,38 +290,61 @@ export default function AIChatPage() {
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[70%] p-3 rounded-lg relative ${
+                      className={`max-w-[70%] rounded-lg relative ${
                         message.role === 'user'
                           ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-black'
+                          : 'bg-white border border-gray-200'
                       }`}
                     >
                       {message.role === 'assistant' ? (
-                        <ReactMarkdown 
-                          remarkPlugins={[remarkGfm]} 
-                          components={{
-                            p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
-                            h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
-                            h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
-                            h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
-                            li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                            code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
-                            pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
-                            blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
-                            table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
-                            th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
-                            td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
-                            a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
-                            strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                            em: ({node, ...props}) => <em className="italic" {...props} />,
-                            ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                            ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
-                          }}
-                        >
-                          {message.content}
-                        </ReactMarkdown>
+                        <>
+                          {/* 思考内容板块 */}
+                          {message.thinking && (
+                            <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg">
+                              <div className="text-xs text-gray-500 mb-2 font-semibold">🤔 思考过程</div>
+                              <ReactMarkdown 
+                                remarkPlugins={[remarkGfm]} 
+                                components={{
+                                  p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2" {...props} />,
+                                  li: ({node, ...props}) => <li className="mb-1 text-sm text-gray-700" {...props} />,
+                                  code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
+                                }}
+                              >
+                                {message.thinking}
+                              </ReactMarkdown>
+                            </div>
+                          )}
+                          {/* 最终回复内容 */}
+                          <div className={`p-3 ${message.thinking ? '' : 'rounded-lg'}`}>
+                            <ReactMarkdown 
+                              remarkPlugins={[remarkGfm]} 
+                              components={{
+                                p: ({node, ...props}) => <p className="text-sm mb-2" {...props} />,
+                                h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
+                                h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2" {...props} />,
+                                h3: ({node, ...props}) => <h3 className="text-base font-bold mb-2" {...props} />,
+                                li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                                code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
+                                pre: ({node, ...props}) => <pre className="bg-gray-200 p-2 rounded mt-1 mb-2 overflow-x-auto" {...props} />,
+                                blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-400 pl-2 text-gray-600 italic" {...props} />,
+                                table: ({node, ...props}) => <table className="min-w-full border-collapse" {...props} />,
+                                th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-100 font-bold" {...props} />,
+                                td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
+                                a: ({node, ...props}) => <a className="text-blue-600 hover:underline" {...props} />,
+                                strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                em: ({node, ...props}) => <em className="italic" {...props} />,
+                                ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                                ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                              }}
+                            >
+                              {message.content}
+                            </ReactMarkdown>
+                          </div>
+                        </>
                       ) : (
-                        <p className="text-sm">{message.content}</p>
+                        <div className="p-3">
+                          <p className="text-sm">{message.content}</p>
+                        </div>
                       )}
                       <p className="text-xs mt-1 opacity-70">
                         {message.timestamp.toLocaleTimeString()}

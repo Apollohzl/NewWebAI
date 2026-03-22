@@ -99,6 +99,7 @@ export default function AIChatPage() {
       let thinkingContent = '';
       let finalContent = '';
       let hasAddedAssistantMessage = false;
+      let usesReasoningField = false; // 标记是否使用reasoning_content字段
       
       // 延迟1.5秒后再开始显示流式响应，让用户体验更自然
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -153,28 +154,46 @@ export default function AIChatPage() {
                 // 检查choices数组并提取内容
                 if (data.choices && data.choices.length > 0) {
                   const delta = data.choices[0].delta;
+                  
+                  // 方式1: 使用reasoning_content字段（如deepseek模型）
+                  if (delta && delta.reasoning_content) {
+                    usesReasoningField = true;
+                    thinkingContent += delta.reasoning_content;
+                    
+                    // 有思考内容就添加assistant消息
+                    addAssistantMessage();
+                    updateMessage(finalContent, thinkingContent);
+                  }
+                  
+                  // 处理回答内容
                   if (delta && delta.content) {
-                    fullContent += delta.content;
-                    
-                    // 提取思考内容和最终回复
-                    const startIndex = fullContent.indexOf(THINKING_START_MARKER);
-                    const endIndex = fullContent.indexOf(THINKING_END_MARKER);
-                    
-                    if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-                      // 找到了开始和结束标识
-                      thinkingContent = fullContent.substring(
-                        startIndex + THINKING_START_MARKER.length, 
-                        endIndex
-                      ).trim();
-                      finalContent = fullContent.substring(endIndex + THINKING_END_MARKER.length).trim();
-                    } else if (startIndex !== -1) {
-                      // 只有开始标识，没有结束标识，全部作为思考内容
-                      thinkingContent = fullContent.substring(startIndex + THINKING_START_MARKER.length).trim();
-                      finalContent = '';
+                    if (usesReasoningField) {
+                      // 如果使用reasoning_content字段，content就是最终回复
+                      finalContent += delta.content;
                     } else {
-                      // 没有开始标识，全部作为最终内容
-                      thinkingContent = '';
-                      finalContent = fullContent.trim();
+                      // 方式2: 使用文本标记方式
+                      fullContent += delta.content;
+                      
+                      // 提取思考内容和最终回复
+                      const startIndex = fullContent.indexOf(THINKING_START_MARKER);
+                      const endIndex = fullContent.indexOf(THINKING_END_MARKER);
+                      
+                      if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+                        // 找到了开始和结束标识
+                        thinkingContent = fullContent.substring(
+                          startIndex + THINKING_START_MARKER.length, 
+                          endIndex
+                        ).trim();
+                        finalContent = fullContent.substring(endIndex + THINKING_END_MARKER.length).trim();
+                      } else if (startIndex !== -1) {
+                        // 只有开始标识，没有结束标识，全部作为思考内容
+                        thinkingContent = fullContent.substring(startIndex + THINKING_START_MARKER.length).trim();
+                        finalContent = '';
+                      } else {
+                        // 没有开始标识，全部作为最终内容
+                        thinkingContent = '';
+                        finalContent = fullContent.trim();
+                      }
                     }
                     
                     // 只有在有内容时才添加assistant消息

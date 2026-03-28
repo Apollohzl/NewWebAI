@@ -511,8 +511,8 @@ export default function AIChatPage() {
             <div className="flex-1 overflow-y-auto flex flex-col-reverse">
               <div className="space-y-4 pb-24">
                 {messages.map((message) => {
-                  // 如果是assistant消息且有segments，将思考内容和每个分段渲染为独立的消息卡片
-                  if (message.role === 'assistant' && message.segments && message.segments.length > 0) {
+                  // 如果是assistant或system消息且有segments，将思考内容和每个分段渲染为独立的消息卡片
+                  if ((message.role === 'assistant' || message.role === 'system') && message.segments && message.segments.length > 0) {
                     return (
                       <React.Fragment key={message.id}>
                         {/* 思考内容作为第一个独立卡片 */}
@@ -571,7 +571,7 @@ export default function AIChatPage() {
                     );
                   }
                   
-                  // 普通消息（用户消息或单段assistant消息）
+                  // 普通消息（用户消息或单段assistant/system消息）
                   return (
                     <div
                       key={message.id}
@@ -584,7 +584,7 @@ export default function AIChatPage() {
                             : 'bg-white border border-gray-200'
                         }`}
                       >
-                        {message.role === 'assistant' && message.thinking ? (
+                        {(message.role === 'assistant' || message.role === 'system') && message.thinking ? (
                           <>
                             {/* 思考内容板块 */}
                             <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg">

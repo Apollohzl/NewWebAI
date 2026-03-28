@@ -253,7 +253,7 @@ export default function AIDrawPage() {
           </div>
           {/* 花粉余额显示 */}
           <div className="text-sm text-gray-600">
-            当前花粉余额：{balance !== null ? balance : '--'}
+            每小时花粉余额：{balance !== null ? balance : '--'}
           </div>
           <div className="w-20"></div>
         </div>

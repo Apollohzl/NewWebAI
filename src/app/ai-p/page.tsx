@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdComponent from '@/components/AdComponent';
+import { videoModels, isVideoModel, getVideoModel, VideoModel } from '@/config/videoModels';
 
 interface ImageModel {
   id: string;
@@ -114,18 +115,19 @@ export default function AIDrawPage() {
       };
 
       // 如果是视频模型，添加相应参数
-      if (['veo', 'seedance', 'seedance-pro','grok-video'].includes(selectedModel)) {
+      const videoModelConfig = getVideoModel(selectedModel);
+      if (videoModelConfig) {
         (requestBody as any).duration = videoDuration; // 使用用户选择的持续时间
         // 视频模型只支持16:9或9:16比例
-        if (selectedRatio === '16:9' || selectedRatio === '9:16') {
+        if (videoModelConfig.features.supportedRatios.includes(selectedRatio)) {
           (requestBody as any).aspectRatio = selectedRatio;
         } else {
-          // 如果不是支持的比例，默认使用16:9
-          (requestBody as any).aspectRatio = '16:9';
+          // 如果不是支持的比例，默认使用第一个支持的比例
+          (requestBody as any).aspectRatio = videoModelConfig.features.supportedRatios[0];
         }
         
-        // 对于seedance模型，支持参考图像
-        if (selectedModel.startsWith('seedance')) {
+        // 对于支持参考图像的模型
+        if (videoModelConfig.features.supportsReferenceImages) {
           if (firstFrameImage) {
             (requestBody as any)['image[0]'] = firstFrameImage; // 第一帧
           }
@@ -134,7 +136,8 @@ export default function AIDrawPage() {
           }
         }
         
-        if (selectedModel === 'veo' || selectedModel === 'grok-video' || selectedModel.startsWith('ltx')) {
+        // 对于支持音频的模型
+        if (videoModelConfig.features.supportsAudio) {
           (requestBody as any).audio = enableAudio; // 使用用户选择的音频设置
         }
       }
@@ -411,116 +414,119 @@ export default function AIDrawPage() {
                   </div>
 
                   {/* 对于视频模型的视频设置 */}
-                  {['veo', 'seedance', 'seedance-pro', 'grok-video'].includes(selectedModel) && (
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-sm font-medium text-black mb-1">
-                          视频持续时间 (秒)
-                        </label>
-                        <select
-                          value={videoDuration}
-                          onChange={(e) => setVideoDuration(parseInt(e.target.value))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value={1}>1秒</option>
-                          <option value={2}>2秒</option>
-                          <option value={3}>3秒</option>
-                          <option value={4}>4秒</option>
-                          <option value={5}>5秒</option>
-                          <option value={6}>6秒</option>
-                          <option value={7}>7秒</option>
-                          <option value={8}>8秒</option>
-                          <option value={9}>9秒</option>
-                          <option value={10}>10秒</option>
-                        </select>
-                        <p className="text-xs text-gray-500 mt-1">选择视频的持续时间</p>
+                  {isVideoModel(selectedModel) && (() => {
+                    const videoModelConfig = getVideoModel(selectedModel);
+                    if (!videoModelConfig) return null;
+                    
+                    return (
+                      <div className="space-y-3">
+                        {/* 持续时间设置 */}
+                        {videoModelConfig.features.supportsDuration && videoModelConfig.advancedOptions?.duration && (
+                          <div>
+                            <label className="block text-sm font-medium text-black mb-1">
+                              {videoModelConfig.advancedOptions.duration.label}
+                            </label>
+                            <select
+                              value={videoDuration}
+                              onChange={(e) => setVideoDuration(parseInt(e.target.value))}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              {videoModelConfig.advancedOptions.duration.options.map(option => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">{videoModelConfig.advancedOptions.duration.description}</p>
+                          </div>
+                        )}
+                        
+                        {/* 参考图像设置 */}
+                        {videoModelConfig.features.supportsReferenceImages && videoModelConfig.advancedOptions?.referenceImages && (
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-sm font-medium text-black mb-1">
+                                {videoModelConfig.advancedOptions.referenceImages.firstFrameLabel}
+                              </label>
+                              <input
+                                type="text"
+                                value={firstFrameImage}
+                                onChange={(e) => {
+                                  setFirstFrameImage(e.target.value);
+                                  if (e.target.value) {
+                                    setFirstFrameImagePreview(e.target.value);
+                                  } else {
+                                    setFirstFrameImagePreview(null);
+                                  }
+                                }}
+                                placeholder={videoModelConfig.advancedOptions.referenceImages.firstFrameDescription}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                              {firstFrameImagePreview && (
+                                <div className="mt-2">
+                                  <p className="text-xs text-gray-500">预览:</p>
+                                  <img 
+                                    src={firstFrameImagePreview} 
+                                    alt="First frame preview" 
+                                    className="w-full h-24 object-contain border rounded mt-1"
+                                    onError={() => setFirstFrameImagePreview(null)}
+                                  />
+                                </div>
+                              )}
+                              <p className="text-xs text-gray-500 mt-1">{videoModelConfig.advancedOptions.referenceImages.firstFrameDescription}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-black mb-1">
+                                {videoModelConfig.advancedOptions.referenceImages.lastFrameLabel}
+                              </label>
+                              <input
+                                type="text"
+                                value={lastFrameImage}
+                                onChange={(e) => {
+                                  setLastFrameImage(e.target.value);
+                                  if (e.target.value) {
+                                    setLastFrameImagePreview(e.target.value);
+                                  } else {
+                                    setLastFrameImagePreview(null);
+                                  }
+                                }}
+                                placeholder={videoModelConfig.advancedOptions.referenceImages.lastFrameDescription}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                              {lastFrameImagePreview && (
+                                <div className="mt-2">
+                                  <p className="text-xs text-gray-500">预览:</p>
+                                  <img 
+                                    src={lastFrameImagePreview} 
+                                    alt="Last frame preview" 
+                                    className="w-full h-24 object-contain border rounded mt-1"
+                                    onError={() => setLastFrameImagePreview(null)}
+                                  />
+                                </div>
+                              )}
+                              <p className="text-xs text-gray-500 mt-1">{videoModelConfig.advancedOptions.referenceImages.lastFrameDescription}</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* 音频设置 */}
+                        {videoModelConfig.features.supportsAudio && videoModelConfig.advancedOptions?.enableAudio && (
+                          <div>
+                            <label className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={enableAudio}
+                                onChange={(e) => setEnableAudio(e.target.checked)}
+                                className="mr-2"
+                              />
+                              <span className="text-sm text-black">{videoModelConfig.advancedOptions.enableAudio.label}</span>
+                            </label>
+                            <p className="text-xs text-gray-500 mt-1">{videoModelConfig.advancedOptions.enableAudio.description}</p>
+                          </div>
+                        )}
                       </div>
-                      
-                      {/* 对于seedance模型的参考图像 */}
-                      {selectedModel.startsWith('seedance') && (
-                        <div className="space-y-3">
-                          <div>
-                            <label className="block text-sm font-medium text-black mb-1">
-                              第一帧参考图像 (可选)
-                            </label>
-                            <input
-                              type="text"
-                              value={firstFrameImage}
-                              onChange={(e) => {
-                                setFirstFrameImage(e.target.value);
-                                if (e.target.value) {
-                                  setFirstFrameImagePreview(e.target.value);
-                                } else {
-                                  setFirstFrameImagePreview(null);
-                                }
-                              }}
-                              placeholder="输入图像URL作为第一帧参考..."
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            {firstFrameImagePreview && (
-                              <div className="mt-2">
-                                <p className="text-xs text-gray-500">预览:</p>
-                                <img 
-                                  src={firstFrameImagePreview} 
-                                  alt="First frame preview" 
-                                  className="w-full h-24 object-contain border rounded mt-1"
-                                  onError={() => setFirstFrameImagePreview(null)}
-                                />
-                              </div>
-                            )}
-                            <p className="text-xs text-gray-500 mt-1">用于seedance模型的第一帧</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-black mb-1">
-                              最后一帧参考图像 (可选)
-                            </label>
-                            <input
-                              type="text"
-                              value={lastFrameImage}
-                              onChange={(e) => {
-                                setLastFrameImage(e.target.value);
-                                if (e.target.value) {
-                                  setLastFrameImagePreview(e.target.value);
-                                } else {
-                                  setLastFrameImagePreview(null);
-                                }
-                              }}
-                              placeholder="输入图像URL作为最后一帧参考..."
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            {lastFrameImagePreview && (
-                              <div className="mt-2">
-                                <p className="text-xs text-gray-500">预览:</p>
-                                <img 
-                                  src={lastFrameImagePreview} 
-                                  alt="Last frame preview" 
-                                  className="w-full h-24 object-contain border rounded mt-1"
-                                  onError={() => setLastFrameImagePreview(null)}
-                                />
-                              </div>
-                            )}
-                            <p className="text-xs text-gray-500 mt-1">用于seedance模型的最后一帧</p>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* 音频设置 - 适用于支持音频的视频模型 */}
-                      {(selectedModel === 'veo' || selectedModel === 'grok-video' || selectedModel.startsWith('ltx')) && (
-                        <div>
-                          <label className="flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={enableAudio}
-                              onChange={(e) => setEnableAudio(e.target.checked)}
-                              className="mr-2"
-                            />
-                            <span className="text-sm text-black">启用音频</span>
-                          </label>
-                          <p className="text-xs text-gray-500 mt-1">为视频生成音频（仅适用于支持的模型）</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    );
+                  })()}
 
                   {/* 负面描述 */}
                   <div>

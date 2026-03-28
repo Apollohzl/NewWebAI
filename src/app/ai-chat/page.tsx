@@ -145,8 +145,10 @@ export default function AIChatPage() {
       let sh = ''; // 存储当前要展示到界面的文本
       let shid = ''; // 存储当前展示的文本的div的id
       
-      // 保存完整的流式数据，用于后续重新处理
-      let allRawChunks: string[] = [];
+      // 保存完整的流式内容，用于后续重新处理
+      let savedReasoningContent = '';
+      let savedContent = '';
+      let savedUsesReasoningField = false;
       
       // 延迟1.5秒后再开始显示流式响应，让用户体验更自然
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -185,7 +187,6 @@ export default function AIChatPage() {
           if (done) break;
           
           const chunk = decoder.decode(value, { stream: true });
-          allRawChunks.push(chunk); // 保存原始chunk
           const lines = chunk.split('\n');
           
           for (const line of lines) {
@@ -206,7 +207,9 @@ export default function AIChatPage() {
                   // 方式1: 使用reasoning_content字段（如deepseek模型）
                   if (delta && delta.reasoning_content) {
                     usesReasoningField = true;
+                    savedUsesReasoningField = true;
                     thinkingContent += delta.reasoning_content;
+                    savedReasoningContent += delta.reasoning_content; // 保存
                     
                     // A. 思考内容：显示在界面的思考过程中
                     addAssistantMessage();
@@ -216,6 +219,7 @@ export default function AIChatPage() {
                   // B. 主要内容：处理流式输出的主要内容
                   if (delta && delta.content) {
                     console.log('收到内容chunk:', delta.content);
+                    savedContent += delta.content; // 保存原始内容
                     
                     if (usesReasoningField) {
                       // 使用reasoning_content字段的方式
@@ -328,81 +332,48 @@ export default function AIChatPage() {
           updateMessage('', thinkingContent, segments);
         }
         
-        // 🔄 重新处理流式数据，确保最终显示内容正确
+        // 🔄 重新处理保存的流式内容，确保最终显示内容正确
         console.log('🔄 开始重新处理流式数据');
         
         // 重置变量
         let reprocessFullContent = '';
         let reprocessThinkingContent = '';
         let reprocessSh = '';
-        let reprocessUsesReasoningField = false;
         let reprocessHasStartedMainContent = false;
         let reprocessSegments: Array<{id: string, content: string}> = [];
         
-        // 重新处理所有chunks
-        for (const chunk of allRawChunks) {
-          const lines = chunk.split('\n');
+        // 使用保存的内容重新处理
+        reprocessThinkingContent = savedReasoningContent;
+        
+        if (savedUsesReasoningField) {
+          // 使用reasoning_content字段的方式
+          reprocessSh = savedContent;
+          reprocessHasStartedMainContent = reprocessSh.length > 0;
+        } else {
+          // 使用文本标记方式
+          reprocessFullContent = savedContent;
           
-          for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (trimmedLine.startsWith('data: ')) {
-              const dataStr = trimmedLine.slice(6);
-              
-              if (!dataStr || dataStr === '[DONE]') continue;
-              
-              try {
-                const data = JSON.parse(dataStr);
-                
-                if (data.choices && data.choices.length > 0) {
-                  const delta = data.choices[0].delta;
-                  
-                  if (delta && delta.reasoning_content) {
-                    reprocessUsesReasoningField = true;
-                    reprocessThinkingContent += delta.reasoning_content;
-                  }
-                  
-                  if (delta && delta.content) {
-                    if (reprocessUsesReasoningField) {
-                      if (!reprocessHasStartedMainContent) {
-                        reprocessHasStartedMainContent = true;
-                        reprocessSh = '';
-                      }
-                      reprocessSh += delta.content;
-                    } else {
-                      reprocessFullContent += delta.content;
-                      
-                      const startIndex = reprocessFullContent.indexOf(THINKING_START_MARKER);
-                      const endIndex = reprocessFullContent.indexOf(THINKING_END_MARKER);
-                      
-                      if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-                        reprocessThinkingContent = reprocessFullContent.substring(
-                          startIndex + THINKING_START_MARKER.length, 
-                          endIndex
-                        ).trim();
-                        reprocessSh = reprocessFullContent.substring(endIndex + THINKING_END_MARKER.length).trim();
-                        
-                        if (!reprocessHasStartedMainContent && reprocessSh) {
-                          reprocessHasStartedMainContent = true;
-                        }
-                      } else if (startIndex !== -1) {
-                        reprocessThinkingContent = reprocessFullContent.substring(startIndex + THINKING_START_MARKER.length).trim();
-                        reprocessSh = '';
-                      } else {
-                        reprocessThinkingContent = '';
-                        reprocessSh = reprocessFullContent.trim();
-                        
-                        if (!reprocessHasStartedMainContent && reprocessSh) {
-                          reprocessHasStartedMainContent = true;
-                        }
-                      }
-                    }
-                  }
-                }
-              } catch (e) {
-                console.error('重新处理流式数据失败:', e);
-              }
-            }
+          const startIndex = reprocessFullContent.indexOf(THINKING_START_MARKER);
+          const endIndex = reprocessFullContent.indexOf(THINKING_END_MARKER);
+          
+          if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+            // 找到了开始和结束标识
+            reprocessThinkingContent = reprocessFullContent.substring(
+              startIndex + THINKING_START_MARKER.length, 
+              endIndex
+            ).trim();
+            reprocessSh = reprocessFullContent.substring(endIndex + THINKING_END_MARKER.length).trim();
+          } else if (startIndex !== -1) {
+            // 只有开始标识，没有结束标识，全部作为思考内容
+            reprocessThinkingContent = reprocessFullContent.substring(startIndex + THINKING_START_MARKER.length).trim();
+            reprocessSh = '';
+          } else {
+            // 没有开始标识，全部作为主要内容
+            reprocessThinkingContent = '';
+            reprocessSh = reprocessFullContent.trim();
           }
+          
+          reprocessHasStartedMainContent = reprocessSh.length > 0;
         }
         
         // 重新分段处理

@@ -533,7 +533,7 @@ export default function AIChatPage() {
       </div>
 
       {/* 消息列表容器 */}
-      <div className="flex-1 overflow-hidden p-4">
+      <div className="flex-1 overflow-hidden p-4" style={{ paddingBottom: '128px' }}>
         <div className="max-w-4xl mx-auto w-full h-full flex flex-col">
           {messages.length === 0 ? (
             <div className="text-center text-gray-500 mt-8 flex-1 flex items-center justify-center">

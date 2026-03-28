@@ -104,20 +104,55 @@ export default function AIChatPage() {
     setIsLoading(true);
 
     try {
+      // 处理消息列表，合并 AI 回复的分段
+      const processedMessages: Array<{role: string, content: string}> = [];
+      let aiReplyContent = ''; // 用于累积 AI 回复的内容
+      
+      for (const message of newMessages) {
+        if (message.role === 'user') {
+          // 用户消息，先添加之前累积的 AI 回复（如果有）
+          if (aiReplyContent) {
+            processedMessages.push({
+              role: 'assistant',
+              content: aiReplyContent
+            });
+            aiReplyContent = '';
+          }
+          // 添加用户消息
+          processedMessages.push({
+            role: 'user',
+            content: message.content
+          });
+        } else if (message.role === 'assistant' || message.role === 'system') {
+          // AI 回复，累积内容
+          if (message.segments && message.segments.length > 0) {
+            // 如果有分段，合并所有分段的内容
+            aiReplyContent += message.segments.map(s => s.content).join('\n\n');
+          } else if (message.content && message.content.trim()) {
+            // 如果没有分段但有内容，直接使用 content
+            aiReplyContent += message.content;
+          }
+          // 不包含思考内容
+        }
+      }
+      
+      // 添加最后的 AI 回复（如果有）
+      if (aiReplyContent) {
+        processedMessages.push({
+          role: 'assistant',
+          content: aiReplyContent
+        });
+      }
+      
+      console.log('处理后的消息列表:', processedMessages);
+
       const response = await fetch('/api/ai-chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: newMessages
-            .filter(m => {
-              // 过滤掉空的 assistant 消息和 system 消息
-              if (m.role === 'system') return false;
-              if (m.role === 'assistant' && !m.content.trim()) return false;
-              return true;
-            })
-            .map(m => ({ role: m.role, content: m.content })),
+          messages: processedMessages,
           model: currentModel,
           temperature: temperature,
           max_tokens: maxTokens,

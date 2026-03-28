@@ -561,14 +561,18 @@ export default function AIChatPage() {
                         {message.thinking && (
                           <div className="flex justify-start">
                             <div className="max-w-[70%] rounded-lg relative bg-white border border-gray-200">
-                              <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg">
+                              <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg overflow-x-auto">
                                 <div className="text-xs text-gray-500 mb-2 font-semibold">🤔 思考过程</div>
                                 <ReactMarkdown 
                                   remarkPlugins={[remarkGfm]} 
                                   components={{
-                                    p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2" {...props} />,
-                                    li: ({node, ...props}) => <li className="mb-1 text-sm text-gray-700" {...props} />,
-                                    code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
+                                    p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2 break-words" {...props} />,
+                                    li: ({node, ...props}) => <li className="mb-1 text-sm text-gray-700 break-words" {...props} />,
+                                    code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs break-all" {...props} />,
+                                    pre: ({node, ...props}) => <pre className="overflow-x-auto text-xs" {...props} />,
+                                    table: ({node, ...props}) => <table className="min-w-full text-xs" {...props} />,
+                                    th: ({node, ...props}) => <th className="px-2 py-1 border break-words" {...props} />,
+                                    td: ({node, ...props}) => <td className="px-2 py-1 border break-words" {...props} />,
                                   }}
                                 >
                                   {message.thinking}
@@ -581,8 +585,19 @@ export default function AIChatPage() {
                         {message.segments.map((segment, index) => (
                           <div key={segment.id} className="flex justify-start">
                             <div className="max-w-[70%] rounded-lg relative bg-white border border-gray-200">
-                              <div className="p-3 rounded-lg">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              <div className="p-3 rounded-lg overflow-x-auto">
+                                <ReactMarkdown 
+                                  remarkPlugins={[remarkGfm]} 
+                                  components={{
+                                    p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2 break-words" {...props} />,
+                                    li: ({node, ...props}) => <li className="mb-1 text-sm text-gray-700 break-words" {...props} />,
+                                    code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs break-all" {...props} />,
+                                    pre: ({node, ...props}) => <pre className="overflow-x-auto text-xs" {...props} />,
+                                    table: ({node, ...props}) => <table className="min-w-full text-xs" {...props} />,
+                                    th: ({node, ...props}) => <th className="px-2 py-1 border break-words" {...props} />,
+                                    td: ({node, ...props}) => <td className="px-2 py-1 border break-words" {...props} />,
+                                  }}
+                                >
                                   {segment.content}
                                 </ReactMarkdown>
                                 
@@ -629,22 +644,37 @@ export default function AIChatPage() {
                         {(message.role === 'assistant' || message.role === 'system') && message.thinking ? (
                           <>
                             {/* 思考内容板块 */}
-                            <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg">
+                            <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg overflow-x-auto">
                               <div className="text-xs text-gray-500 mb-2 font-semibold">🤔 思考过程</div>
                               <ReactMarkdown 
                                 remarkPlugins={[remarkGfm]} 
                                 components={{
-                                  p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2" {...props} />,
-                                  li: ({node, ...props}) => <li className="mb-1 text-sm text-gray-700" {...props} />,
-                                  code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs" {...props} />,
+                                  p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2 break-words" {...props} />,
+                                  li: ({node, ...props}) => <li className="mb-1 text-sm text-gray-700 break-words" {...props} />,
+                                  code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs break-all" {...props} />,
+                                  pre: ({node, ...props}) => <pre className="overflow-x-auto text-xs" {...props} />,
+                                  table: ({node, ...props}) => <table className="min-w-full text-xs" {...props} />,
+                                  th: ({node, ...props}) => <th className="px-2 py-1 border break-words" {...props} />,
+                                  td: ({node, ...props}) => <td className="px-2 py-1 border break-words" {...props} />,
                                 }}
                               >
                                 {message.thinking}
                               </ReactMarkdown>
                             </div>
                             {/* 最终回复内容 */}
-                            <div className="p-3 rounded-lg">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            <div className="p-3 rounded-lg overflow-x-auto">
+                              <ReactMarkdown 
+                                remarkPlugins={[remarkGfm]} 
+                                components={{
+                                  p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2 break-words" {...props} />,
+                                  li: ({node, ...props}) => <li className="mb-1 text-sm text-gray-700 break-words" {...props} />,
+                                  code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs break-all" {...props} />,
+                                  pre: ({node, ...props}) => <pre className="overflow-x-auto text-xs" {...props} />,
+                                  table: ({node, ...props}) => <table className="min-w-full text-xs" {...props} />,
+                                  th: ({node, ...props}) => <th className="px-2 py-1 border break-words" {...props} />,
+                                  td: ({node, ...props}) => <td className="px-2 py-1 border break-words" {...props} />,
+                                }}
+                              >
                                 {message.content}
                               </ReactMarkdown>
                               
@@ -665,8 +695,8 @@ export default function AIChatPage() {
                             </div>
                           </>
                         ) : (
-                          <div className="p-3">
-                            <p className="text-sm">{message.content}</p>
+                          <div className="p-3 overflow-x-auto">
+                            <p className="text-sm break-words">{message.content}</p>
                           </div>
                         )}
                       </div>

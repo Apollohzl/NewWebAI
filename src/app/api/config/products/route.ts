@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { leancloudRequest } from '@/lib/leancloud';
+import { ProductQueries } from '@/lib/sqlDatabase';
 
 export async function GET(request: NextRequest) {
   try {
-    const response = await leancloudRequest('/classes/Products');
-    
-    return NextResponse.json({
-      products: response.results || []
-    });
-  } catch (error: any) {
+    const products = await ProductQueries.getAll();
+    return NextResponse.json({ success: true, data: products });
+  } catch (error) {
     console.error('获取产品数据失败:', error);
     return NextResponse.json(
-      { error: error.message || '获取产品数据失败' },
+      { error: error instanceof Error ? error.message : '获取失败' },
       { status: 500 }
     );
   }

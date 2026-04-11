@@ -1,34 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { leancloudRequest } from '@/lib/leancloud';
-
-// LeanCloud配置
-const LEANCLOUD_APP_ID = process.env.LEANCLOUD_APP_ID;
-const LEANCLOUD_APP_KEY = process.env.LEANCLOUD_APP_KEY;
-const LEANCLOUD_SERVER_URL = process.env.LEANCLOUD_SERVER_URL;
-
-// 使用Master Key的请求函数
-async function leancloudRequestWithMasterKey(endpoint: string, options: RequestInit = {}) {
-  const url = `${LEANCLOUD_SERVER_URL}/1.1${endpoint}`;
-  
-  const headers = {
-    'X-LC-Id': LEANCLOUD_APP_ID!,
-    'X-LC-Key': `${LEANCLOUD_APP_KEY},master`,
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
-
-  return {
-    ok: response.ok,
-    status: response.status,
-    statusText: response.statusText,
-    data: await response.json().catch(() => null)
-  };
-}
+import { query, testConnection, getDatabaseInfo } from '@/lib/sql';
 
 export async function GET(request: NextRequest) {
   const results: any[] = [];
@@ -39,66 +10,62 @@ export async function GET(request: NextRequest) {
       success: true,
       message: '环境变量正常',
       data: {
-        LEANCLOUD_APP_ID: LEANCLOUD_APP_ID ? '已设置' : '未设置',
-        LEANCLOUD_APP_KEY: LEANCLOUD_APP_KEY ? '已设置' : '未设置',
-        LEANCLOUD_SERVER_URL: LEANCLOUD_SERVER_URL ? '已设置' : '未设置'
+        SQL_HOST: process.env.SQL_HOST ? '已设置' : '未设置',
+        SQL_PORT: process.env.SQL_PORT ? '已设置' : '未设置',
+        SQL_USER: process.env.SQL_USER ? '已设置' : '未设置',
+        SQL_DATABASE: process.env.SQL_DATABASE ? '已设置' : '未设置'
       }
     });
 
-    // 测试1: 使用普通App Key查询用户
+    // 测试数据库连接
     try {
-      const result = await leancloudRequest('/users?limit=5');
+      const isConnected = await testConnection();
       results.push({
-        test: '普通App Key查询用户',
+        test: '数据库连接测试',
+        success: isConnected,
+        message: isConnected ? '数据库连接成功' : '数据库连接失败',
+        data: {
+          connected: isConnected
+        }
+      });
+    } catch (error: any) {
+      results.push({
+        test: '数据库连接测试',
+        success: false,
+        message: error.message,
+        data: null
+      });
+    }
+
+    // 测试查询用户
+    try {
+      const [users] = await query('SELECT COUNT(*) as count FROM users');
+      results.push({
+        test: '查询用户数据',
         success: true,
-        message: `获取到 ${result.results?.length || 0} 个用户`,
+        message: `当前有 ${users[0]?.count || 0} 个用户`,
         data: {
-          count: result.results?.length || 0,
-          users: result.results?.map((u: any) => ({ username: u.username, email: u.email, objectId: u.objectId })) || []
+          count: users[0]?.count || 0
         }
       });
     } catch (error: any) {
       results.push({
-        test: '普通App Key查询用户',
+        test: '查询用户数据',
         success: false,
         message: error.message,
         data: null
       });
     }
 
-    // 测试2: 使用Master Key查询用户
+    // 测试查询博客文章
     try {
-      const result = await leancloudRequestWithMasterKey('/users?limit=5');
-      results.push({
-        test: 'Master Key查询用户',
-        success: result.ok,
-        message: result.ok ? `获取到 ${result.data?.results?.length || 0} 个用户` : `失败: ${result.statusText}`,
-        data: {
-          status: result.status,
-          count: result.data?.results?.length || 0,
-          users: result.data?.results?.map((u: any) => ({ username: u.username, email: u.email, objectId: u.objectId })) || [],
-          error: !result.ok ? result.data : null
-        }
-      });
-    } catch (error: any) {
-      results.push({
-        test: 'Master Key查询用户',
-        success: false,
-        message: error.message,
-        data: null
-      });
-    }
-
-    // 测试3: 查询博客文章
-    try {
-      const result = await leancloudRequest('/classes/BlogPosts?limit=5');
+      const [posts] = await query('SELECT COUNT(*) as count FROM blog_posts');
       results.push({
         test: '查询博客文章',
         success: true,
-        message: `获取到 ${result.results?.length || 0} 篇文章`,
+        message: `当前有 ${posts[0]?.count || 0} 篇文章`,
         data: {
-          count: result.results?.length || 0,
-          posts: result.results?.map((p: any) => ({ title: p.title, author: p.author, objectId: p.objectId })) || []
+          count: posts[0]?.count || 0
         }
       });
     } catch (error: any) {
@@ -110,21 +77,40 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 测试4: 查询产品
+    // 测试查询产品
     try {
-      const result = await leancloudRequest('/classes/Products?limit=5');
+      const [products] = await query('SELECT COUNT(*) as count FROM products');
       results.push({
-        test: '查询产品',
+        test: '查询产品数据',
         success: true,
-        message: `获取到 ${result.results?.length || 0} 个产品`,
+        message: `当前有 ${products[0]?.count || 0} 个产品`,
         data: {
-          count: result.results?.length || 0,
-          products: result.results?.map((p: any) => ({ name: p.name, price: p.price, objectId: p.objectId })) || []
+          count: products[0]?.count || 0
         }
       });
     } catch (error: any) {
       results.push({
-        test: '查询产品',
+        test: '查询产品数据',
+        success: false,
+        message: error.message,
+        data: null
+      });
+    }
+
+    // 获取数据库信息
+    try {
+      const dbInfo = await getDatabaseInfo();
+      if (dbInfo) {
+        results.push({
+          test: '数据库信息',
+          success: true,
+          message: '数据库信息获取成功',
+          data: dbInfo
+        });
+      }
+    } catch (error: any) {
+      results.push({
+        test: '数据库信息',
         success: false,
         message: error.message,
         data: null

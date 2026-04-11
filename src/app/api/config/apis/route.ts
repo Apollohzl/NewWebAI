@@ -1,25 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { leancloudRequest } from '@/lib/leancloud';
+import { NextResponse } from 'next/server';
+import { ApiQueries } from '@/lib/sqlDatabase';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const response = await leancloudRequest('/classes/APIs');
-    
-    const categories = [
-      { id: 'all', name: '全部API', description: '所有可用的API接口' },
-      { id: 'basic', name: '基础接口', description: '基础功能API' },
-      { id: 'ai', name: 'AI服务', description: '人工智能相关API' },
-      { id: 'utility', name: '工具类', description: '实用工具API' }
-    ];
-    
-    return NextResponse.json({
-      apis: response.results || [],
-      categories: categories
-    });
-  } catch (error: any) {
-    console.error('获取API数据失败:', error);
+    const apis = await ApiQueries.getAll();
+    return NextResponse.json({ success: true, data: apis });
+  } catch (error) {
+    console.error('获取API配置失败:', error);
     return NextResponse.json(
-      { error: error.message || '获取API数据失败' },
+      { error: error instanceof Error ? error.message : '获取失败' },
       { status: 500 }
     );
   }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { leancloudRequest } from '@/lib/leancloud';
+import { BlogQueries } from '@/lib/sqlDatabase';
 
 // 移除HTML标签的辅助函数
 function stripHtml(html: string): string {
@@ -18,33 +18,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 创建博客文章 - 使用App Key，不需要用户权限
-    const blogPost = await leancloudRequest('/classes/BlogPosts', {
-      method: 'POST',
-      body: JSON.stringify({
-        title,
-        content,
-        excerpt: excerpt || stripHtml(content).substring(0, 150) + '...',
-        category: category || '技术',
-        tags: tags || [],
-        author,
-        readTime: readTime || '5 分钟阅读',
-        status: '正常',
-        published: true,
-        createdAt: { "__type": "Date", "iso": new Date().toISOString() },
-        updatedAt: { "__type": "Date", "iso": new Date().toISOString() }
-      }),
-    });
+    // 创建博客文章
+    const blogPost = {
+      title,
+      content,
+      excerpt: excerpt || stripHtml(content).substring(0, 150) + '...',
+      category: category || '技术',
+      tags: tags || [],
+      author,
+      readTime: readTime || '5 分钟阅读',
+      status: '正常',
+      published: true
+    };
+
+    const newPost = await BlogQueries.create(blogPost);
+
+    if (!newPost) {
+      return NextResponse.json(
+        { error: '创建博客文章失败' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
       message: '博客文章发布成功',
-      post: blogPost
+      post: newPost
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('创建博客文章错误:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : '发布失败，请重试' },
+      { error: error.message || '发布失败，请重试' },
       { status: 500 }
     );
   }

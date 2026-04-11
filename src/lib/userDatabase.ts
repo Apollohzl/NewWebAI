@@ -1,12 +1,10 @@
 import { User } from '@/types';
-import { connectToDatabase } from '@/lib/mongodb';
+import { UserQueries } from './sqlDatabase';
 
 // 查找用户
 export async function findUserByEmail(email: string): Promise<User | null> {
   try {
-    const db = await connectToDatabase();
-    const user = await db.collection('users').findOne({ email });
-    return user as User | null;
+    return await UserQueries.findByEmail(email);
   } catch (error) {
     console.error('查找用户失败:', error);
     return null;
@@ -16,9 +14,7 @@ export async function findUserByEmail(email: string): Promise<User | null> {
 // 查找用户
 export async function findUserById(id: string): Promise<User | null> {
   try {
-    const db = await connectToDatabase();
-    const user = await db.collection('users').findOne({ id });
-    return user as User | null;
+    return await UserQueries.findById(id);
   } catch (error) {
     console.error('查找用户失败:', error);
     return null;
@@ -28,16 +24,7 @@ export async function findUserById(id: string): Promise<User | null> {
 // 添加用户
 export async function addUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
   try {
-    const db = await connectToDatabase();
-    const newUser: User = {
-      ...userData,
-      id: Date.now().toString(), // 在实际应用中，可以使用MongoDB的ObjectId
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    await db.collection('users').insertOne(newUser);
-    return newUser;
+    return await UserQueries.create(userData);
   } catch (error) {
     console.error('添加用户失败:', error);
     throw error;
@@ -47,14 +34,7 @@ export async function addUser(userData: Omit<User, 'id' | 'createdAt' | 'updated
 // 更新用户
 export async function updateUser(id: string, updates: Partial<User>): Promise<User | null> {
   try {
-    const db = await connectToDatabase();
-    const result = await db.collection('users').findOneAndUpdate(
-      { id },
-      { $set: { ...updates, updatedAt: new Date().toISOString() } },
-      { returnDocument: 'after' }
-    );
-    
-    return result as User | null;
+    return await UserQueries.update(id, updates);
   } catch (error) {
     console.error('更新用户失败:', error);
     return null;
@@ -64,9 +44,7 @@ export async function updateUser(id: string, updates: Partial<User>): Promise<Us
 // 删除用户
 export async function deleteUser(id: string): Promise<boolean> {
   try {
-    const db = await connectToDatabase();
-    const result = await db.collection('users').deleteOne({ id });
-    return result.deletedCount > 0;
+    return await UserQueries.delete(id);
   } catch (error) {
     console.error('删除用户失败:', error);
     return false;
@@ -76,16 +54,15 @@ export async function deleteUser(id: string): Promise<boolean> {
 // 获取所有用户
 export async function getUsers(): Promise<User[]> {
   try {
-    const db = await connectToDatabase();
-    const users = await db.collection('users').find({}).toArray();
-    return users.map(user => ({
-      id: user._id.toString(),
+    const results = await UserQueries.getAll();
+    return results.map(user => ({
+      id: user.id.toString(),
       username: user.username || '',
       email: user.email || '',
       password: user.password || '',
       avatar: user.avatar,
       role: user.role || 'user',
-      isActive: user.isActive || false,
+      isActive: user.isActive !== undefined ? user.isActive : true,
       createdAt: user.createdAt || new Date().toISOString(),
       updatedAt: user.updatedAt || new Date().toISOString(),
     })) as User[];

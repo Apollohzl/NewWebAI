@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBlogPosts as getBlogPostsFromDB, createBlogPost } from '@/lib/blogDatabase';
+import { BlogQueries } from '@/lib/sqlDatabase';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,49 +11,51 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category') || '';
     const author = searchParams.get('author') || '';
 
-    // 注意：MongoDB的完整文本搜索需要预先建立文本索引
-    // 在实际应用中，您可能需要在数据库设置中创建相应的索引
     const skip = (page - 1) * limit;
     
-    // 这里简化处理，实际应用中可能需要更复杂的搜索逻辑
-    const db = await (await import('@/lib/mongodb')).connectToDatabase();
-    let query: any = {};
+    // 构建查询条件
+    let whereClause = 'WHERE published = TRUE';
+    const params: any[] = [];
+    
+    if (category) {
+      whereClause += ' AND category = ?';
+      params.push(category);
+    }
+    
+    if (author) {
+      whereClause += ' AND author = ?';
+      params.push(author);
+    }
     
     if (search) {
-      query.$text = { $search: search }; // 需要在数据库中创建文本索引
-    }
-    if (category) {
-      query.category = category;
-    }
-    if (author) {
-      query.author = author;
+      // 全文搜索
+      whereClause += ` AND (title LIKE ? OR content LIKE ?)`;
+      const searchTerm = `%${search}%`;
+      params.push(searchTerm, searchTerm);
     }
 
     // 计算总数
-    const total = await db.collection('blog_posts').countDocuments(query);
+    const countQuery = `SELECT COUNT(*) as count FROM blog_posts ${whereClause}`;
+    const [countResult] = await (await import('@/lib/sql')).query(countQuery, params);
+    const total = countResult[0]?.count || 0;
 
     // 获取文章列表
-    let postsQuery = db.collection('blog_posts').find(query);
-    
-    if (search) {
-      // 如果有搜索词，使用文本搜索排序
-      postsQuery = postsQuery.sort({ score: { $meta: 'textScore' } });
-    } else {
-      // 否则按创建时间排序
-      postsQuery = postsQuery.sort({ createdAt: -1 });
-    }
-    
-    const posts = await postsQuery
-      .skip(skip)
-      .limit(limit)
-      .toArray();
+    const selectQuery = `
+      SELECT * FROM blog_posts 
+      ${whereClause}
+      ORDER BY created_at DESC 
+      LIMIT ? OFFSET ?
+    `;
+    const [posts] = await (await import('@/lib/sql')).query(selectQuery, [...params, limit, skip]);
 
     // 转换为前端需要的格式
-    const formattedPosts = posts.map(post => ({
+    const formattedPosts = posts.map((post: any) => ({
       ...post,
-      id: post._id.toString(),
-      objectId: post._id.toString(),
-      _id: undefined // 避免返回内部ID
+      id: post.id.toString(),
+      objectId: post.id.toString(),
+      published: post.published === 1,
+      createdAt: post.createdAt?.toISOString(),
+      updatedAt: post.updatedAt?.toISOString()
     }));
 
     return NextResponse.json({
@@ -99,7 +101,7 @@ export async function POST(request: NextRequest) {
       readTime: Math.ceil(content.length / 500) + ' 分钟阅读'
     };
 
-    const newPost = await createBlogPost(blogPost);
+    const newPost = await BlogQueries.create(blogPost);
 
     if (!newPost) {
       return NextResponse.json(

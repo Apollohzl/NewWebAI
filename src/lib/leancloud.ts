@@ -1,132 +1,101 @@
-// 初始化LeanCloud配置
-function getLeanCloudConfig() {
-  const appId = process.env.LEANCLOUD_APP_ID;
-  const appKey = process.env.LEANCLOUD_APP_KEY;
-  const serverURL = process.env.LEANCLOUD_SERVER_URL;
+// =====================================================
+// SQLPub 数据库操作 (替换 LeanCloud)
+// 保持文件名以保持向后兼容性
+// =====================================================
 
-  console.log('环境变量检查:', {
-    LEANCLOUD_APP_ID: appId ? '已设置' : '未设置',
-    LEANCLOUD_APP_KEY: appKey ? '已设置' : '未设置',
-    LEANCLOUD_SERVER_URL: serverURL ? '已设置' : '未设置',
-  });
+import { query } from './sql';
 
-  if (!appId || !appKey || !serverURL) {
-    throw new Error(`LeanCloud配置缺失。请检查环境变量：
-    - LEANCLOUD_APP_ID: ${appId ? '已设置' : '未设置'}
-    - LEANCLOUD_APP_KEY: ${appKey ? '已设置' : '未设置'}  
-    - LEANCLOUD_SERVER_URL: ${serverURL ? '已设置' : '未设置'}`);
-  }
-
-  return { appId, appKey, serverURL };
-}
-
-// LeanCloud API 基础请求函数
+// 为了保持向后兼容性，导出类似 LeanCloud 的接口
 export async function leancloudRequest(endpoint: string, options: RequestInit = {}) {
-  const config = getLeanCloudConfig();
+  console.warn('⚠️  leancloudRequest() 已被 SQLPub 数据库替换，请使用 sqlDatabase.ts 中的方法');
   
-  // 确保endpoint以/开头
-  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  const url = `${config.serverURL}/1.1${normalizedEndpoint}`;
+  // 解析 endpoint 转换为 SQL 查询
+  const tableName = endpoint.match(/\/classes\/(\w+)/)?.[1];
   
-  console.log('LeanCloud API请求:', { url, endpoint });
+  if (!tableName) {
+    throw new Error(`无法解析表名: ${endpoint}`);
+  }
   
-  const headers = {
-    'X-LC-Id': config.appId,
-    'X-LC-Key': config.appKey,
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-
   try {
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
-
-    console.log('LeanCloud API响应状态:', response.status);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('LeanCloud API错误响应:', errorData);
-      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    console.log('LeanCloud API成功响应:', data);
-    return data;
-  } catch (error) {
-    console.error('LeanCloud API请求失败:', error);
-    throw error;
-  }
-}
-
-// 用户相关的LeanCloud操作
-export class LeanCloudUser {
-  // 注册用户
-  static async register(username: string, email: string, password: string) {
-    try {
-      const userData = {
-        username,
-        email,
-        password,
-      };
-
-      const response = await leancloudRequest('/users', {
-        method: 'POST',
-        body: JSON.stringify(userData),
-      });
-
-      return response;
-    } catch (error: any) {
-      throw new Error(error.message || '注册失败');
-    }
-  }
-
-  // 用户登录
-  static async login(email: string, password: string) {
-    try {
-      const loginData = {
-        email, // LeanCloud支持邮箱登录
-        password,
-      };
-
-      const response = await leancloudRequest('/login', {
-        method: 'POST',
-        body: JSON.stringify(loginData),
-      });
-
-      return response;
-    } catch (error: any) {
-      throw new Error(error.message || '登录失败');
-    }
-  }
-
-  // 通过邮箱查找用户
-  static async findUserByEmail(email: string) {
-    try {
-      const where = {
-        email,
-      };
-
-      const response = await leancloudRequest(`/users?where=${encodeURIComponent(JSON.stringify(where))}`);
+    if (options.method === 'POST') {
+      // 创建操作
+      const body = JSON.parse(options.body as string);
+      const now = new Date();
       
-      return response.results && response.results.length > 0 ? response.results[0] : null;
-    } catch (error: any) {
-      throw new Error(error.message || '查找用户失败');
+      const fields = Object.keys(body).filter(k => k !== 'id');
+      const values = fields.map(f => body[f]);
+      const placeholders = fields.map(() => '?');
+      
+      const sql = `INSERT INTO ${tableName} (${fields.join(', ')}) VALUES (${placeholders.join(', ')})`;
+      await query(sql, [...values, now, now]);
+      
+      return { objectId: Date.now().toString() };
+    } else if (endpoint.includes('?')) {
+      // 查询操作
+      const url = new URL('http://localhost' + endpoint);
+      const where = url.searchParams.get('where');
+      const limit = url.searchParams.get('limit') || '100';
+      
+      let sql = `SELECT * FROM ${tableName}`;
+      const params: any[] = [];
+      
+      if (where) {
+        const queryObj = JSON.parse(where);
+        const conditions = Object.entries(queryObj).map(([key, value]) => {
+          if (typeof value === 'object' && value !== null) {
+            if (value.$gte || value.$lt) {
+              if (value.$gte?.__type === 'Date') {
+                params.push(value.$gte.iso);
+                return `${key} >= ?`;
+              }
+            }
+            return `${key} = ?`;
+          }
+          params.push(value);
+          return `${key} = ?`;
+        });
+        sql += ' WHERE ' + conditions.join(' AND ');
+      }
+      
+      sql += ` LIMIT ${limit}`;
+      const results = await query(sql, params);
+      
+      return { results };
     }
+    
+    return { results: [] };
+  } catch (error) {
+    console.error('SQL 查询失败:', error);
+    throw error;
   }
 }
 
-// 初始化函数（保持兼容性）
-export function initLeanCloud() {
-  try {
-    const config = getLeanCloudConfig();
-    console.log('LeanCloud REST API 初始化完成:', {
-      appId: config.appId,
-      serverURL: config.serverURL,
-    });
-  } catch (error) {
-    console.error('LeanCloud初始化失败:', error);
-    throw error;
+// 用户相关的操作 - 使用 SQL 数据库
+export class LeanCloudUser {
+  static async register(username: string, email: string, password: string) {
+    console.warn('⚠️  LeanCloudUser.register() 已被 UserQueries.create() 替换');
+    const { UserQueries } = await import('./sqlDatabase');
+    return await UserQueries.create({ username, email, password, role: 'user', isActive: true });
   }
+
+  static async login(email: string, password: string) {
+    console.warn('⚠️  LeanCloudUser.login() 已被 UserQueries.findByEmail() 替换');
+    const { UserQueries } = await import('./sqlDatabase');
+    const user = await UserQueries.findByEmail(email);
+    if (user && user.password === password) {
+      return user;
+    }
+    throw new Error('用户名或密码错误');
+  }
+
+  static async findUserByEmail(email: string) {
+    console.warn('⚠️  LeanCloudUser.findUserByEmail() 已被 UserQueries.findByEmail() 替换');
+    const { UserQueries } = await import('./sqlDatabase');
+    return await UserQueries.findByEmail(email);
+  }
+}
+
+// 初始化函数
+export function initLeanCloud() {
+  console.log('✅ SQLPub 数据库已初始化（替换 LeanCloud）');
 }

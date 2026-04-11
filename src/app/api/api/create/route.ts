@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { leancloudRequest } from '@/lib/leancloud';
+import { query } from '@/lib/sql';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,22 +12,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 创建新API配置
-    const response = await leancloudRequest('/classes/APIs', {
-      method: 'POST',
-      body: JSON.stringify({
-        name: apiData.name,
-        endpoint: apiData.endpoint,
-        description: apiData.description || '',
-        category: apiData.category || 'general',
-        method: apiData.method || 'GET',
-        status: '正常',
-        tags: apiData.tags || [],
-        visits: '0',
-      }),
-    });
+    // 创建新API配置到 SQL 数据库
+    const now = new Date();
+    const sql = `
+      INSERT INTO api_configs (id, name, description, endpoint, method, category, status, tags, visits, icon, request_url, methods, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    
+    await query(sql, [
+      Date.now().toString(),
+      apiData.name,
+      apiData.description || '',
+      apiData.endpoint,
+      'GET',
+      apiData.category || 'general',
+      '正常',
+      JSON.stringify(apiData.tags || []),
+      0,
+      '',
+      apiData.endpoint,
+      JSON.stringify(['GET', 'POST']),
+      now,
+      now
+    ]);
 
-    return NextResponse.json({ success: true, data: response });
+    return NextResponse.json({ success: true, data: { id: Date.now().toString() } });
   } catch (error) {
     console.error('创建API配置失败:', error);
     return NextResponse.json(

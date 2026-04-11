@@ -207,6 +207,24 @@ export const BlogQueries = {
       [id]
     ) as ResultSetHeader;
     return result.affectedRows > 0;
+  },
+
+  // 根据作者获取博客文章
+  async getByAuthor(author: string, limit: number = 10): Promise<BlogPost[]> {
+    const results = await query(
+      `SELECT * FROM blog_posts 
+       WHERE author = ? AND published = TRUE 
+       ORDER BY created_at DESC 
+       LIMIT ?`,
+      [author, limit]
+    ) as BlogPost[];
+    
+    return results.map(post => ({
+      ...post,
+      id: post.id.toString(),
+      createdAt: post.createdAt?.toISOString(),
+      updatedAt: post.updatedAt?.toISOString()
+    }));
   }
 };
 

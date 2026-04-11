@@ -3,6 +3,12 @@ import { findUserByEmail, addUser } from '@/lib/userDatabase';
 import bcrypt from 'bcrypt';
 
 export async function POST(request: NextRequest) {
+  // 注册功能已禁用，等待后续改为 QQ 邮箱验证
+  return NextResponse.json(
+    { error: '注册功能暂时禁用，请稍后再试' },
+    { status: 503 }
+  );
+
   try {
     const { username, email, password } = await request.json();
     console.log('收到注册请求:', { username, email });

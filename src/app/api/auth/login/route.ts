@@ -4,6 +4,12 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 export async function POST(request: NextRequest) {
+  // 登录功能已禁用，等待后续改为 QQ 邮箱验证
+  return NextResponse.json(
+    { error: '登录功能暂时禁用，请稍后再试' },
+    { status: 503 }
+  );
+
   try {
     const { email, password } = await request.json();
     console.log('收到登录请求:', { email });

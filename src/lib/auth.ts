@@ -37,7 +37,7 @@ export async function registerUser(userData: {
   password: string;
 }): Promise<{ user: User; token: string } | null> {
   // 检查邮箱是否已存在
-  const existingUser = findUserByEmail(userData.email);
+  const existingUser = await findUserByEmail(userData.email);
   if (existingUser) {
     return null;
   }
@@ -46,7 +46,7 @@ export async function registerUser(userData: {
   const hashedPassword = await hashPassword(userData.password);
 
   // 创建用户
-  const user = addUser({
+  const user = await addUser({
     username: userData.username,
     email: userData.email,
     password: hashedPassword,
@@ -63,7 +63,7 @@ export async function registerUser(userData: {
 // 用户登录
 export async function loginUser(email: string, password: string): Promise<{ user: User; token: string } | null> {
   // 查找用户
-  const user = findUserByEmail(email);
+  const user = await findUserByEmail(email);
   if (!user || !user.isActive) {
     return null;
   }

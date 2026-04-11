@@ -3,6 +3,12 @@ import { findUserByEmail, updateUser } from '@/lib/userDatabase';
 import bcrypt from 'bcrypt';
 
 export async function POST(request: NextRequest) {
+  // 重置密码功能已禁用，等待后续改为 QQ 邮箱验证
+  return NextResponse.json(
+    { error: '重置密码功能暂时禁用，请稍后再试' },
+    { status: 503 }
+  );
+
   try {
     const { email, token, newPassword } = await request.json();
 

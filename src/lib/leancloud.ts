@@ -43,9 +43,10 @@ export async function leancloudRequest(endpoint: string, options: RequestInit = 
         const queryObj = JSON.parse(where);
         const conditions = Object.entries(queryObj).map(([key, value]) => {
           if (typeof value === 'object' && value !== null) {
-            if (value.$gte || value.$lt) {
-              if (value.$gte?.__type === 'Date') {
-                params.push(value.$gte.iso);
+            const queryValue = value as any;
+            if (queryValue.$gte || queryValue.$lt) {
+              if (queryValue.$gte?.__type === 'Date') {
+                params.push(queryValue.$gte.iso);
                 return `${key} >= ?`;
               }
             }

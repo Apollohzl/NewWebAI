@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
     let blogPosts: any[] = [];
     try {
       console.log('尝试获取博客文章...');
-      const [posts] = await query('SELECT * FROM blog_posts ORDER BY created_at DESC LIMIT 100');
+      const postsResult = await query('SELECT * FROM blog_posts ORDER BY created_at DESC LIMIT 100') as any[];
+      const [posts] = postsResult.length > 0 ? [postsResult] : [[]];
       blogPosts = posts || [];
       console.log(`成功获取 ${blogPosts.length} 篇博客文章`);
     } catch (error) {
@@ -21,7 +22,8 @@ export async function GET(request: NextRequest) {
     let products: any[] = [];
     try {
       console.log('尝试获取产品数据...');
-      const [productData] = await query('SELECT * FROM products');
+      const productResult = await query('SELECT * FROM products') as any[];
+      const [productData] = productResult.length > 0 ? [productResult] : [[]];
       products = productData || [];
       console.log(`成功获取 ${products.length} 个产品`);
     } catch (error) {
@@ -33,7 +35,8 @@ export async function GET(request: NextRequest) {
     let apis: any[] = [];
     try {
       console.log('尝试获取API配置...');
-      const [apiData] = await query('SELECT * FROM api_configs ORDER BY visits DESC');
+      const apiResult = await query('SELECT * FROM api_configs ORDER BY visits DESC') as any[];
+      const [apiData] = apiResult.length > 0 ? [apiResult] : [[]];
       apis = apiData || [];
       console.log(`成功获取 ${apis.length} 个API配置`);
     } catch (error) {
@@ -49,13 +52,13 @@ export async function GET(request: NextRequest) {
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      const [userCount] = await query(
+      const userCountResult = await query(
         'SELECT COUNT(*) as count FROM users WHERE created_at >= ? AND created_at < ?',
         [today, tomorrow]
-      );
+      ) as any[];
       
-      if (userCount && userCount.length > 0) {
-        todayNewUsers = userCount[0].count;
+      if (userCountResult && userCountResult.length > 0) {
+        todayNewUsers = userCountResult[0].count;
       }
     } catch (error) {
       console.error('获取今日新增用户失败:', error);

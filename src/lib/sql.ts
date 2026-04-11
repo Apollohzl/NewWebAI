@@ -76,14 +76,14 @@ export async function testConnection() {
  */
 export async function getDatabaseInfo() {
   try {
-    const [version] = await query('SELECT VERSION() as version');
-    const [charset] = await query('SELECT @@character_set_database as charset');
-    const [collation] = await query('SELECT @@collation_database as collation');
+    const versionResults = await query('SELECT VERSION() as version') as any[];
+    const charsetResults = await query('SELECT @@character_set_database as charset') as any[];
+    const collationResults = await query('SELECT @@collation_database as collation') as any[];
     
     return {
-      version: version[0]?.version,
-      charset: charset[0]?.charset,
-      collation: collation[0]?.collation,
+      version: versionResults[0]?.version,
+      charset: charsetResults[0]?.charset,
+      collation: collationResults[0]?.collation,
       host: dbConfig.host,
       port: dbConfig.port,
       database: dbConfig.database

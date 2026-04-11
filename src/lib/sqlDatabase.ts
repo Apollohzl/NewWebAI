@@ -5,6 +5,7 @@
 
 import { query, getConnection } from './sql';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { User, BlogPost, Product, ApiConfig, ChatMessage } from '@/types';
 
 // 通用查询结果类型
 export type QueryResult<T = any> = T[];
@@ -35,11 +36,10 @@ export const UserQueries = {
   // 创建用户
   async create(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     const id = Date.now().toString();
-    const now = new Date();
     
     await query(
-      `INSERT INTO users (id, username, email, password, avatar, role, is_active, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO users (id, username, email, password, avatar, role, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         userData.username,
@@ -47,34 +47,29 @@ export const UserQueries = {
         userData.password,
         userData.avatar || null,
         userData.role || 'user',
-        userData.isActive !== undefined ? userData.isActive : true,
-        now,
-        now
+        userData.isActive !== undefined ? userData.isActive : true
       ]
     );
 
     return {
       id,
       ...userData,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     } as User;
   },
 
   // 更新用户
   async update(id: string, updates: Partial<User>): Promise<SingleResult<User>> {
-    const now = new Date();
-    
     await query(
       `UPDATE users 
-       SET username = ?, avatar = ?, role = ?, is_active = ?, updated_at = ?
+       SET username = ?, avatar = ?, role = ?, is_active = ?
        WHERE id = ?`,
       [
         updates.username,
         updates.avatar || null,
         updates.role || 'user',
         updates.isActive !== undefined ? updates.isActive : true,
-        now,
         id
       ]
     );
@@ -95,14 +90,14 @@ export const UserQueries = {
   async getAll(): Promise<User[]> {
     const results = await query(
       'SELECT * FROM users ORDER BY created_at DESC'
-    ) as User[];
+    ) as any[];
     
-    return results.map(user => ({
+    return results.map((user: any) => ({
       ...user,
       id: user.id.toString(),
       isActive: user.is_active !== undefined ? user.is_active : true,
-      createdAt: user.createdAt?.toISOString(),
-      updatedAt: user.updatedAt?.toISOString()
+      createdAt: user.createdAt || new Date().toISOString(),
+      updatedAt: user.updatedAt || new Date().toISOString()
     }));
   }
 };
@@ -121,11 +116,11 @@ export const BlogQueries = {
       [limit, skip]
     ) as BlogPost[];
     
-    return results.map(post => ({
+    return results.map((post: any) => ({
       ...post,
       id: post.id.toString(),
-      createdAt: post.createdAt?.toISOString(),
-      updatedAt: post.updatedAt?.toISOString()
+      createdAt: post.createdAt || new Date().toISOString(),
+      updatedAt: post.updatedAt || new Date().toISOString()
     }));
   },
 
@@ -141,19 +136,18 @@ export const BlogQueries = {
     return {
       ...results[0],
       id: results[0].id.toString(),
-      createdAt: results[0].createdAt?.toISOString(),
-      updatedAt: results[0].updatedAt?.toISOString()
+      createdAt: results[0].createdAt || new Date().toISOString(),
+      updatedAt: results[0].updatedAt || new Date().toISOString()
     };
   },
 
   // 创建博客文章
   async create(postData: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt'>): Promise<BlogPost> {
     const id = Date.now().toString();
-    const now = new Date();
     
     await query(
-      `INSERT INTO blog_posts (id, title, content, excerpt, category, author, read_time, published, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO blog_posts (id, title, content, excerpt, category, author, read_time, published)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         postData.title,
@@ -162,27 +156,23 @@ export const BlogQueries = {
         postData.category || '技术',
         postData.author,
         postData.readTime,
-        postData.published !== undefined ? postData.published : true,
-        now,
-        now
+        postData.published !== undefined ? postData.published : true
       ]
     );
 
     return {
       id,
       ...postData,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     } as BlogPost;
   },
 
   // 更新博客文章
   async update(id: string, updates: Partial<BlogPost>): Promise<SingleResult<BlogPost>> {
-    const now = new Date();
-    
     await query(
       `UPDATE blog_posts 
-       SET title = ?, content = ?, excerpt = ?, category = ?, author = ?, read_time = ?, published = ?, updated_at = ?
+       SET title = ?, content = ?, excerpt = ?, category = ?, author = ?, read_time = ?, published = ?
        WHERE id = ?`,
       [
         updates.title,
@@ -192,7 +182,6 @@ export const BlogQueries = {
         updates.author,
         updates.readTime,
         updates.published,
-        now,
         id
       ]
     );
@@ -219,11 +208,11 @@ export const BlogQueries = {
       [author, limit]
     ) as BlogPost[];
     
-    return results.map(post => ({
+    return results.map((post: any) => ({
       ...post,
       id: post.id.toString(),
-      createdAt: post.createdAt?.toISOString(),
-      updatedAt: post.updatedAt?.toISOString()
+      createdAt: post.createdAt || new Date().toISOString(),
+      updatedAt: post.updatedAt || new Date().toISOString()
     }));
   }
 };
@@ -235,11 +224,10 @@ export const ChatQueries = {
   // 保存聊天消息
   async create(messageData: Omit<ChatMessage, 'id' | 'createdAt'>): Promise<ChatMessage> {
     const id = Date.now().toString();
-    const now = new Date();
     
     await query(
-      `INSERT INTO chat_messages (id, user_id, role, content, thinking_content, model, session_id, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO chat_messages (id, user_id, role, content, thinking_content, model, session_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         messageData.userId || null,
@@ -247,15 +235,14 @@ export const ChatQueries = {
         messageData.content,
         messageData.thinkingContent || null,
         messageData.model || null,
-        messageData.sessionId || null,
-        now
+        messageData.sessionId || null
       ]
     );
 
     return {
       id,
       ...messageData,
-      createdAt: now.toISOString()
+      createdAt: new Date().toISOString()
     } as ChatMessage;
   },
 
@@ -269,10 +256,10 @@ export const ChatQueries = {
       [userId, limit]
     ) as ChatMessage[];
     
-    return results.map(msg => ({
+    return results.map((msg: any) => ({
       ...msg,
       id: msg.id.toString(),
-      createdAt: msg.createdAt?.toISOString()
+      createdAt: msg.createdAt || new Date().toISOString()
     }));
   },
 
@@ -285,10 +272,10 @@ export const ChatQueries = {
       [sessionId]
     ) as ChatMessage[];
     
-    return results.map(msg => ({
+    return results.map((msg: any) => ({
       ...msg,
       id: msg.id.toString(),
-      createdAt: msg.createdAt?.toISOString()
+      createdAt: msg.createdAt || new Date().toISOString()
     }));
   }
 };
@@ -303,12 +290,12 @@ export const ProductQueries = {
       'SELECT * FROM products WHERE in_stock = TRUE ORDER BY created_at DESC'
     ) as Product[];
     
-    return results.map(product => ({
+    return results.map((product: any) => ({
       ...product,
-      createdAt: product.createdAt?.toISOString(),
-      updatedAt: product.updatedAt?.toISOString(),
-      tags: product.tags ? JSON.parse(product.tags as string) : [],
-      features: product.features ? JSON.parse(product.features as string) : []
+      createdAt: product.createdAt || new Date().toISOString(),
+      updatedAt: product.updatedAt || new Date().toISOString(),
+      tags: product.tags ? JSON.parse(product.tags as unknown as string) : [],
+      features: product.features ? JSON.parse(product.features as unknown as string) : []
     }));
   },
 
@@ -324,10 +311,10 @@ export const ProductQueries = {
     const product = results[0];
     return {
       ...product,
-      tags: product.tags ? JSON.parse(product.tags as string) : [],
-      features: product.features ? JSON.parse(product.features as string) : [],
-      createdAt: product.createdAt?.toISOString(),
-      updatedAt: product.updatedAt?.toISOString()
+      tags: product.tags ? JSON.parse(product.tags as unknown as string) : [],
+      features: product.features ? JSON.parse(product.features as unknown as string) : [],
+      createdAt: product.createdAt || new Date().toISOString(),
+      updatedAt: product.updatedAt || new Date().toISOString()
     } as Product;
   }
 };
@@ -342,12 +329,12 @@ export const ApiQueries = {
       'SELECT * FROM api_configs ORDER BY visits DESC'
     ) as ApiConfig[];
     
-    return results.map(api => ({
+    return results.map((api: any) => ({
       ...api,
-      tags: api.tags ? JSON.parse(api.tags as string) : [],
-      methods: api.methods ? JSON.parse(api.methods as string) : [],
-      createdAt: api.createdAt?.toISOString(),
-      updatedAt: api.updatedAt?.toISOString()
+      tags: api.tags ? JSON.parse(api.tags as unknown as string) : [],
+      methods: api.methods ? JSON.parse(api.methods as unknown as string) : [],
+      createdAt: api.createdAt || new Date().toISOString(),
+      updatedAt: api.updatedAt || new Date().toISOString()
     }));
   },
 
@@ -358,12 +345,12 @@ export const ApiQueries = {
       [category]
     ) as ApiConfig[];
     
-    return results.map(api => ({
+    return results.map((api: any) => ({
       ...api,
-      tags: api.tags ? JSON.parse(api.tags as string) : [],
-      methods: api.methods ? JSON.parse(api.methods as string) : [],
-      createdAt: api.createdAt?.toISOString(),
-      updatedAt: api.updatedAt?.toISOString()
+      tags: api.tags ? JSON.parse(api.tags as unknown as string) : [],
+      methods: api.methods ? JSON.parse(api.methods as unknown as string) : [],
+      createdAt: api.createdAt || new Date().toISOString(),
+      updatedAt: api.updatedAt || new Date().toISOString()
     }));
   }
 };
@@ -383,8 +370,8 @@ export const DatabaseUtils = {
       connection.release();
       
       // 检查必要表是否存在
-      const [tables] = await query('SHOW TABLES');
-      const tableNames = tables.map((t: any) => Object.values(t)[0]);
+      const tablesResult = await query('SHOW TABLES') as any[];
+      const tableNames = tablesResult.map((t: any) => Object.values(t)[0]);
       
       const requiredTables = ['users', 'blog_posts', 'chat_messages', 'products'];
       const missingTables = requiredTables.filter(t => !tableNames.includes(t));
@@ -405,17 +392,17 @@ export const DatabaseUtils = {
   // 健康检查
   async healthCheck(): Promise<{ status: string; database: any; tables: any[] }> {
     try {
-      const [version] = await query('SELECT VERSION() as version');
-      const [tables] = await query('SHOW TABLES');
+      const versionResult = await query('SELECT VERSION() as version') as any[];
+      const tablesResult = await query('SHOW TABLES') as any[];
       
       return {
         status: 'healthy',
         database: {
-          version: version[0]?.version,
+          version: versionResult[0]?.version,
           host: process.env.SQL_HOST,
           database: process.env.SQL_DATABASE
         },
-        tables: tables.map((t: any) => ({
+        tables: tablesResult.map((t: any) => ({
           name: Object.values(t)[0],
           status: 'active'
         }))

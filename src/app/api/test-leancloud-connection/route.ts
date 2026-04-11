@@ -39,7 +39,8 @@ export async function GET(request: NextRequest) {
 
     // 测试查询用户
     try {
-      const [users] = await query('SELECT COUNT(*) as count FROM users');
+      const usersResult = await query('SELECT COUNT(*) as count FROM users') as any[];
+      const users = usersResult.length > 0 ? usersResult : [];
       results.push({
         test: '查询用户数据',
         success: true,
@@ -59,7 +60,8 @@ export async function GET(request: NextRequest) {
 
     // 测试查询博客文章
     try {
-      const [posts] = await query('SELECT COUNT(*) as count FROM blog_posts');
+      const postsResult = await query('SELECT COUNT(*) as count FROM blog_posts') as any[];
+      const posts = postsResult.length > 0 ? postsResult : [];
       results.push({
         test: '查询博客文章',
         success: true,
@@ -79,7 +81,8 @@ export async function GET(request: NextRequest) {
 
     // 测试查询产品
     try {
-      const [products] = await query('SELECT COUNT(*) as count FROM products');
+      const productsResult = await query('SELECT COUNT(*) as count FROM products') as any[];
+      const products = productsResult.length > 0 ? productsResult : [];
       results.push({
         test: '查询产品数据',
         success: true,

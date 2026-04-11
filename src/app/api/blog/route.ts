@@ -36,8 +36,8 @@ export async function GET(request: NextRequest) {
 
     // 计算总数
     const countQuery = `SELECT COUNT(*) as count FROM blog_posts ${whereClause}`;
-    const [countResult] = await (await import('@/lib/sql')).query(countQuery, params);
-    const total = countResult[0]?.count || 0;
+    const countResultArray = await (await import('@/lib/sql')).query(countQuery, params) as any[];
+    const total = countResultArray[0]?.count || 0;
 
     // 获取文章列表
     const selectQuery = `
@@ -46,7 +46,8 @@ export async function GET(request: NextRequest) {
       ORDER BY created_at DESC 
       LIMIT ? OFFSET ?
     `;
-    const [posts] = await (await import('@/lib/sql')).query(selectQuery, [...params, limit, skip]);
+    const postsResult = await (await import('@/lib/sql')).query(selectQuery, [...params, limit, skip]) as any[];
+    const posts = postsResult.length > 0 ? postsResult : [];
 
     // 转换为前端需要的格式
     const formattedPosts = posts.map((post: any) => ({
@@ -54,8 +55,8 @@ export async function GET(request: NextRequest) {
       id: post.id.toString(),
       objectId: post.id.toString(),
       published: post.published === 1,
-      createdAt: post.createdAt?.toISOString(),
-      updatedAt: post.updatedAt?.toISOString()
+      createdAt: post.createdAt || new Date().toISOString(),
+      updatedAt: post.updatedAt || new Date().toISOString()
     }));
 
     return NextResponse.json({

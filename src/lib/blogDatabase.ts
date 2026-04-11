@@ -58,9 +58,9 @@ export async function createBlogPost(postData: Omit<BlogPost, 'id' | 'objectId' 
     if (!newPost) return null;
     
     return {
+      ...newPost,
       id: newPost.id.toString(),
-      objectId: newPost.id.toString(),
-      ...newPost
+      objectId: newPost.id.toString()
     };
   } catch (error) {
     console.error('创建博客文章失败:', error);

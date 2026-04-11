@@ -11,15 +11,17 @@ export interface User {
 }
 
 export interface Product {
-  id: string;
+  id: string | number;
   name: string;
   description: string;
   price: number;
   category: string;
   image?: string;
   inStock: boolean;
-  createdAt: string;
-  updatedAt: string;
+  tags?: string[];
+  features?: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CartItem {
@@ -28,4 +30,46 @@ export interface CartItem {
   productId: string;
   quantity: number;
   addedAt: string;
+}
+
+export interface BlogPost {
+  id: string;
+  objectId?: string; // 保持与现有代码的兼容性
+  title: string;
+  content: string;
+  excerpt?: string;
+  category: string;
+  author: string;
+  readTime: string;
+  createdAt: string;
+  updatedAt: string;
+  tags: string[];
+  published: boolean;
+}
+
+export interface ApiConfig {
+  id: string;
+  name: string;
+  endpoint: string;
+  method: string;
+  category?: string;
+  headers?: Record<string, string>;
+  params?: Record<string, any>;
+  status?: string;
+  visits?: number;
+  tags?: string[];
+  methods?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  userId?: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  thinkingContent?: string;
+  model?: string;
+  sessionId?: string;
+  createdAt?: string;
 }

@@ -81,6 +81,6 @@ export async function loginUser(email: string, password: string): Promise<{ user
 }
 
 // 获取用户信息
-export function getUserById(id: string): User | null {
-  return findUserById(id);
+export async function getUserById(id: string): Promise<User | null> {
+  return await findUserById(id);
 }

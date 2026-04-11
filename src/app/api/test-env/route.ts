@@ -3,11 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const envData = {
-      LEANCLOUD_APP_ID: process.env.LEANCLOUD_APP_ID ? '已设置' : '未设置',
-      LEANCLOUD_APP_KEY: process.env.LEANCLOUD_APP_KEY ? '已设置' : '未设置',
-      LEANCLOUD_SERVER_URL: process.env.LEANCLOUD_SERVER_URL ? '已设置' : '未设置',
-      NEXT_PUBLIC_LEANCLOUD_APP_ID: process.env.NEXT_PUBLIC_LEANCLOUD_APP_ID ? '已设置' : '未设置',
-      NEXT_PUBLIC_LEANCLOUD_SERVER_URL: process.env.NEXT_PUBLIC_LEANCLOUD_SERVER_URL ? '已设置' : '未设置',
+      SQL_HOST: process.env.SQL_HOST ? '已设置' : '未设置',
+      SQL_PORT: process.env.SQL_PORT ? '已设置' : '未设置',
+      SQL_USER: process.env.SQL_USER ? '已设置' : '未设置',
+      SQL_PASSWORD: process.env.SQL_PASSWORD ? '已设置' : '未设置',
+      SQL_DATABASE: process.env.SQL_DATABASE ? '已设置' : '未设置',
+      JWT_SECRET: process.env.JWT_SECRET ? '已设置' : '未设置',
     };
 
     return NextResponse.json({

@@ -38,7 +38,7 @@ export async function getConnection() {
     return connection;
   } catch (error) {
     console.error('❌ 数据库连接失败:', error);
-    throw new Error(`数据库连接失败: ${error.message}`);
+    throw new Error(`数据库连接失败: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -51,7 +51,7 @@ export async function query(sql: string, params?: any[]) {
     return results;
   } catch (error) {
     console.error('❌ 查询执行失败:', error);
-    throw new Error(`查询执行失败: ${error.message}`);
+    throw new Error(`查询执行失败: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 

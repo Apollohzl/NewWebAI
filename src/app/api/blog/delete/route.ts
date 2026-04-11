@@ -23,10 +23,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 标记为未发布
-    const now = new Date();
     await query(
-      'UPDATE blog_posts SET published = ?, updated_at = ? WHERE id = ?',
-      [false, now, id]
+      'UPDATE blog_posts SET published = ? WHERE id = ?',
+      [false, id]
     );
 
     return NextResponse.json({

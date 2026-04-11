@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { findUserByEmail, addUser } from '@/lib/userDatabase';
-import bcrypt from 'bcrypt';
 
 export async function POST(request: NextRequest) {
   // 注册功能已禁用，等待后续改为 QQ 邮箱验证
@@ -8,6 +6,12 @@ export async function POST(request: NextRequest) {
     { error: '注册功能暂时禁用，请稍后再试' },
     { status: 503 }
   );
+
+  /*
+  原有注册逻辑已禁用，等待后续实现 QQ 邮箱验证功能
+
+  import { findUserByEmail, addUser } from '@/lib/userDatabase';
+  import bcrypt from 'bcrypt';
 
   try {
     const { username, email, password } = await request.json();
@@ -76,4 +80,5 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+  */
 }

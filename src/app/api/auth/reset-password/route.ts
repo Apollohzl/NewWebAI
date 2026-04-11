@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { findUserByEmail, updateUser } from '@/lib/userDatabase';
-import bcrypt from 'bcrypt';
 
 export async function POST(request: NextRequest) {
   // 重置密码功能已禁用，等待后续改为 QQ 邮箱验证
@@ -8,6 +6,12 @@ export async function POST(request: NextRequest) {
     { error: '重置密码功能暂时禁用，请稍后再试' },
     { status: 503 }
   );
+
+  /*
+  原有重置密码逻辑已禁用，等待后续实现 QQ 邮箱验证功能
+
+  import { findUserByEmail, updateUser } from '@/lib/userDatabase';
+  import bcrypt from 'bcrypt';
 
   try {
     const { email, token, newPassword } = await request.json();
@@ -50,4 +54,5 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+  */
 }

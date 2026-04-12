@@ -12,6 +12,34 @@ export type QueryResult<T = any> = T[];
 export type SingleResult<T = any> = T | null;
 
 /**
+ * 解析 tags 或 features 字段
+ * 支持 JSON 数组格式和逗号分隔字符串格式
+ */
+function parseTagsOrFeatures(value: any): string[] {
+  if (!value) return [];
+  
+  // 如果是数组，直接返回
+  if (Array.isArray(value)) {
+    return value;
+  }
+  
+  // 如果是字符串，尝试解析
+  const strValue = String(value);
+  
+  // 尝试解析为 JSON 数组
+  if (strValue.startsWith('[') && strValue.endsWith(']')) {
+    try {
+      return JSON.parse(strValue as unknown as string);
+    } catch (error) {
+      // JSON 解析失败，继续使用逗号分隔的方式
+    }
+  }
+  
+  // 使用逗号分隔
+  return strValue.split(',').map(tag => tag.trim()).filter(tag => tag);
+}
+
+/**
  * 用户相关操作
  */
 export const UserQueries = {
@@ -294,8 +322,8 @@ export const ProductQueries = {
       ...product,
       createdAt: product.createdAt || new Date().toISOString(),
       updatedAt: product.updatedAt || new Date().toISOString(),
-      tags: product.tags ? JSON.parse(product.tags as unknown as string) : [],
-      features: product.features ? JSON.parse(product.features as unknown as string) : []
+      tags: parseTagsOrFeatures(product.tags),
+      features: parseTagsOrFeatures(product.features)
     }));
   },
 
@@ -311,8 +339,8 @@ export const ProductQueries = {
     const product = results[0];
     return {
       ...product,
-      tags: product.tags ? JSON.parse(product.tags as unknown as string) : [],
-      features: product.features ? JSON.parse(product.features as unknown as string) : [],
+      tags: parseTagsOrFeatures(product.tags),
+      features: parseTagsOrFeatures(product.features),
       createdAt: product.createdAt || new Date().toISOString(),
       updatedAt: product.updatedAt || new Date().toISOString()
     } as Product;

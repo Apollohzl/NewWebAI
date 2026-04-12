@@ -136,24 +136,25 @@ export const BlogQueries = {
   async getList(limit: number = 10, skip: number = 0): Promise<BlogPost[]> {
     console.log('BlogQueries.getList called with limit:', limit, 'skip:', skip, 'types:', typeof limit, typeof skip);
     
-    // 先获取文章列表（不带标签）
+    const safeLimit = Math.max(1, Math.min(100, parseInt(limit.toString(), 10) || 10));
+    const safeSkip = Math.max(0, parseInt(skip.toString(), 10) || 0);
+    
+    // 先获取文章列表（不带标签）- 直接拼接参数避免参数化问题
     const posts = await query(
       `SELECT * FROM blogposts
        WHERE status = '正常'
        ORDER BY id DESC 
-       LIMIT ? OFFSET ?`,
-      [parseInt(limit.toString(), 10), parseInt(skip.toString(), 10)]
+       LIMIT ${safeLimit} OFFSET ${safeSkip}`
     ) as any[];
     
     // 如果有文章，获取标签
     if (posts.length > 0) {
-      const postIds = posts.map(p => p.id);
+      const postIds = posts.map(p => `'${p.id}'`).join(',');
       const tagRelations = await query(
         `SELECT bpt.post_id, bt.tag_name
          FROM blog_post_tags bpt
          JOIN blog_tags bt ON bpt.tag_id = bt.id
-         WHERE bpt.post_id IN (${postIds.map(() => '?').join(',')})`,
-        postIds
+         WHERE bpt.post_id IN (${postIds})`
       ) as any[];
       
       // 将标签关联到文章
@@ -187,14 +188,13 @@ export const BlogQueries = {
   // 根据ID获取博客文章
   async findById(id: string): Promise<SingleResult<BlogPost>> {
     // 获取文章基本信息
-    const postResults = await query(
-      'SELECT * FROM blogposts WHERE id = ? LIMIT 1',
-      [id]
+    const results = await query(
+      `SELECT * FROM blogposts WHERE id = '${id.replace(/'/g, "\\'")}' LIMIT 1`
     ) as any[];
     
-    if (postResults.length === 0) return null;
+    if (results.length === 0) return null;
     
-    const post = postResults[0];
+    const post = results[0];
     
     // 获取文章标签
     const tagResults = await query(
@@ -348,17 +348,17 @@ export const BlogQueries = {
 
   // 根据作者获取博客文章
   async getByAuthor(author: string, limit: number = 10): Promise<BlogPost[]> {
-      const results = await query(
-        `SELECT bp.*, GROUP_CONCAT(bt.tag_name) as tags
-         FROM blogposts bp
-         LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
-         LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
-         WHERE bp.author = ? AND bp.status = '正常'
-         GROUP BY bp.id
-         ORDER BY bp.id DESC 
-        LIMIT ?`,
-        [author, limit]
-      ) as any[];    return results.map((post: any) => ({
+      const safeLimit = Math.max(1, Math.min(100, parseInt(limit.toString(), 10) || 10));
+      const safeAuthor = author.replace(/'/g, "\\'");
+      
+      const posts = await query(
+        `SELECT * FROM blogposts
+         WHERE author = '${safeAuthor}' AND status = '正常'
+         ORDER BY id DESC 
+         LIMIT ${safeLimit}`
+      ) as any[];
+    
+    return posts.map((post: any) => ({
       ...post,
       id: post.id.toString(),
       tags: post.tags ? post.tags.split(',') : [],

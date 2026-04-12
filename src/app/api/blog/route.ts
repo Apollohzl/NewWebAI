@@ -13,7 +13,24 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
     
-    // 构建查询条件
+    // 如果没有筛选条件，使用 BlogQueries.getList
+    if (!search && !category && !author) {
+      const posts = await BlogQueries.getList(limit, skip);
+      const total = await getTotalBlogCount();
+      
+      return NextResponse.json({
+        posts: formatPosts(posts),
+        pagination: {
+          current: page,
+          total: Math.ceil(total / limit),
+          count: total,
+          hasNext: page * limit < total,
+          hasPrev: page > 1
+        }
+      });
+    }
+    
+    // 如果有筛选条件，构建查询
     let whereClause = 'WHERE published = TRUE';
     const params: any[] = [];
     
@@ -39,28 +56,22 @@ export async function GET(request: NextRequest) {
     const countResultArray = await (await import('@/lib/sql')).query(countQuery, params) as any[];
     const total = countResultArray[0]?.count || 0;
 
-    // 获取文章列表
+    // 获取文章列表（使用 JOIN 获取标签）
     const selectQuery = `
-      SELECT * FROM blog_posts 
+      SELECT bp.*, GROUP_CONCAT(bt.tag_name) as tags
+      FROM blog_posts bp
+      LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
+      LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
       ${whereClause}
-      ORDER BY created_at DESC 
+      GROUP BY bp.id
+      ORDER BY bp.created_at DESC 
       LIMIT ? OFFSET ?
     `;
     const postsResult = await (await import('@/lib/sql')).query(selectQuery, [...params, limit, skip]) as any[];
     const posts = postsResult.length > 0 ? postsResult : [];
 
-    // 转换为前端需要的格式
-    const formattedPosts = posts.map((post: any) => ({
-      ...post,
-      id: post.id.toString(),
-      objectId: post.id.toString(),
-      published: post.published === 1,
-      createdAt: post.createdAt || new Date().toISOString(),
-      updatedAt: post.updatedAt || new Date().toISOString()
-    }));
-
     return NextResponse.json({
-      posts: formattedPosts,
+      posts: formatPosts(posts),
       pagination: {
         current: page,
         total: Math.ceil(total / limit),
@@ -76,6 +87,29 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// 辅助函数：获取博客总数
+async function getTotalBlogCount(): Promise<number> {
+  try {
+    const result = await (await import('@/lib/sql')).query('SELECT COUNT(*) as count FROM blog_posts WHERE published = TRUE') as any[];
+    return result[0]?.count || 0;
+  } catch {
+    return 0;
+  }
+}
+
+// 辅助函数：格式化博客数据
+function formatPosts(posts: any[]): any[] {
+  return posts.map((post: any) => ({
+    ...post,
+    id: post.id.toString(),
+    objectId: post.id.toString(),
+    published: post.published === 1,
+    tags: post.tags ? post.tags.split(',') : [],
+    createdAt: post.created_at || post.createdAt || new Date().toISOString(),
+    updatedAt: post.updated_at || post.updatedAt || new Date().toISOString()
+  }));
 }
 
 export async function POST(request: NextRequest) {

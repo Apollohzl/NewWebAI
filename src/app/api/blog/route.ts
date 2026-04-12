@@ -27,10 +27,10 @@ export async function GET(request: NextRequest) {
       params.push(author);
     }
     
-    if (search) {
+    if (search && search.trim()) {
       // 全文搜索
       whereClause += ` AND (title LIKE ? OR content LIKE ?)`;
-      const searchTerm = `%${search}%`;
+      const searchTerm = `%${search.trim()}%`;
       params.push(searchTerm, searchTerm);
     }
 

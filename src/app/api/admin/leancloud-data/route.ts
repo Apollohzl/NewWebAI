@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     let blogPosts: any[] = [];
     try {
       console.log('尝试获取博客文章...');
-      const postsResult = await query('SELECT * FROM blog_posts ORDER BY created_at DESC LIMIT 100') as any[];
+      const postsResult = await query('SELECT * FROM blog_posts ORDER BY id DESC LIMIT 100') as any[];
       const [posts] = postsResult.length > 0 ? [postsResult] : [[]];
       blogPosts = posts || [];
       console.log(`成功获取 ${blogPosts.length} 篇博客文章`);
@@ -46,24 +46,8 @@ export async function GET(request: NextRequest) {
 
     // 获取今日新增用户
     let todayNewUsers = 0;
-    try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
-      const userCountResult = await query(
-        'SELECT COUNT(*) as count FROM users WHERE created_at >= ? AND created_at < ?',
-        [today, tomorrow]
-      ) as any[];
-      
-      if (userCountResult && userCountResult.length > 0) {
-        todayNewUsers = userCountResult[0].count;
-      }
-    } catch (error) {
-      console.error('获取今日新增用户失败:', error);
-      todayNewUsers = 0;
-    }
+    // 注意：由于 created_at 字段由 SQLPub 自动管理，暂时无法统计今日新增用户
+    // 如果需要此功能，请联系数据库管理员确认字段名称
 
     const data = {
       blogPosts,

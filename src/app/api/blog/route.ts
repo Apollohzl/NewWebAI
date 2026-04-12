@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
       ${whereClause}
       GROUP BY bp.id
-      ORDER BY bp.created_at DESC 
+      ORDER BY bp.id DESC 
       LIMIT ? OFFSET ?
     `;
     const postsResult = await (await import('@/lib/sql')).query(selectQuery, [...params, limit, skip]) as any[];

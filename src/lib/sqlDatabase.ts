@@ -139,7 +139,7 @@ export const BlogQueries = {
        FROM blogposts bp
        LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
        LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
-       WHERE bp.published = TRUE 
+       WHERE bp.status = '正常'
        GROUP BY bp.id
        ORDER BY bp.id DESC 
        LIMIT ? OFFSET ?`,
@@ -193,7 +193,7 @@ export const BlogQueries = {
     
     // 插入文章基本信息
     await query(
-      `INSERT INTO blogposts (id, title, content, excerpt, category, author, read_time, published)
+      `INSERT INTO blogposts (id, title, content, excerpt, category, author, read_time, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
@@ -203,7 +203,7 @@ export const BlogQueries = {
         postData.category || '技术',
         postData.author,
         postData.readTime,
-        postData.published !== undefined ? postData.published : true
+        postData.published !== undefined ? (postData.published ? '正常' : '草稿') : '正常'
       ]
     );
 
@@ -250,7 +250,7 @@ export const BlogQueries = {
     // 更新文章基本信息
     await query(
       `UPDATE blogposts 
-       SET title = ?, content = ?, excerpt = ?, category = ?, author = ?, read_time = ?, published = ?
+       SET title = ?, content = ?, excerpt = ?, category = ?, author = ?, read_time = ?, status = ?
        WHERE id = ?`,
       [
         updates.title,
@@ -259,7 +259,7 @@ export const BlogQueries = {
         updates.category,
         updates.author,
         updates.readTime,
-        updates.published,
+        updates.published !== undefined ? (updates.published ? '正常' : '草稿') : '正常',
         id
       ]
     );
@@ -324,13 +324,12 @@ export const BlogQueries = {
          FROM blogposts bp
          LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
          LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
-         WHERE bp.author = ? AND bp.published = TRUE 
+         WHERE bp.author = ? AND bp.status = '正常'
          GROUP BY bp.id
          ORDER BY bp.id DESC 
-         LIMIT ?`,
+        LIMIT ?`,
         [author, limit]
-      ) as any[];    
-    return results.map((post: any) => ({
+      ) as any[];    return results.map((post: any) => ({
       ...post,
       id: post.id.toString(),
       tags: post.tags ? post.tags.split(',') : [],

@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     }
     
     // 如果有筛选条件，构建查询
-    let whereClause = 'WHERE published = TRUE';
+    let whereClause = 'WHERE status = "正常"';
     const params: any[] = [];
     
     if (category) {
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
 // 辅助函数：获取博客总数
 async function getTotalBlogCount(): Promise<number> {
   try {
-    const result = await (await import('@/lib/sql')).query('SELECT COUNT(*) as count FROM blogposts WHERE published = TRUE') as any[];
+    const result = await (await import('@/lib/sql')).query('SELECT COUNT(*) as count FROM blogposts WHERE status = "正常"') as any[];
     return result[0]?.count || 0;
   } catch {
     return 0;
@@ -105,7 +105,7 @@ function formatPosts(posts: any[]): any[] {
     ...post,
     id: post.id.toString(),
     objectId: post.id.toString(),
-    published: post.published === 1,
+    published: post.status === '正常',
     tags: post.tags ? post.tags.split(',') : [],
     createdAt: post.created_at || post.createdAt || new Date().toISOString(),
     updatedAt: post.updated_at || post.updatedAt || new Date().toISOString()

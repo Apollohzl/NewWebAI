@@ -22,10 +22,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 标记为未发布
+    // 标记为草稿
     await query(
-      'UPDATE blogposts SET published = ? WHERE id = ?',
-      [false, id]
+      'UPDATE blogposts SET status = ? WHERE id = ?',
+      ['草稿', id]
     );
 
     return NextResponse.json({

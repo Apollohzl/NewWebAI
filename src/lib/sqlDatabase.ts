@@ -135,22 +135,50 @@ export const BlogQueries = {
   // 获取博客列表
   async getList(limit: number = 10, skip: number = 0): Promise<BlogPost[]> {
     console.log('BlogQueries.getList called with limit:', limit, 'skip:', skip, 'types:', typeof limit, typeof skip);
-    const results = await query(
-      `SELECT bp.*, GROUP_CONCAT(bt.tag_name) as tags
-       FROM blogposts bp
-       LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
-       LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
-       WHERE bp.status = '正常'
-       GROUP BY bp.id
-       ORDER BY bp.id DESC 
+    
+    // 先获取文章列表（不带标签）
+    const posts = await query(
+      `SELECT * FROM blogposts
+       WHERE status = '正常'
+       ORDER BY id DESC 
        LIMIT ? OFFSET ?`,
       [parseInt(limit.toString(), 10), parseInt(skip.toString(), 10)]
     ) as any[];
     
-    return results.map((post: any) => ({
+    // 如果有文章，获取标签
+    if (posts.length > 0) {
+      const postIds = posts.map(p => p.id);
+      const tagRelations = await query(
+        `SELECT bpt.post_id, bt.tag_name
+         FROM blog_post_tags bpt
+         JOIN blog_tags bt ON bpt.tag_id = bt.id
+         WHERE bpt.post_id IN (${postIds.map(() => '?').join(',')})`,
+        postIds
+      ) as any[];
+      
+      // 将标签关联到文章
+      const postTags: Record<string, string[]> = {};
+      tagRelations.forEach((rel: any) => {
+        if (!postTags[rel.post_id]) {
+          postTags[rel.post_id] = [];
+        }
+        postTags[rel.post_id].push(rel.tag_name);
+      });
+      
+      // 添加标签到文章
+      return posts.map((post: any) => ({
+        ...post,
+        id: post.id.toString(),
+        tags: postTags[post.id] || [],
+        createdAt: post.created_at || new Date().toISOString(),
+        updatedAt: post.updated_at || new Date().toISOString()
+      }));
+    }
+    
+    return posts.map((post: any) => ({
       ...post,
       id: post.id.toString(),
-      tags: post.tags ? post.tags.split(',') : [],
+      tags: [],
       createdAt: post.created_at || new Date().toISOString(),
       updatedAt: post.updated_at || new Date().toISOString()
     }));

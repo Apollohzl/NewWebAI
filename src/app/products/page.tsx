@@ -1,55 +1,73 @@
-import { FaRobot, FaChartLine, FaCogs, FaGlobe, FaMobileAlt, FaLock } from 'react-icons/fa';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { FaRobot, FaChartLine, FaCogs, FaGlobe, FaMobileAlt, FaLock, FaFilter, FaSpinner } from 'react-icons/fa';
 import Link from 'next/link';
 
-export default function ProductsPage() {
-  const products = [
-    {
-      id: 1,
-      title: 'AI内容生成器',
-      description: '使用先进的GPT模型自动生成高质量文章、博客和营销内容',
-      icon: <FaRobot className="text-4xl text-blue-600" />,
-      features: ['智能内容生成', '多语言支持', 'SEO优化', '个性化定制']
-    },
-    {
-      id: 2,
-      title: '数据分析平台',
-      description: '实时分析业务数据，提供可视化报告和智能预测',
-      icon: <FaChartLine className="text-4xl text-green-600" />,
-      features: ['实时数据监控', '可视化报表', '趋势预测', '智能警报']
-    },
-    {
-      id: 3,
-      title: '智能客服系统',
-      description: '24/7全自动化客服，支持多渠道接入和智能对话',
-      icon: <FaCogs className="text-4xl text-purple-600" />,
-      features: ['多语言支持', '情感分析', '无缝转接人工', '对话记录']
-    },
-    {
-      id: 4,
-      title: '电商平台AI',
-      description: '个性化商品推荐，智能搜索，动态定价策略',
-      icon: <FaGlobe className="text-4xl text-yellow-600" />,
-      features: ['个性化推荐', '智能搜索', '动态定价', '库存预测']
-    }
-  ];
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: string;
+  original_price: string;
+  image: string | null;
+  category: string;
+  rating: string;
+  tags: string[];
+  features: string[];
+  in_stock: number;
+}
 
-  const features = [
-    {
-      title: '智能算法',
-      description: '基于最新AI技术，提供精准的分析和预测能力',
-      icon: <FaCogs className="text-blue-600" />
-    },
-    {
-      title: '多平台支持',
-      description: '支持Web、移动端、API等多种接入方式',
-      icon: <FaMobileAlt className="text-blue-600" />
-    },
-    {
-      title: '数据安全',
-      description: '采用银行级加密技术，确保数据安全和隐私',
-      icon: <FaLock className="text-blue-600" />
+export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('全部');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    if (selectedCategory === '全部') {
+      setFilteredProducts(products);
+    } else {
+      setFilteredProducts(products.filter(p => p.category === selectedCategory));
     }
-  ];
+  }, [selectedCategory, products]);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/config/products');
+      const data = await response.json();
+      
+      if (data.success) {
+        setProducts(data.data);
+        // 提取所有分类
+        const uniqueCategories = Array.from(new Set(data.data.map((p: Product) => p.category)));
+        setCategories(uniqueCategories);
+      } else {
+        setError('获取产品数据失败');
+      }
+    } catch (err) {
+      setError('网络错误，请稍后重试');
+      console.error('获取产品数据失败:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const categoryIcons: { [key: string]: any } = {
+    '软件工具': <FaRobot className="text-blue-600" />,
+    '数据分析': <FaChartLine className="text-green-600" />,
+    '客户服务': <FaCogs className="text-purple-600" />,
+    '创意设计': <FaGlobe className="text-yellow-600" />,
+    '开发工具': <FaLock className="text-red-600" />,
+    '营销工具': <FaMobileAlt className="text-indigo-600" />,
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
@@ -73,57 +91,121 @@ export default function ProductsPage() {
         <h1 className="text-4xl md:text-5xl font-bold text-center text-black mb-6">
           我们的 <span className="text-blue-600">AI产品</span>
         </h1>
-        <p className="text-xl text-center text-black max-w-3xl mx-auto mb-16">
+        <p className="text-xl text-center text-black max-w-3xl mx-auto mb-8">
           NewWebAI提供一系列智能化解决方案，帮助您的业务实现数字化转型
         </p>
 
-        {/* 核心功能 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-          {features.map((feature, index) => (
-            <div key={index} className="bg-white p-8 rounded-xl shadow-md text-center hover:shadow-lg transition">
-              <div className="flex justify-center mb-6">
-                <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center">
-                  {feature.icon}
-                </div>
-              </div>
-              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-black">{feature.description}</p>
-            </div>
-          ))}
-        </div>
+        {/* 分类筛选 */}
+        {categories.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-3 mb-12">
+            <button
+              onClick={() => setSelectedCategory('全部')}
+              className={`px-6 py-2 rounded-full transition ${
+                selectedCategory === '全部'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-black hover:bg-gray-300'
+              }`}
+            >
+              全部
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-6 py-2 rounded-full transition flex items-center gap-2 ${
+                  selectedCategory === category
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-black hover:bg-gray-300'
+                }`}
+              >
+                {categoryIcons[category]}
+                {category}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 加载状态 */}
+        {loading && (
+          <div className="flex justify-center items-center py-20">
+            <FaSpinner className="animate-spin text-blue-600 text-4xl" />
+          </div>
+        )}
+
+        {/* 错误状态 */}
+        {error && (
+          <div className="text-center py-20">
+            <p className="text-red-600 text-xl">{error}</p>
+            <button
+              onClick={fetchProducts}
+              className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+              重试
+            </button>
+          </div>
+        )}
 
         {/* 产品列表 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-20">
-          {products.map((product) => (
-            <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row">
-              <div className="p-8 flex flex-col justify-center">
-                <div className="mb-4">{product.icon}</div>
-                <h3 className="text-2xl font-bold text-black mb-3">{product.title}</h3>
-                <p className="text-black mb-6">{product.description}</p>
-                <ul className="space-y-2 mb-6">
-                  {product.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <button className="mt-auto bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-40">
-                  了解更多
-                </button>
-              </div>
-              <div className="md:w-2/5 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center p-8">
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 text-white text-center">
-                  <h4 className="font-bold mb-2">AI性能指标</h4>
-                  <p className="text-4xl font-bold mb-2">99.9%</p>
-                  <p className="text-sm">准确率</p>
+        {!loading && !error && filteredProducts.length === 0 && (
+          <div className="text-center py-20">
+            <p className="text-gray-600 text-xl">暂无产品数据</p>
+          </div>
+        )}
+
+        {!loading && !error && filteredProducts.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+            {filteredProducts.map((product) => (
+              <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">
+                      {product.category}
+                    </span>
+                    <div className="flex items-center text-yellow-500">
+                      <span className="ml-1 text-black">{product.rating}</span>
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-black mb-3">{product.name}</h3>
+                  <p className="text-black mb-4 line-clamp-2">{product.description}</p>
+                  
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {product.tags.map((tag, idx) => (
+                      <span key={idx} className="bg-gray-100 text-black px-2 py-1 rounded text-xs">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="space-y-2 mb-4">
+                    {product.features.slice(0, 3).map((feature, idx) => (
+                      <li key={idx} className="flex items-center text-sm text-black">
+                        <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        {feature}
+                      </li>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <span className="text-2xl font-bold text-blue-600">¥{product.price}</span>
+                      <span className="text-gray-400 line-through ml-2">¥{product.original_price}</span>
+                    </div>
+                    <span className={product.in_stock ? 'text-green-600' : 'text-red-600'}>
+                      {product.in_stock ? '有货' : '缺货'}
+                    </span>
+                  </div>
+
+                  <button className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+                    了解更多
+                  </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* 定价方案 */}
         <div className="text-center mb-16">
@@ -134,19 +216,19 @@ export default function ProductsPage() {
               <div className="text-4xl font-bold text-blue-600 mb-4">¥99<span className="text-lg">/月</span></div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   基础AI功能
                 </li>
                 <li className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   10,000次API调用
                 </li>
                 <li className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   基础支持
@@ -164,25 +246,25 @@ export default function ProductsPage() {
               <div className="text-4xl font-bold text-blue-600 mb-4">¥299<span className="text-lg">/月</span></div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   全部AI功能
                 </li>
                 <li className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   100,000次API调用
                 </li>
                 <li className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   优先支持
                 </li>
                 <li className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   个性化定制
@@ -197,25 +279,25 @@ export default function ProductsPage() {
               <div className="text-4xl font-bold text-blue-600 mb-4">定制报价</div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   全部功能
                 </li>
                 <li className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   无限API调用
                 </li>
                 <li className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   专属客户经理
                 </li>
                 <li className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   安全合规

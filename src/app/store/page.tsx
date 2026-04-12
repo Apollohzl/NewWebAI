@@ -128,8 +128,21 @@ const ProductPage = () => {
         const response = await fetch('/api/config/products');
         const data = await response.json();
         
-        if (response.ok) {
-          setProducts(data.products || []);
+        if (response.ok && data.success) {
+          // 转换数据格式以匹配 Product 接口
+          const formattedProducts = data.data.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            price: parseFloat(item.price),
+            originalPrice: parseFloat(item.original_price),
+            image: item.image || '/placeholder.png',
+            category: item.category,
+            rating: parseFloat(item.rating),
+            tags: item.tags || [],
+            features: item.features || []
+          }));
+          setProducts(formattedProducts);
         } else {
           setError('获取产品数据失败');
         }

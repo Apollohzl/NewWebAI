@@ -47,7 +47,7 @@ export default function ProductsPage() {
       if (data.success) {
         setProducts(data.data);
         // 提取所有分类
-        const uniqueCategories = Array.from(new Set(data.data.map((p: Product) => p.category)));
+        const uniqueCategories = Array.from(new Set<string>(data.data.map((p: Product) => p.category)));
         setCategories(uniqueCategories);
       } else {
         setError('获取产品数据失败');

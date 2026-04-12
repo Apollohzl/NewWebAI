@@ -8,6 +8,8 @@ export interface User {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Product {
@@ -22,6 +24,8 @@ export interface Product {
   features?: string[];
   createdAt?: string;
   updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CartItem {
@@ -45,6 +49,8 @@ export interface BlogPost {
   updatedAt: string;
   tags: string[];
   published: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ApiConfig {
@@ -61,6 +67,8 @@ export interface ApiConfig {
   methods?: string[];
   createdAt?: string;
   updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ChatMessage {
@@ -72,4 +80,5 @@ export interface ChatMessage {
   model?: string;
   sessionId?: string;
   createdAt?: string;
+  created_at?: string;
 }

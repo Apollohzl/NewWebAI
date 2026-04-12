@@ -81,9 +81,7 @@ export const UserQueries = {
 
     return {
       id,
-      ...userData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      ...userData
     } as User;
   },
 
@@ -124,8 +122,8 @@ export const UserQueries = {
       ...user,
       id: user.id.toString(),
       isActive: user.is_active !== undefined ? user.is_active : true,
-      createdAt: user.createdAt || new Date().toISOString(),
-      updatedAt: user.updatedAt || new Date().toISOString()
+      createdAt: user.created_at || new Date().toISOString(),
+      updatedAt: user.updated_at || new Date().toISOString()
     }));
   }
 };
@@ -243,9 +241,7 @@ export const BlogQueries = {
 
     return {
       id,
-      ...postData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      ...postData
     } as BlogPost;
   },
 
@@ -369,8 +365,7 @@ export const ChatQueries = {
 
     return {
       id,
-      ...messageData,
-      createdAt: new Date().toISOString()
+      ...messageData
     } as ChatMessage;
   },
 
@@ -420,8 +415,8 @@ export const ProductQueries = {
     
     return results.map((product: any) => ({
       ...product,
-      createdAt: product.createdAt || new Date().toISOString(),
-      updatedAt: product.updatedAt || new Date().toISOString(),
+      createdAt: product.created_at || new Date().toISOString(),
+      updatedAt: product.updated_at || new Date().toISOString(),
       tags: parseTagsOrFeatures(product.tags),
       features: parseTagsOrFeatures(product.features)
     }));
@@ -441,8 +436,8 @@ export const ProductQueries = {
       ...product,
       tags: parseTagsOrFeatures(product.tags),
       features: parseTagsOrFeatures(product.features),
-      createdAt: product.createdAt || new Date().toISOString(),
-      updatedAt: product.updatedAt || new Date().toISOString()
+      createdAt: product.created_at || new Date().toISOString(),
+      updatedAt: product.updated_at || new Date().toISOString()
     } as Product;
   }
 };
@@ -461,8 +456,8 @@ export const ApiQueries = {
       ...api,
       tags: api.tags ? JSON.parse(api.tags as unknown as string) : [],
       methods: api.methods ? JSON.parse(api.methods as unknown as string) : [],
-      createdAt: api.createdAt || new Date().toISOString(),
-      updatedAt: api.updatedAt || new Date().toISOString()
+      createdAt: api.created_at || new Date().toISOString(),
+      updatedAt: api.updated_at || new Date().toISOString()
     }));
   },
 
@@ -477,8 +472,8 @@ export const ApiQueries = {
       ...api,
       tags: api.tags ? JSON.parse(api.tags as unknown as string) : [],
       methods: api.methods ? JSON.parse(api.methods as unknown as string) : [],
-      createdAt: api.createdAt || new Date().toISOString(),
-      updatedAt: api.updatedAt || new Date().toISOString()
+      createdAt: api.created_at || new Date().toISOString(),
+      updatedAt: api.updated_at || new Date().toISOString()
     }));
   }
 };

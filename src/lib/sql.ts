@@ -54,6 +54,9 @@ export async function getConnection() {
  * 执行查询（带重试机制）
  */
 export async function query(sql: string, params?: any[], retries = 3): Promise<any> {
+  console.log('Query called with SQL:', sql);
+  console.log('Query params:', params, 'type:', typeof params);
+  
   for (let i = 0; i < retries; i++) {
     try {
       const [results] = await pool.execute(sql, params);

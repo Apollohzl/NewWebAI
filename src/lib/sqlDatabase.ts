@@ -134,6 +134,7 @@ export const UserQueries = {
 export const BlogQueries = {
   // 获取博客列表
   async getList(limit: number = 10, skip: number = 0): Promise<BlogPost[]> {
+    console.log('BlogQueries.getList called with limit:', limit, 'skip:', skip, 'types:', typeof limit, typeof skip);
     const results = await query(
       `SELECT bp.*, GROUP_CONCAT(bt.tag_name) as tags
        FROM blogposts bp
@@ -143,7 +144,7 @@ export const BlogQueries = {
        GROUP BY bp.id
        ORDER BY bp.id DESC 
        LIMIT ? OFFSET ?`,
-      [limit, skip]
+      [parseInt(limit.toString(), 10), parseInt(skip.toString(), 10)]
     ) as any[];
     
     return results.map((post: any) => ({

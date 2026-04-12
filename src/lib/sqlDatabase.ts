@@ -115,7 +115,7 @@ export const UserQueries = {
   // 获取所有用户
   async getAll(): Promise<User[]> {
     const results = await query(
-      'SELECT * FROM users ORDER BY created_at DESC'
+      'SELECT * FROM users ORDER BY id DESC'
     ) as any[];
     
     return results.map((user: any) => ({
@@ -374,7 +374,7 @@ export const ChatQueries = {
     const results = await query(
       `SELECT * FROM chat_messages 
        WHERE user_id = ? 
-       ORDER BY created_at DESC 
+       ORDER BY id DESC 
        LIMIT ?`,
       [userId, limit]
     ) as ChatMessage[];
@@ -391,7 +391,7 @@ export const ChatQueries = {
     const results = await query(
       `SELECT * FROM chat_messages 
        WHERE session_id = ? 
-       ORDER BY created_at ASC`,
+       ORDER BY id ASC`,
       [sessionId]
     ) as ChatMessage[];
     
@@ -410,7 +410,7 @@ export const ProductQueries = {
   // 获取所有产品
   async getAll(): Promise<Product[]> {
     const results = await query(
-      'SELECT * FROM products WHERE in_stock = TRUE ORDER BY created_at DESC'
+      'SELECT * FROM products WHERE in_stock = TRUE ORDER BY id DESC'
     ) as Product[];
     
     return results.map((product: any) => ({

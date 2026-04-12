@@ -106,7 +106,7 @@ function formatPosts(posts: any[]): any[] {
     id: post.id.toString(),
     objectId: post.id.toString(),
     published: post.status === '正常',
-    tags: post.tags ? post.tags.split(',') : [],
+    tags: Array.isArray(post.tags) ? post.tags : (post.tags ? post.tags.split(',') : []),
     createdAt: post.created_at || post.createdAt || new Date().toISOString(),
     updatedAt: post.updated_at || post.updatedAt || new Date().toISOString()
   }));

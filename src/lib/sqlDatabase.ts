@@ -361,7 +361,7 @@ export const BlogQueries = {
     return posts.map((post: any) => ({
       ...post,
       id: post.id.toString(),
-      tags: post.tags ? post.tags.split(',') : [],
+      tags: Array.isArray(post.tags) ? post.tags : (post.tags ? post.tags.split(',') : []),
       createdAt: post.created_at || new Date().toISOString(),
       updatedAt: post.updated_at || new Date().toISOString()
     }));

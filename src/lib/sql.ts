@@ -19,10 +19,18 @@ const dbConfig = {
 const poolConfig = {
   ...dbConfig,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: 5,
   queueLimit: 0,
   enableKeepAlive: true,
-  keepAliveInitialDelay: 0
+  keepAliveInitialDelay: 0,
+  // 超时配置
+  connectTimeout: 60000, // 连接超时 60 秒
+  acquireTimeout: 60000, // 获取连接超时 60 秒
+  timeout: 60000, // 查询超时 60 秒
+  // SSL 配置
+  ssl: {
+    rejectUnauthorized: false
+  }
 };
 
 // 创建连接池
@@ -43,31 +51,59 @@ export async function getConnection() {
 }
 
 /**
- * 执行查询
+ * 执行查询（带重试机制）
  */
-export async function query(sql: string, params?: any[]) {
-  try {
-    const [results] = await pool.execute(sql, params);
-    return results;
-  } catch (error) {
-    console.error('❌ 查询执行失败:', error);
-    throw new Error(`查询执行失败: ${error instanceof Error ? error.message : String(error)}`);
+export async function query(sql: string, params?: any[], retries = 3): Promise<any> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const [results] = await pool.execute(sql, params);
+      return results;
+    } catch (error) {
+      console.error(`❌ 查询执行失败 (尝试 ${i + 1}/${retries}):`, error);
+      
+      // 如果是最后一次尝试，抛出错误
+      if (i === retries - 1) {
+        throw new Error(`查询执行失败: ${error instanceof Error ? error.message : String(error)}`);
+      }
+      
+      // 等待一段时间后重试
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+    }
   }
+  
+  throw new Error('查询执行失败：重试次数已用尽');
 }
 
 /**
  * 测试数据库连接
  */
-export async function testConnection() {
+export async function testConnection(): Promise<{ success: boolean; message: string; details?: any }> {
   try {
-    const connection = await getConnection();
+    const connection = await pool.getConnection();
     await connection.ping();
     connection.release();
-    console.log('✅ 数据库连接测试成功');
-    return true;
+    return {
+      success: true,
+      message: '数据库连接成功',
+      details: {
+        host: dbConfig.host,
+        port: dbConfig.port,
+        database: dbConfig.database
+      }
+    };
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error('❌ 数据库连接测试失败:', error);
-    return false;
+    return {
+      success: false,
+      message: `数据库连接失败: ${errorMessage}`,
+      details: {
+        host: dbConfig.host,
+        port: dbConfig.port,
+        database: dbConfig.database,
+        error: errorMessage
+      }
+    };
   }
 }
 

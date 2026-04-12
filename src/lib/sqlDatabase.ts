@@ -137,35 +137,55 @@ export const BlogQueries = {
   // 获取博客列表
   async getList(limit: number = 10, skip: number = 0): Promise<BlogPost[]> {
     const results = await query(
-      `SELECT * FROM blog_posts 
-       WHERE published = TRUE 
-       ORDER BY created_at DESC 
+      `SELECT bp.*, GROUP_CONCAT(bt.tag_name) as tags
+       FROM blog_posts bp
+       LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
+       LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
+       WHERE bp.published = TRUE 
+       GROUP BY bp.id
+       ORDER BY bp.created_at DESC 
        LIMIT ? OFFSET ?`,
       [limit, skip]
-    ) as BlogPost[];
+    ) as any[];
     
     return results.map((post: any) => ({
       ...post,
       id: post.id.toString(),
-      createdAt: post.createdAt || new Date().toISOString(),
-      updatedAt: post.updatedAt || new Date().toISOString()
+      tags: post.tags ? post.tags.split(',') : [],
+      createdAt: post.created_at || new Date().toISOString(),
+      updatedAt: post.updated_at || new Date().toISOString()
     }));
   },
 
   // 根据ID获取博客文章
   async findById(id: string): Promise<SingleResult<BlogPost>> {
-    const results = await query(
+    // 获取文章基本信息
+    const postResults = await query(
       'SELECT * FROM blog_posts WHERE id = ? LIMIT 1',
       [id]
-    ) as BlogPost[];
+    ) as any[];
     
-    if (results.length === 0) return null;
+    if (postResults.length === 0) return null;
+    
+    const post = postResults[0];
+    
+    // 获取文章标签
+    const tagResults = await query(
+      `SELECT bt.id, bt.tag_name
+       FROM blog_post_tags bpt
+       JOIN blog_tags bt ON bpt.tag_id = bt.id
+       WHERE bpt.post_id = ?`,
+      [id]
+    ) as any[];
+    
+    const tags = tagResults.map(t => t.tag_name);
     
     return {
-      ...results[0],
-      id: results[0].id.toString(),
-      createdAt: results[0].createdAt || new Date().toISOString(),
-      updatedAt: results[0].updatedAt || new Date().toISOString()
+      ...post,
+      id: post.id.toString(),
+      tags: tags,
+      createdAt: post.created_at || new Date().toISOString(),
+      updatedAt: post.updated_at || new Date().toISOString()
     };
   },
 
@@ -173,6 +193,7 @@ export const BlogQueries = {
   async create(postData: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt'>): Promise<BlogPost> {
     const id = Date.now().toString();
     
+    // 插入文章基本信息
     await query(
       `INSERT INTO blog_posts (id, title, content, excerpt, category, author, read_time, published)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -188,6 +209,38 @@ export const BlogQueries = {
       ]
     );
 
+    // 处理标签
+    if (postData.tags && Array.isArray(postData.tags) && postData.tags.length > 0) {
+      for (const tagName of postData.tags) {
+        if (typeof tagName !== 'string' || !tagName.trim()) continue;
+        
+        // 检查标签是否存在
+        const tagResults = await query(
+          'SELECT id FROM blog_tags WHERE tag_name = ? LIMIT 1',
+          [tagName.trim()]
+        ) as any[];
+        
+        let tagId: number;
+        
+        if (tagResults.length === 0) {
+          // 创建新标签
+          const insertResult = await query(
+            'INSERT INTO blog_tags (tag_name) VALUES (?)',
+            [tagName.trim()]
+          ) as any;
+          tagId = insertResult.insertId;
+        } else {
+          tagId = tagResults[0].id;
+        }
+        
+        // 创建文章-标签关联
+        await query(
+          'INSERT INTO blog_post_tags (post_id, tag_id) VALUES (?, ?)',
+          [id, tagId]
+        );
+      }
+    }
+
     return {
       id,
       ...postData,
@@ -198,6 +251,7 @@ export const BlogQueries = {
 
   // 更新博客文章
   async update(id: string, updates: Partial<BlogPost>): Promise<SingleResult<BlogPost>> {
+    // 更新文章基本信息
     await query(
       `UPDATE blog_posts 
        SET title = ?, content = ?, excerpt = ?, category = ?, author = ?, read_time = ?, published = ?
@@ -214,6 +268,47 @@ export const BlogQueries = {
       ]
     );
 
+    // 处理标签更新
+    if (updates.tags !== undefined) {
+      // 删除旧的标签关联
+      await query(
+        'DELETE FROM blog_post_tags WHERE post_id = ?',
+        [id]
+      );
+
+      // 创建新的标签关联
+      if (Array.isArray(updates.tags) && updates.tags.length > 0) {
+        for (const tagName of updates.tags) {
+          if (typeof tagName !== 'string' || !tagName.trim()) continue;
+          
+          // 检查标签是否存在
+          const tagResults = await query(
+            'SELECT id FROM blog_tags WHERE tag_name = ? LIMIT 1',
+            [tagName.trim()]
+          ) as any[];
+          
+          let tagId: number;
+          
+          if (tagResults.length === 0) {
+            // 创建新标签
+            const insertResult = await query(
+              'INSERT INTO blog_tags (tag_name) VALUES (?)',
+              [tagName.trim()]
+            ) as any;
+            tagId = insertResult.insertId;
+          } else {
+            tagId = tagResults[0].id;
+          }
+          
+          // 创建文章-标签关联
+          await query(
+            'INSERT INTO blog_post_tags (post_id, tag_id) VALUES (?, ?)',
+            [id, tagId]
+          );
+        }
+      }
+    }
+
     return this.findById(id);
   },
 
@@ -229,18 +324,23 @@ export const BlogQueries = {
   // 根据作者获取博客文章
   async getByAuthor(author: string, limit: number = 10): Promise<BlogPost[]> {
     const results = await query(
-      `SELECT * FROM blog_posts 
-       WHERE author = ? AND published = TRUE 
-       ORDER BY created_at DESC 
+      `SELECT bp.*, GROUP_CONCAT(bt.tag_name) as tags
+       FROM blog_posts bp
+       LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
+       LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
+       WHERE bp.author = ? AND bp.published = TRUE 
+       GROUP BY bp.id
+       ORDER BY bp.created_at DESC 
        LIMIT ?`,
       [author, limit]
-    ) as BlogPost[];
+    ) as any[];
     
     return results.map((post: any) => ({
       ...post,
       id: post.id.toString(),
-      createdAt: post.createdAt || new Date().toISOString(),
-      updatedAt: post.updatedAt || new Date().toISOString()
+      tags: post.tags ? post.tags.split(',') : [],
+      createdAt: post.created_at || new Date().toISOString(),
+      updatedAt: post.updated_at || new Date().toISOString()
     }));
   }
 };

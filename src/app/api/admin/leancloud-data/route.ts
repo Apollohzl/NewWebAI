@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     let blogPosts: any[] = [];
     try {
       console.log('尝试获取博客文章...');
-      const postsResult = await query('SELECT * FROM blog_posts ORDER BY id DESC LIMIT 100') as any[];
+      const postsResult = await query('SELECT * FROM blogposts ORDER BY id DESC LIMIT 100') as any[];
       const [posts] = postsResult.length > 0 ? [postsResult] : [[]];
       blogPosts = posts || [];
       console.log(`成功获取 ${blogPosts.length} 篇博客文章`);

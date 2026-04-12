@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     // 测试查询博客文章
     try {
-      const postsResult = await query('SELECT COUNT(*) as count FROM blog_posts') as any[];
+      const postsResult = await query('SELECT COUNT(*) as count FROM blogposts') as any[];
       const posts = postsResult.length > 0 ? postsResult : [];
       results.push({
         test: '查询博客文章',

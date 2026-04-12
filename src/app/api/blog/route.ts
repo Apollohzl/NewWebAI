@@ -52,14 +52,14 @@ export async function GET(request: NextRequest) {
     }
 
     // 计算总数
-    const countQuery = `SELECT COUNT(*) as count FROM blog_posts ${whereClause}`;
+    const countQuery = `SELECT COUNT(*) as count FROM blogposts ${whereClause}`;
     const countResultArray = await (await import('@/lib/sql')).query(countQuery, params) as any[];
     const total = countResultArray[0]?.count || 0;
 
     // 获取文章列表（使用 JOIN 获取标签）
     const selectQuery = `
       SELECT bp.*, GROUP_CONCAT(bt.tag_name) as tags
-      FROM blog_posts bp
+      FROM blogposts bp
       LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
       LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
       ${whereClause}
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
 // 辅助函数：获取博客总数
 async function getTotalBlogCount(): Promise<number> {
   try {
-    const result = await (await import('@/lib/sql')).query('SELECT COUNT(*) as count FROM blog_posts WHERE published = TRUE') as any[];
+    const result = await (await import('@/lib/sql')).query('SELECT COUNT(*) as count FROM blogposts WHERE published = TRUE') as any[];
     return result[0]?.count || 0;
   } catch {
     return 0;

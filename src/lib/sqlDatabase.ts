@@ -136,7 +136,7 @@ export const BlogQueries = {
   async getList(limit: number = 10, skip: number = 0): Promise<BlogPost[]> {
     const results = await query(
       `SELECT bp.*, GROUP_CONCAT(bt.tag_name) as tags
-       FROM blog_posts bp
+       FROM blogposts bp
        LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
        LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
        WHERE bp.published = TRUE 
@@ -159,7 +159,7 @@ export const BlogQueries = {
   async findById(id: string): Promise<SingleResult<BlogPost>> {
     // 获取文章基本信息
     const postResults = await query(
-      'SELECT * FROM blog_posts WHERE id = ? LIMIT 1',
+      'SELECT * FROM blogposts WHERE id = ? LIMIT 1',
       [id]
     ) as any[];
     
@@ -193,7 +193,7 @@ export const BlogQueries = {
     
     // 插入文章基本信息
     await query(
-      `INSERT INTO blog_posts (id, title, content, excerpt, category, author, read_time, published)
+      `INSERT INTO blogposts (id, title, content, excerpt, category, author, read_time, published)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
@@ -249,7 +249,7 @@ export const BlogQueries = {
   async update(id: string, updates: Partial<BlogPost>): Promise<SingleResult<BlogPost>> {
     // 更新文章基本信息
     await query(
-      `UPDATE blog_posts 
+      `UPDATE blogposts 
        SET title = ?, content = ?, excerpt = ?, category = ?, author = ?, read_time = ?, published = ?
        WHERE id = ?`,
       [
@@ -311,7 +311,7 @@ export const BlogQueries = {
   // 删除博客文章
   async delete(id: string): Promise<boolean> {
     const result = await query(
-      'DELETE FROM blog_posts WHERE id = ?',
+      'DELETE FROM blogposts WHERE id = ?',
       [id]
     ) as ResultSetHeader;
     return result.affectedRows > 0;
@@ -319,18 +319,17 @@ export const BlogQueries = {
 
   // 根据作者获取博客文章
   async getByAuthor(author: string, limit: number = 10): Promise<BlogPost[]> {
-    const results = await query(
-      `SELECT bp.*, GROUP_CONCAT(bt.tag_name) as tags
-       FROM blog_posts bp
-       LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
-       LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
-       WHERE bp.author = ? AND bp.published = TRUE 
-       GROUP BY bp.id
-       ORDER BY bp.id DESC 
-       LIMIT ?`,
-      [author, limit]
-    ) as any[];
-    
+      const results = await query(
+        `SELECT bp.*, GROUP_CONCAT(bt.tag_name) as tags
+         FROM blogposts bp
+         LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
+         LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
+         WHERE bp.author = ? AND bp.published = TRUE 
+         GROUP BY bp.id
+         ORDER BY bp.id DESC 
+         LIMIT ?`,
+        [author, limit]
+      ) as any[];    
     return results.map((post: any) => ({
       ...post,
       id: post.id.toString(),
@@ -496,7 +495,7 @@ export const DatabaseUtils = {
       const tablesResult = await query('SHOW TABLES') as any[];
       const tableNames = tablesResult.map((t: any) => Object.values(t)[0]);
       
-      const requiredTables = ['users', 'blog_posts', 'chat_messages', 'products'];
+      const requiredTables = ['users', 'blogposts', 'chat_messages', 'products'];
       const missingTables = requiredTables.filter(t => !tableNames.includes(t));
       
       if (missingTables.length > 0) {

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     // 标记为未发布
     await query(
-      'UPDATE blog_posts SET published = ? WHERE id = ?',
+      'UPDATE blogposts SET published = ? WHERE id = ?',
       [false, id]
     );
 

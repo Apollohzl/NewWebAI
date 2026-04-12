@@ -141,7 +141,7 @@ export const BlogQueries = {
        LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
        WHERE bp.published = TRUE 
        GROUP BY bp.id
-       ORDER BY bp.created_at DESC 
+       ORDER BY bp.id DESC 
        LIMIT ? OFFSET ?`,
       [limit, skip]
     ) as any[];
@@ -326,7 +326,7 @@ export const BlogQueries = {
        LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
        WHERE bp.author = ? AND bp.published = TRUE 
        GROUP BY bp.id
-       ORDER BY bp.created_at DESC 
+       ORDER BY bp.id DESC 
        LIMIT ?`,
       [author, limit]
     ) as any[];

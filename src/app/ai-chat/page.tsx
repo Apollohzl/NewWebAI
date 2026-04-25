@@ -6,6 +6,166 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import AdComponent from '@/components/AdComponent';
 
+// DrawCommandParser 组件 - 用于解析和执行 <draw> 命令
+const DrawCommandParser = ({ content }: { content: string }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [imageData, setImageData] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [showFullImage, setShowFullImage] = useState(false);
+  
+  // 解析 <draw> 命令
+  useEffect(() => {
+    const drawMatch = content.match(/<draw>(.*?)<\/draw>/s);
+    if (drawMatch) {
+      const drawCommand = drawMatch[1].trim();
+      console.log('解析到 draw 命令:', drawCommand);
+      
+      // 解析命令参数
+      const params: any = {};
+      const paramMatches = drawCommand.match(/(\w+):(["']?)([^"',]+)\2/g);
+      if (paramMatches) {
+        paramMatches.forEach(match => {
+          const [key, value] = match.split(/:(?=["']?[^"',]+["']?$)/);
+          params[key] = value.replace(/^["']|"'$/g, '');
+        });
+        
+        console.log('解析到参数:', params);
+        
+        // 调用图像生成 API
+        generateImage(params);
+      }
+    }
+  }, [content]);
+  
+  // 生成图像
+  const generateImage = async (params: any) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // 构建 API 请求 URL
+      const url = new URL('https://hzliflow.ken520.top/api/ai-image');
+      url.searchParams.append('prompt', params.prompt || '');
+      url.searchParams.append('model', params.model || 'zimage');
+      url.searchParams.append('style', params.style || '');
+      url.searchParams.append('width', params.width || '512');
+      url.searchParams.append('height', params.height || '512');
+      url.searchParams.append('seed', Date.now().toString());
+      
+      console.log('请求图像生成 API:', url.toString());
+      
+      const response = await fetch(url.toString());
+      const data = await response.json();
+      
+      console.log('图像生成 API 响应:', data);
+      
+      if (data.success && data.data) {
+        setImageData(data.data.imageData || null);
+        setImageUrl(data.data.imageUrl || null);
+      } else {
+        setError('图像生成失败: ' + (data.error?.message || '未知错误'));
+      }
+    } catch (err) {
+      console.error('图像生成错误:', err);
+      setError('图像生成失败: 网络错误');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // 下载图片
+  const downloadImage = () => {
+    if (imageData) {
+      const link = document.createElement('a');
+      link.href = imageData;
+      link.download = `image_${Date.now()}.jpg`;
+      link.click();
+    } else if (imageUrl) {
+      const link = document.createElement('a');
+      link.href = imageUrl;
+      link.download = `image_${Date.now()}.jpg`;
+      link.click();
+    }
+  };
+  
+  // 检查是否包含 <draw> 命令
+  const hasDrawCommand = content.includes('<draw>');
+  
+  if (!hasDrawCommand) {
+    // 如果没有 <draw> 命令，显示原始内容
+    return (
+      <ReactMarkdown 
+        remarkPlugins={[remarkGfm]} 
+        components={{
+          p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2 break-words" {...props} />,
+          li: ({node, ...props}) => <li className="mb-1 text-sm text-gray-700 break-words" {...props} />,
+          code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs break-all" {...props} />,
+          pre: ({node, ...props}) => <pre className="overflow-x-auto text-xs" {...props} />,
+          table: ({node, ...props}) => <table className="min-w-full text-xs" {...props} />,
+          th: ({node, ...props}) => <th className="px-2 py-1 border break-words" {...props} />,
+          td: ({node, ...props}) => <td className="px-2 py-1 border break-words" {...props} />,
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    );
+  }
+  
+  return (
+    <div className="space-y-4">
+      {/* 原始命令内容（隐藏） */}
+      <div className="hidden">{content}</div>
+      
+      {/* 加载状态 */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-8">
+          <div className="text-sm text-gray-600">正在生成图片...</div>
+        </div>
+      )}
+      
+      {/* 错误信息 */}
+      {error && (
+        <div className="bg-red-50 p-3 rounded-md">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+      
+      {/* 生成的图片 */}
+      {(imageData || imageUrl) && (
+        <div className="space-y-4">
+          <div className="flex justify-center">
+            <div 
+              className="cursor-pointer"
+              onClick={() => setShowFullImage(!showFullImage)}
+            >
+              <img 
+                src={imageData || imageUrl} 
+                alt="AI生成的图像" 
+                className={`max-w-full h-auto rounded-lg shadow-md transition-all ${showFullImage ? 'transform scale-150 z-10' : ''}`}
+                style={{ maxHeight: showFullImage ? '80vh' : '300px' }}
+              />
+            </div>
+          </div>
+          
+          <div className="flex justify-center">
+            <button 
+              onClick={downloadImage}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              下载图片
+            </button>
+          </div>
+          
+          <div className="text-center">
+            <p className="text-xs text-gray-500">生成图片会消耗右上角的余额</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // 🔧 思考内容标识符配置 - 在这里修改思考内容的开始和结束标识
 const THINKING_START_MARKER = '<think>';  // 思考内容的开始标识
 const THINKING_END_MARKER = '</think>';         // 思考内容的结束标识（之后的内容为最终回复）
@@ -163,7 +323,7 @@ export default function AIChatPage() {
           model: currentModel,
           temperature: temperature,
           max_tokens: maxTokens,
-          system:"**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端聊天界面只会使用一条消息显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多条消息，更加人性化，模拟更真实的AI聊天，注意要合理分段。",
+          system:"**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端聊天界面只会使用一条消息显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多条消息，更加人性化，模拟更真实的AI聊天，注意要合理分段。\n**AI绘画功能**：当用户要求你生成图片时，你需要在两个<N>之间使用以下格式命令：\n<draw>prompt:‘画面提示词’,model:’zimage‘,style:"风格",width:512,height:512</draw>\n其中：\n- prompt：画面提示词，描述你想生成的图像内容\n- model：固定为"zimage"，不要使用其他模型\n- style：图像风格，如"realistic"（写实）、"cartoon"（卡通）、"anime"（动漫）等\n- width和height：图像尺寸，建议使用512或1024\n例如：<draw>prompt:"一只可爱的小猫在花园里玩耍",model:"zimage",style:"cartoon",width:512,height:512</draw>",
           stream: true
         })
       });
@@ -586,20 +746,7 @@ export default function AIChatPage() {
                           <div key={segment.id} className="flex justify-start">
                             <div className="max-w-[70%] rounded-lg relative bg-white border border-gray-200">
                               <div className="p-3 rounded-lg overflow-x-auto">
-                                <ReactMarkdown 
-                                  remarkPlugins={[remarkGfm]} 
-                                  components={{
-                                    p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2 break-words" {...props} />,
-                                    li: ({node, ...props}) => <li className="mb-1 text-sm text-gray-700 break-words" {...props} />,
-                                    code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs break-all" {...props} />,
-                                    pre: ({node, ...props}) => <pre className="overflow-x-auto text-xs" {...props} />,
-                                    table: ({node, ...props}) => <table className="min-w-full text-xs" {...props} />,
-                                    th: ({node, ...props}) => <th className="px-2 py-1 border break-words" {...props} />,
-                                    td: ({node, ...props}) => <td className="px-2 py-1 border break-words" {...props} />,
-                                  }}
-                                >
-                                  {segment.content}
-                                </ReactMarkdown>
+                                <DrawCommandParser content={segment.content} />
                                 
                                 {/* 只在最后一个分段显示时间和模型信息 */}
                                 {index === (message.segments?.length || 0) - 1 && (

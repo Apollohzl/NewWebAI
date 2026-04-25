@@ -77,8 +77,8 @@ const ApiDetailPage = () => {
 
   useEffect(() => {
     // 加载API参数
-    if (apiId) {
-      fetch(`/api/config/params?api=${apiId}`)
+    if (currentApi && currentApi.name_v2) {
+      fetch(`/api/config/params?api=${currentApi.name_v2}`)
         .then(response => response.json())
         .then(data => {
           setApiParams(data);
@@ -95,7 +95,7 @@ const ApiDetailPage = () => {
         })
         .catch(error => console.error('Error loading API params:', error));
     }
-  }, [apiId]);
+  }, [apiId, currentApi]);
 
   // 加载AI模型列表（仅对AI对话API）
   useEffect(() => {

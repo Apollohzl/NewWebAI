@@ -16,7 +16,7 @@ const DrawCommandParser = ({ content }: { content: string }) => {
   
   // 解析 <draw> 命令
   useEffect(() => {
-    const drawMatch = content.match(/<draw>(.*?)<\/draw>/s);
+    const drawMatch = content.match(/<draw>([\s\S]*?)<\/draw>/);
     if (drawMatch) {
       const drawCommand = drawMatch[1].trim();
       console.log('解析到 draw 命令:', drawCommand);
@@ -140,7 +140,7 @@ const DrawCommandParser = ({ content }: { content: string }) => {
               onClick={() => setShowFullImage(!showFullImage)}
             >
               <img 
-                src={imageData || imageUrl} 
+                src={imageData || imageUrl || ''} 
                 alt="AI生成的图像" 
                 className={`max-w-full h-auto rounded-lg shadow-md transition-all ${showFullImage ? 'transform scale-150 z-10' : ''}`}
                 style={{ maxHeight: showFullImage ? '80vh' : '300px' }}

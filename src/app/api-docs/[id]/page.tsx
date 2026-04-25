@@ -149,6 +149,8 @@ const ApiDetailPage = () => {
             params.push(`${key}=${value}`);
           }
         });
+        // 添加stream参数
+        params.push('stream=true');
         if (params.length > 0) {
           url += '?' + params.join('&');
         }
@@ -193,6 +195,8 @@ const ApiDetailPage = () => {
             processedParams[key] = value;
           }
         });
+        // 添加stream参数
+        processedParams.stream = true;
         
         const response = await fetch(url, {
           method: activeMethod,

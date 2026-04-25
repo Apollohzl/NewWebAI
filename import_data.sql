@@ -9,7 +9,7 @@ INSERT INTO api_config (api_name, params) VALUES (
 
 INSERT INTO api_config (api_name, params) VALUES (
   'ai-chat',
-  '[{"name":"message","type":"string","required":false,"description":"对话消息（GET请求时使用）","example":"你好，请介绍一下你自己"},{"name":"messages","type":"array","required":false,"description":"对话消息数组（POST请求时使用），格式：[{role: \"user\", content: \"消息\"}]","example":"[{\\"role\\": \\"user\\", \\"content\\": \\"你好\\"}]"},{"name":"sessionId","type":"string","required":false,"description":"会话ID","example":"session_123"},{"name":"model","type":"string","required":false,"description":"AI模型(openai/claude/gemini等)","example":"openai"},{"name":"temperature","type":"number","required":false,"description":"创造性控制(0-2，默认0.7)","example":"0.7"},{"name":"max_tokens","type":"number","required":false,"description":"最大回复长度(默认2000)","example":"2000"}]'
+  '[{"name":"message","type":"string","required":false,"description":"对话消息（GET请求时使用）","example":"你好，请介绍一下你自己"},{"name":"messages","type":"array","required":false,"description":"对话消息数组（POST请求时使用），格式：[{role: user, content: 消息}]","example":"[{role: user, content: 你好}]"},{"name":"sessionId","type":"string","required":false,"description":"会话ID","example":"session_123"},{"name":"model","type":"string","required":false,"description":"AI模型(openai/claude/gemini等)","example":"openai"},{"name":"temperature","type":"number","required":false,"description":"创造性控制(0-2，默认0.7)","example":"0.7"},{"name":"max_tokens","type":"number","required":false,"description":"最大回复长度(默认2000)","example":"2000"}]'
 );
 
 INSERT INTO api_config (api_name, params) VALUES (

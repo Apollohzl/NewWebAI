@@ -180,12 +180,24 @@ const ApiDetailPage = () => {
         });
       } else {
         // POST、PUT、PATCH请求使用请求体
+        // 转换数字类型的参数
+        const processedParams: Record<string, any> = {};
+        Object.entries(testParams).forEach(([key, value]) => {
+          if (key === 'temperature') {
+            processedParams[key] = parseFloat(value);
+          } else if (key === 'max_tokens') {
+            processedParams[key] = parseInt(value, 10);
+          } else {
+            processedParams[key] = value;
+          }
+        });
+        
         const response = await fetch(url, {
           method: activeMethod,
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(testParams)
+          body: JSON.stringify(processedParams)
         });
         
         // 检查响应是否为JSON

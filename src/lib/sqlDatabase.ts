@@ -481,8 +481,8 @@ export const ApiQueries = {
     
     return results.map((api: any) => ({
       ...api,
-      tags: api.tags ? JSON.parse(api.tags as unknown as string) : [],
-      methods: api.methods ? JSON.parse(api.methods as unknown as string) : [],
+      tags: parseTagsOrFeatures(api.tags),
+      methods: parseTagsOrFeatures(api.methods),
       createdAt: api.created_at || new Date().toISOString(),
       updatedAt: api.updated_at || new Date().toISOString()
     }));
@@ -497,8 +497,8 @@ export const ApiQueries = {
     
     return results.map((api: any) => ({
       ...api,
-      tags: api.tags ? JSON.parse(api.tags as unknown as string) : [],
-      methods: api.methods ? JSON.parse(api.methods as unknown as string) : [],
+      tags: parseTagsOrFeatures(api.tags),
+      methods: parseTagsOrFeatures(api.methods),
       createdAt: api.created_at || new Date().toISOString(),
       updatedAt: api.updated_at || new Date().toISOString()
     }));

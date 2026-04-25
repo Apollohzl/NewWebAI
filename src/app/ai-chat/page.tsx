@@ -22,19 +22,51 @@ const DrawCommandParser = ({ content }: { content: string }) => {
       console.log('解析到 draw 命令:', drawCommand);
       
       // 解析命令参数
-      const params: any = {};
-      const paramMatches = drawCommand.match(/(\w+):(["']?)([^"',]+)\2/g);
-      if (paramMatches) {
-        paramMatches.forEach(match => {
-          const [key, value] = match.split(/:(?=["']?[^"',]+["']?$)/);
-          params[key] = value.replace(/^["']|"'$/g, '');
-        });
-        
-        console.log('解析到参数:', params);
-        
-        // 调用图像生成 API
-        generateImage(params);
+      const params: any = {
+        seed: -1 // 默认 seed 值
+      };
+      
+      // 处理可能的参数格式问题
+      const lines = drawCommand.split(',');
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine) {
+          const colonIndex = trimmedLine.indexOf(':');
+          if (colonIndex > 0) {
+            const key = trimmedLine.substring(0, colonIndex).trim();
+            let value = trimmedLine.substring(colonIndex + 1).trim();
+            
+            // 移除可能的引号
+            value = value.replace(/^["']|"'$/g, '');
+            // 移除末尾可能的多余字符
+            value = value.replace(/["']*$/, '');
+            
+            params[key] = value;
+          }
+        }
+      });
+      
+      // 确保必要参数存在
+      if (!params.prompt) {
+        params.prompt = '';
       }
+      if (!params.model) {
+        params.model = 'zimage';
+      }
+      if (!params.style) {
+        params.style = '';
+      }
+      if (!params.width) {
+        params.width = '512';
+      }
+      if (!params.height) {
+        params.height = '512';
+      }
+      
+      console.log('解析到参数:', params);
+      
+      // 调用图像生成 API
+      generateImage(params);
     }
   }, [content]);
   

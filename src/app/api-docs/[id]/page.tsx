@@ -138,8 +138,10 @@ const ApiDetailPage = () => {
       let response;
 
       if (activeMethod === 'GET' || activeMethod === 'DELETE') {
-        // GET和DELETE请求使用查询参数
-        let params = new URLSearchParams(testParams).toString();
+        // GET和DELETE请求使用查询参数（不进行URL编码）
+        let params = Object.entries(testParams)
+          .map(([key, value]) => `${key}=${value}`)
+          .join('&');
         if (params) {
           url += '?' + params;
         }

@@ -89,7 +89,7 @@ const DrawCommandParser = ({ content }: { content: string }) => {
       url.searchParams.append('style', params.style || '');
       url.searchParams.append('width', params.width || '512');
       url.searchParams.append('height', params.height || '512');
-      url.searchParams.append('seed', Date.now().toString());
+      url.searchParams.append('seed', '-1');
       
       console.log('请求图像生成 API:', url.toString());
       

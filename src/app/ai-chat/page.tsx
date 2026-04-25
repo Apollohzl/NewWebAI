@@ -21,6 +21,16 @@ const DrawCommandParser = ({ content }: { content: string }) => {
       const drawCommand = drawMatch[1].trim();
       console.log('解析到 draw 命令:', drawCommand);
       
+      // 检查是否已经处理过这个命令（避免重复请求）
+      const commandHash = btoa(drawCommand);
+      if (window.sessionStorage.getItem(`draw_${commandHash}`)) {
+        console.log('跳过重复的 draw 命令');
+        return;
+      }
+      
+      // 标记命令已处理
+      window.sessionStorage.setItem(`draw_${commandHash}`, 'processed');
+      
       // 解析命令参数
       const params: any = {
         seed: -1 // 默认 seed 值

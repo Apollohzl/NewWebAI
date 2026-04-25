@@ -186,14 +186,11 @@ const DrawCommandParser = ({ content }: { content: string }) => {
             </button>
             <button
               onClick={() => {
-                if (imageData || imageUrl) {
-                  const imageLink = imageData || imageUrl;
-                  if (imageLink) {
-                    navigator.clipboard.writeText(imageLink).then(() => {
-                      alert('图片链接已复制到剪贴板');
-                    }).catch(() => {
-                    });
-                  }
+                if (imageUrl) {
+                  navigator.clipboard.writeText(imageUrl).then(() => {
+                    alert('图片链接已复制到剪贴板');
+                  }).catch(() => {
+                  });
                 }
               }}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"

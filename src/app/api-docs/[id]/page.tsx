@@ -132,8 +132,8 @@ const ApiDetailPage = () => {
     if (!currentApi) return;
     
     try {
-      // 使用相对路径而不是绝对URL
-      let url = `/api/${currentApi.id}`;
+      // 使用从 /apis 端点获取的 requestUrl
+      let url = currentApi.requestUrl;
       let response;
 
       if (activeMethod === 'GET' || activeMethod === 'DELETE') {

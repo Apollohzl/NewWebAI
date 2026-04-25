@@ -25,6 +25,7 @@ interface ApiMethodData {
 interface ApiInfo {
   id: string;
   name: string;
+  name_v2: string;
   description: string;
   status: string;
   visits: string;

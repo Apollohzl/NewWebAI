@@ -84,11 +84,12 @@ CREATE TABLE IF NOT EXISTS blog_post_tags (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='博客文章标签关联表';
 
 -- =====================================================
--- API配置表 (api_configs)
+-- API配置表 (apis)
 -- =====================================================
-CREATE TABLE IF NOT EXISTS api_configs (
+CREATE TABLE IF NOT EXISTS apis (
   id VARCHAR(255) PRIMARY KEY COMMENT 'API ID',
   name VARCHAR(255) NOT NULL COMMENT 'API名称',
+  name_v2 VARCHAR(255) NOT NULL COMMENT 'API名称_v2',
   description TEXT COMMENT 'API描述',
   category VARCHAR(100) COMMENT '分类',
   tags JSON COMMENT '标签数组',

@@ -56,6 +56,7 @@ export interface BlogPost {
 export interface ApiConfig {
   id: string;
   name: string;
+  name_v2: string;
   endpoint: string;
   method: string;
   category?: string;

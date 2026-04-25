@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     // 使用 SQL 数据库更新 API 状态
     const result = await query(
-      'UPDATE api_configs SET status = ? WHERE id = ?',
+      'UPDATE apis SET status = ? WHERE id = ?',
       [status, id]
     );
 

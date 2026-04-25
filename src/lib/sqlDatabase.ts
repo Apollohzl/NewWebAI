@@ -476,7 +476,7 @@ export const ApiQueries = {
   // 获取所有API配置
   async getAll(): Promise<ApiConfig[]> {
     const results = await query(
-      'SELECT * FROM api_configs ORDER BY visits DESC'
+      'SELECT * FROM apis ORDER BY visits DESC'
     ) as ApiConfig[];
     
     return results.map((api: any) => ({
@@ -491,7 +491,7 @@ export const ApiQueries = {
   // 根据分类获取API配置
   async getByCategory(category: string): Promise<ApiConfig[]> {
     const results = await query(
-      'SELECT * FROM api_configs WHERE category = ? ORDER BY visits DESC',
+      'SELECT * FROM apis WHERE category = ? ORDER BY visits DESC',
       [category]
     ) as ApiConfig[];
     

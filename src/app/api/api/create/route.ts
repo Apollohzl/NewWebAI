@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     // 创建新API配置到 SQL 数据库
     const now = new Date();
     const sql = `
-      INSERT INTO api_configs (id, name, description, endpoint, method, category, status, tags, visits, icon, request_url, methods, created_at, updated_at)
+      INSERT INTO apis (id, name, description, endpoint, method, category, status, tags, visits, icon, request_url, methods, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     

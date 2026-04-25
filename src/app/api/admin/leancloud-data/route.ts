@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     let apis: any[] = [];
     try {
       console.log('尝试获取API配置...');
-      const apiResult = await query('SELECT * FROM api_configs ORDER BY visits DESC') as any[];
+      const apiResult = await query('SELECT * FROM apis ORDER BY visits DESC') as any[];
       const [apiData] = apiResult.length > 0 ? [apiResult] : [[]];
       apis = apiData || [];
       console.log(`成功获取 ${apis.length} 个API配置`);

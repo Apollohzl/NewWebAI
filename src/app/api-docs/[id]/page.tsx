@@ -150,7 +150,7 @@ const ApiDetailPage = () => {
           }
         });
         // 添加stream参数
-        params.push('stream=true');
+        params.push('stream=false');
         if (params.length > 0) {
           url += '?' + params.join('&');
         }
@@ -196,7 +196,7 @@ const ApiDetailPage = () => {
           }
         });
         // 添加stream参数
-        processedParams.stream = true;
+        processedParams.stream = false;
         
         const response = await fetch(url, {
           method: activeMethod,

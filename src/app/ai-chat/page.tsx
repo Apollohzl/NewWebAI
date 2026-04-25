@@ -19,12 +19,10 @@ const DrawCommandParser = ({ content }: { content: string }) => {
     const drawMatch = content.match(/<draw>([\s\S]*?)<\/draw>/);
     if (drawMatch) {
       const drawCommand = drawMatch[1].trim();
-      console.log('解析到 draw 命令:', drawCommand);
       
       // 检查是否已经处理过这个命令（避免重复请求）
       const commandHash = btoa(drawCommand);
       if (window.sessionStorage.getItem(`draw_${commandHash}`)) {
-        console.log('跳过重复的 draw 命令');
         return;
       }
       
@@ -79,8 +77,6 @@ const DrawCommandParser = ({ content }: { content: string }) => {
       // 强制设置 seed 为 -1
       params.seed = -1;
       
-      console.log('解析到参数:', params);
-      
       // 调用图像生成 API
       generateImage(params);
     }
@@ -101,12 +97,10 @@ const DrawCommandParser = ({ content }: { content: string }) => {
       url.searchParams.append('height', params.height || '512');
       url.searchParams.append('seed', '-1');
       
-      console.log('请求图像生成 API:', url.toString());
+
       
       const response = await fetch(url.toString());
       const data = await response.json();
-      
-      console.log('图像生成 API 响应:', data);
       
       if (data.success && data.data) {
         setImageData(data.data.imageData || null);
@@ -115,7 +109,6 @@ const DrawCommandParser = ({ content }: { content: string }) => {
         setError('图像生成失败: ' + (data.error?.message || '未知错误'));
       }
     } catch (err) {
-      console.error('图像生成错误:', err);
       setError('图像生成失败: 网络错误');
     } finally {
       setIsLoading(false);
@@ -210,8 +203,7 @@ const DrawCommandParser = ({ content }: { content: string }) => {
                   if (imageLink) {
                     navigator.clipboard.writeText(imageLink).then(() => {
                       alert('图片链接已复制到剪贴板');
-                    }).catch(err => {
-                      console.error('复制失败:', err);
+                    }).catch(() => {
                     });
                   }
                 }
@@ -306,7 +298,6 @@ export default function AIChatPage() {
         }
       }
     } catch (error) {
-      console.error('获取余额失败:', error);
     }
   };
 
@@ -344,7 +335,7 @@ export default function AIChatPage() {
           }
         }
       })
-      .catch(error => console.error('Failed to load models:', error));
+      .catch(() => {});
   }, []);
 
   // 自动滚动到底部
@@ -410,7 +401,7 @@ export default function AIChatPage() {
         });
       }
       
-      console.log('处理后的消息列表:', processedMessages);
+
 
       const response = await fetch('/api/ai-chat', {
         method: 'POST',
@@ -519,8 +510,7 @@ export default function AIChatPage() {
                   
                   // B. 主要内容：处理流式输出的主要内容
                   if (delta && delta.content) {
-                    console.log('收到内容chunk:', delta.content);
-                    savedContent += delta.content; // 保存原始内容
+                      savedContent += delta.content; // 保存原始内容
                     
                     if (usesReasoningField) {
                       // 使用reasoning_content字段的方式
@@ -529,15 +519,12 @@ export default function AIChatPage() {
                         hasStartedMainContent = true;
                         shid = Date.now().toString();
                         sh = '';
-                        console.log('🔄 开始处理主要内容');
                       }
                       // 拼接到sh
                       sh += delta.content;
-                      console.log('当前sh内容:', sh);
                     } else {
                       // 使用文本标记方式
                       fullContent += delta.content;
-                      console.log('当前fullContent:', fullContent);
                       
                       // 提取思考内容和最终回复
                       const startIndex = fullContent.indexOf(THINKING_START_MARKER);
@@ -555,7 +542,7 @@ export default function AIChatPage() {
                         if (!hasStartedMainContent && sh) {
                           hasStartedMainContent = true;
                           shid = Date.now().toString();
-                          console.log('🔄 开始处理主要内容');
+
                         }
                       } else if (startIndex !== -1) {
                         // 只有开始标识，没有结束标识，全部作为思考内容
@@ -570,14 +557,13 @@ export default function AIChatPage() {
                         if (!hasStartedMainContent && sh) {
                           hasStartedMainContent = true;
                           shid = Date.now().toString();
-                          console.log('🔄 开始处理主要内容');
+
                         }
                       }
                     }
                     
                     // 判断sh里面有没有<N>，如果有的话就拆出来进行分段
                     if (sh.includes('<N>')) {
-                      console.log('✅ 发现<N>标识符，开始分段');
                       const parts = sh.split('<N>');
                       segments = [];
                       
@@ -591,7 +577,7 @@ export default function AIChatPage() {
                         }
                       }
                       
-                      console.log('- 分段完成，共', segments.length, '个分段');
+
                       
                       // 更新消息，显示分段内容
                       addAssistantMessage();
@@ -616,7 +602,6 @@ export default function AIChatPage() {
                   }
                 }
               } catch (e) {
-                console.error('解析流式数据失败:', e);
               }
             }
           }
@@ -624,7 +609,6 @@ export default function AIChatPage() {
         
         // 流式完成后，如果还有剩余内容没有分段（没有<N>），创建单个分段
         if (hasStartedMainContent && sh && !sh.includes('<N>') && segments.length === 0) {
-          console.log('🔄 流式完成，创建最后一个分段');
           segments.push({
             id: shid,
             content: sh.trim()
@@ -634,7 +618,6 @@ export default function AIChatPage() {
         }
         
         // 🔄 重新处理保存的流式内容，确保最终显示内容正确
-        console.log('🔄 开始重新处理流式数据');
         
         // 重置变量
         let reprocessFullContent = '';
@@ -679,7 +662,6 @@ export default function AIChatPage() {
         
         // 重新分段处理
         if (reprocessHasStartedMainContent && reprocessSh) {
-          console.log('🔄 重新处理分段');
           
           if (reprocessSh.includes('<N>')) {
             const parts = reprocessSh.split('<N>');
@@ -694,8 +676,6 @@ export default function AIChatPage() {
                 });
               }
             }
-            
-            console.log('- 重新分段完成，共', reprocessSegments.length, '个分段');
           } else {
             reprocessSegments.push({
               id: Date.now().toString() + Math.random(),
@@ -722,7 +702,6 @@ export default function AIChatPage() {
       }
       
     } catch (error: any) {
-      console.error('Chat error:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -744,10 +723,8 @@ export default function AIChatPage() {
     navigator.clipboard.writeText(text).then(
       () => {
         // 可以添加一个提示，表示复制成功
-        console.log('内容已复制到剪贴板');
       },
-      (err) => {
-        console.error('复制失败: ', err);
+      () => {
       }
     );
   };

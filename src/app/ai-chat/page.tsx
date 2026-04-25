@@ -185,29 +185,78 @@ const DrawCommandParser = ({ content }: { content: string }) => {
           <div className="flex justify-center">
             <div 
               className="cursor-pointer"
-              onClick={() => setShowFullImage(!showFullImage)}
+              onClick={() => setShowFullImage(true)}
             >
               <img 
                 src={imageData || imageUrl || ''} 
                 alt="AI生成的图像" 
-                className={`max-w-full h-auto rounded-lg shadow-md transition-all ${showFullImage ? 'transform scale-150 z-10' : ''}`}
-                style={{ maxHeight: showFullImage ? '80vh' : '300px' }}
+                className="max-w-full h-auto rounded-lg shadow-md"
+                style={{ maxHeight: '300px' }}
               />
             </div>
           </div>
           
-          <div className="flex justify-center">
+          <div className="flex justify-center space-x-4">
             <button 
               onClick={downloadImage}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               下载图片
             </button>
+            <button 
+              onClick={() => {
+                if (imageData || imageUrl) {
+                  const imageLink = imageData || imageUrl;
+                  navigator.clipboard.writeText(imageLink).then(() => {
+                    alert('图片链接已复制到剪贴板');
+                  }).catch(err => {
+                    console.error('复制失败:', err);
+                  });
+                }
+              }}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              复制链接
+            </button>
           </div>
           
           <div className="text-center">
             <p className="text-xs text-gray-500">生成图片会消耗右上角的余额</p>
           </div>
+          
+          {/* 全屏放大模态框 */}
+          {showFullImage && (
+            <div className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center p-4">
+              <button 
+                onClick={() => setShowFullImage(false)}
+                className="absolute top-4 right-4 text-white text-2xl font-bold z-10 hover:text-gray-300"
+              >
+                ×
+              </button>
+              <div className="relative max-w-full max-h-full">
+                <img 
+                  src={imageData || imageUrl || ''} 
+                  alt="AI生成的图像" 
+                  className="max-w-full max-h-[90vh] object-contain"
+                  style={{ 
+                    cursor: 'zoom-in',
+                    touchAction: 'manipulation'
+                  }}
+                  onWheel={(e) => {
+                    e.preventDefault();
+                    const img = e.currentTarget;
+                    const rect = img.getBoundingClientRect();
+                    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                    const newWidth = img.width * delta;
+                    const newHeight = img.height * delta;
+                    
+                    img.style.width = `${newWidth}px`;
+                    img.style.height = `${newHeight}px`;
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

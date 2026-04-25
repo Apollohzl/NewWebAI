@@ -41,7 +41,10 @@ const DrawCommandParser = ({ content }: { content: string }) => {
             // 移除末尾可能的多余字符
             value = value.replace(/["']*$/, '');
             
-            params[key] = value;
+            // 忽略 seed 参数，强制使用 -1
+            if (key !== 'seed') {
+              params[key] = value;
+            }
           }
         }
       });
@@ -62,6 +65,9 @@ const DrawCommandParser = ({ content }: { content: string }) => {
       if (!params.height) {
         params.height = '512';
       }
+      
+      // 强制设置 seed 为 -1
+      params.seed = -1;
       
       console.log('解析到参数:', params);
       

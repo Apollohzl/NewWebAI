@@ -28,10 +28,12 @@ const DrawCommandParser = ({ content }: { content: string }) => {
       if (drawMatch) {
         const drawCommand = drawMatch[1].trim();
         const commandHash = await generateHash(drawCommand);
-        if (window.sessionStorage.getItem(`draw_${commandHash}`)) {
-          return;
-        }
-        window.sessionStorage.setItem(`draw_${commandHash}`, 'processed');
+        
+        // 暂时注释掉sessionStorage检查，调试用
+        // if (window.sessionStorage.getItem(`draw_${commandHash}`)) {
+        //   return;
+        // }
+        // window.sessionStorage.setItem(`draw_${commandHash}`, 'processed');
 
         const params: any = {
           seed: -1
@@ -72,7 +74,7 @@ const DrawCommandParser = ({ content }: { content: string }) => {
 
         params.seed = -1;
 
-        generateImage(params);
+        await generateImage(params);
       }
     };
 

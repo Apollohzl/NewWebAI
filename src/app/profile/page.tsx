@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function ProfilePage() {
-  const { user, token, sessionToken, updateUser } = useAuth();
+  const { user, token, updateUser } = useAuth();
   const router = useRouter();
   
   const [formData, setFormData] = useState({
@@ -79,7 +79,7 @@ export default function ProfilePage() {
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!sessionToken) {
+    if (!token) {
       showMessage('登录状态已过期，请重新登录', 'error');
       router.push('/login');
       return;
@@ -93,7 +93,6 @@ export default function ProfilePage() {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'X-LC-Session': sessionToken,
         },
         body: JSON.stringify({
           username: formData.username,
@@ -117,7 +116,7 @@ export default function ProfilePage() {
   };
 
   const handlePasswordResetRequest = async () => {
-    if (!sessionToken) {
+    if (!token) {
       showMessage('登录状态已过期，请重新登录', 'error');
       router.push('/login');
       return;
@@ -131,7 +130,6 @@ export default function ProfilePage() {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'X-LC-Session': sessionToken,
         },
         body: JSON.stringify({
           email: user?.email,
@@ -160,7 +158,7 @@ export default function ProfilePage() {
       return;
     }
 
-    if (!sessionToken) {
+    if (!token) {
       showMessage('登录状态已过期，请重新登录', 'error');
       router.push('/login');
       return;
@@ -176,7 +174,6 @@ export default function ProfilePage() {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'X-LC-Session': sessionToken,
         },
         body: formData,
       });

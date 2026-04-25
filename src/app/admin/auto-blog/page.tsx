@@ -609,7 +609,7 @@ export default function AutoBlogAdmin() {
             <ul className="text-black space-y-1 text-sm">
               <li>• 定时器启动后，每小时自动生成一篇博客</li>
               <li>• 博客内容使用AI对话API生成，主题随机选择</li>
-              <li>• 生成的博客会自动保存到LeanCloud数据库</li>
+              <li>• 生成的博客会自动保存到SQLPub数据库</li>
               <li>• 可以随时启动、停止或重启定时器</li>
               <li>• 支持手动生成博客进行测试</li>
               <li>• 定时器在服务器重启后会停止，需要手动重启</li>

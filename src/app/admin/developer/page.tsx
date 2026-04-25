@@ -11,7 +11,7 @@ interface User {
   name?: string;
 }
 
-interface LeanCloudData {
+interface DashboardData {
   blogPosts: any[];
   products: any[];
   apis: any[];
@@ -28,7 +28,7 @@ export default function DeveloperPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-  const [leanCloudData, setLeanCloudData] = useState<LeanCloudData | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loadingData, setLoadingData] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -37,10 +37,10 @@ export default function DeveloperPage() {
     checkAuthStatus();
   }, []);
 
-  // 加载LeanCloud数据
+  // 加载仪表板数据
   useEffect(() => {
     if (user) {
-      loadLeanCloudData();
+      loadDashboardData();
     }
   }, [user]);
 
@@ -55,16 +55,16 @@ export default function DeveloperPage() {
 
   const checkAuthStatus = async () => {
     try {
-      const sessionToken = localStorage.getItem('sessionToken');
+      const token = localStorage.getItem('token');
       
-      if (!sessionToken) {
+      if (!token) {
         router.push('/');
         return;
       }
 
       const response = await fetch('/api/auth/check-status', {
         headers: {
-          'Authorization': `Bearer ${sessionToken}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
       const data = await response.json();
@@ -88,16 +88,21 @@ export default function DeveloperPage() {
     }
   };
 
-  const loadLeanCloudData = async () => {
+  const loadDashboardData = async () => {
     setLoadingData(true);
     try {
-      const response = await fetch('/api/admin/leancloud-data');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/dashboard-data', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       const data = await response.json();
       if (response.ok) {
-        setLeanCloudData(data);
+        setDashboardData(data);
       }
     } catch (error) {
-      console.error('加载LeanCloud数据失败:', error);
+      console.error('加载数据失败:', error);
     } finally {
       setLoadingData(false);
     }
@@ -149,7 +154,7 @@ export default function DeveloperPage() {
                 开发者模式
               </div>
               <button
-                onClick={loadLeanCloudData}
+                onClick={loadDashboardData}
                 disabled={loadingData}
                 className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'} text-white transition-colors disabled:opacity-50`}
               >
@@ -217,16 +222,16 @@ export default function DeveloperPage() {
           {/* 内容区域 */}
           <div className="space-y-6">
             {activeTab === 'overview' && (
-              <OverviewTab darkMode={darkMode} leanCloudData={leanCloudData} loadingData={loadingData} />
+              <OverviewTab darkMode={darkMode} dashboardData={dashboardData} loadingData={loadingData} />
             )}
             {activeTab === 'blogs' && (
-              <BlogsTab darkMode={darkMode} leanCloudData={leanCloudData} loadingData={loadingData} />
+              <BlogsTab darkMode={darkMode} dashboardData={dashboardData} loadingData={loadingData} />
             )}
             {activeTab === 'products' && (
-              <ProductsTab darkMode={darkMode} leanCloudData={leanCloudData || { blogPosts: [], products: [], apis: [], stats: { totalBlogPosts: 0, totalProducts: 0, totalApis: 0, todayNewUsers: 0 } }} loadingData={loadingData} />
+              <ProductsTab darkMode={darkMode} dashboardData={dashboardData || { blogPosts: [], products: [], apis: [], stats: { totalBlogPosts: 0, totalProducts: 0, totalApis: 0, todayNewUsers: 0 } }} loadingData={loadingData} />
             )}
             {activeTab === 'apis' && (
-              <ApisTab darkMode={darkMode} leanCloudData={leanCloudData || { blogPosts: [], products: [], apis: [], stats: { totalBlogPosts: 0, totalProducts: 0, totalApis: 0, todayNewUsers: 0 } }} loadingData={loadingData} />
+              <ApisTab darkMode={darkMode} dashboardData={dashboardData || { blogPosts: [], products: [], apis: [], stats: { totalBlogPosts: 0, totalProducts: 0, totalApis: 0, todayNewUsers: 0 } }} loadingData={loadingData} />
             )}
             {activeTab === 'tools' && (
               <ToolsTab darkMode={darkMode} />
@@ -239,8 +244,8 @@ export default function DeveloperPage() {
 }
 
 // 概览标签页组件
-function OverviewTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; leanCloudData: LeanCloudData | null; loadingData: boolean }) {
-  const stats = leanCloudData?.stats || { totalBlogPosts: 0, totalProducts: 0, totalApis: 0, todayNewUsers: 0 };
+function OverviewTab({ darkMode, dashboardData, loadingData }: { darkMode: boolean; dashboardData: DashboardData | null; loadingData: boolean }) {
+  const stats = dashboardData?.stats || { totalBlogPosts: 0, totalProducts: 0, totalApis: 0, todayNewUsers: 0 };
 
   return (
     <div className="space-y-6">
@@ -278,22 +283,22 @@ function OverviewTab({ darkMode, leanCloudData, loadingData }: { darkMode: boole
   );
 }
 
-function BlogsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; leanCloudData: LeanCloudData | null; loadingData: boolean }) {
+function BlogsTab({ darkMode, dashboardData, loadingData }: { darkMode: boolean; dashboardData: DashboardData | null; loadingData: boolean }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [posts, setPosts] = useState<any[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    if (leanCloudData?.blogPosts) {
+    if (dashboardData?.blogPosts) {
       // 按创建时间倒序排序
-      const sortedPosts = [...leanCloudData.blogPosts].sort((a, b) => {
+      const sortedPosts = [...dashboardData.blogPosts].sort((a, b) => {
         const dateA = new Date(a.createdAt || 0);
         const dateB = new Date(b.createdAt || 0);
         return dateB.getTime() - dateA.getTime();
       });
       setPosts(sortedPosts);
     }
-  }, [leanCloudData]);
+  }, [dashboardData]);
 
   const handleDelete = async (postId: string) => {
     if (!confirm('确定要删除这篇博客文章吗？')) {
@@ -410,9 +415,9 @@ function BlogsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean;
   );
 }
 
-function ProductsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; leanCloudData: LeanCloudData; loadingData: boolean }) {
+function ProductsTab({ darkMode, dashboardData, loadingData }: { darkMode: boolean; dashboardData: DashboardData; loadingData: boolean }) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const products = leanCloudData?.products || [];
+  const products = dashboardData?.products || [];
 
   return (
     <div className={`rounded-lg p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'} border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
@@ -568,16 +573,16 @@ function ProductsTab({ darkMode, leanCloudData, loadingData }: { darkMode: boole
   );
 }
 
-function ApisTab({ darkMode, leanCloudData, loadingData }: { darkMode: boolean; leanCloudData: LeanCloudData; loadingData: boolean }) {
+function ApisTab({ darkMode, dashboardData, loadingData }: { darkMode: boolean; dashboardData: DashboardData; loadingData: boolean }) {
   const [apis, setApis] = useState<any[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    if (leanCloudData?.apis) {
-      setApis(leanCloudData.apis);
+    if (dashboardData?.apis) {
+      setApis(dashboardData.apis);
     }
-  }, [leanCloudData]);
+  }, [dashboardData]);
 
   const handleStatusChange = async (apiId: string, currentStatus: string) => {
     const newStatus = currentStatus === '正常' ? '关闭' : '正常';
@@ -968,7 +973,7 @@ function ToolsTab({ darkMode }: { darkMode: boolean }) {
           <ToolItem darkMode={darkMode} title="最后一次用户提示词" description="lastq.log" status="待实现" />
           <ToolItem darkMode={darkMode} title="项目快照" description="project_snapshot.txt" status="待实现" />
           <ToolItem darkMode={darkMode} title="Git操作" description="提交、推送代码到GitHub" status="待实现" />
-          <ToolItem darkMode={darkMode} title="LeanCloud管理" description="管理数据库和数据表" status="待实现" />
+          <ToolItem darkMode={darkMode} title="SQLPub管理" description="管理数据库和数据表" status="待实现" />
         </div>
       </div>
     </div>

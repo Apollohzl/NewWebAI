@@ -1,74 +1,39 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { loginUser } from '@/lib/auth';
 
-export async function POST(request: NextRequest) {
-  // 登录功能已禁用，等待后续改为 QQ 邮箱验证
-  return NextResponse.json(
-    { error: '登录功能暂时禁用，请稍后再试' },
-    { status: 503 }
-  );
-
-  /*
-  原有登录逻辑已禁用，等待后续实现 QQ 邮箱验证功能
-  
-  import { findUserByEmail } from '@/lib/userDatabase';
-  import jwt from 'jsonwebtoken';
-  import bcrypt from 'bcrypt';
-
+export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
-    console.log('收到登录请求:', { email });
 
-    // 验证输入
     if (!email || !password) {
       return NextResponse.json(
-        { error: '邮箱和密码都是必填的' },
+        { error: 'Email and password are required' },
         { status: 400 }
       );
     }
 
-    // 查找用户
-    console.log('开始查找用户...');
-    const user = await findUserByEmail(email);
-    
-    if (!user) {
+    const result = await loginUser(email, password);
+
+    if (!result) {
       return NextResponse.json(
-        { error: '邮箱或密码错误' },
+        { error: 'Invalid email or password' },
         { status: 401 }
       );
     }
 
-    // 验证密码
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: '邮箱或密码错误' },
-        { status: 401 }
-      );
-    }
-
-    console.log('用户验证成功:', user.id);
-    
-    // 生成JWT Token
-    const jwtToken = jwt.sign(
-      { userId: user.id, email: user.email },
-      process.env.JWT_SECRET || 'fallback-secret',
-      { expiresIn: '7d' }
-    );
-
-    // 返回用户信息（移除密码）
+    const { user, token } = result;
+    // Remove password from user object before returning
     const { password: _, ...userWithoutPassword } = user;
-    
+
     return NextResponse.json({
-      message: '登录成功',
       user: userWithoutPassword,
-      token: jwtToken,
+      token
     });
-  } catch (error: any) {
-    console.error('登录错误详情:', error);
+  } catch (error) {
+    console.error('Login error:', error);
     return NextResponse.json(
-      { error: error.message || '登录失败，请稍后重试' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
-  */
 }

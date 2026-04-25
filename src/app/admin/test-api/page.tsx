@@ -24,16 +24,16 @@ export default function TestApiPage() {
 
   const checkAuthStatus = async () => {
     try {
-      const sessionToken = localStorage.getItem('sessionToken');
+      const token = localStorage.getItem('token');
       
-      if (!sessionToken) {
+      if (!token) {
         router.push('/');
         return;
       }
 
       const response = await fetch('/api/auth/check-status', {
         headers: {
-          'Authorization': `Bearer ${sessionToken}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
       const data = await response.json();
@@ -67,7 +67,7 @@ export default function TestApiPage() {
     setTestResults(prev => [result, ...prev]);
   };
 
-  const testLeanCloudConfig = async () => {
+  const testSQLPubConfig = async () => {
     addTestResult('检查环境变量', true, '开始检查环境变量...');
     
     try {
@@ -84,10 +84,15 @@ export default function TestApiPage() {
     addTestResult('用户数据查询测试', true, '开始测试用户数据查询...');
     
     try {
+      const token = localStorage.getItem('token');
       // 测试1: 调用我们的API
       addTestResult('测试1: 调用我们的API', true, '开始调用我们的API...');
       try {
-        const response = await fetch('/api/admin/leancloud-data');
+        const response = await fetch('/api/admin/dashboard-data', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
         const text = await response.text();
         let data;
         try {
@@ -100,10 +105,10 @@ export default function TestApiPage() {
         addTestResult('测试1结果', false, `错误: ${error instanceof Error ? error.message : '未知错误'}`);
       }
 
-      // 测试2: 测试LeanCloud连接
-      addTestResult('测试2: 测试LeanCloud连接', true, '开始测试LeanCloud连接...');
+      // 测试2: 测试SQLPub连接
+      addTestResult('测试2: 测试SQLPub连接', true, '开始测试SQLPub连接...');
       try {
-        const response = await fetch('/api/test-leancloud-connection');
+        const response = await fetch('/api/test-sql-connection');
         const data = await response.json();
         addTestResult('测试2结果', response.ok, `状态码: ${response.status}`, data);
       } catch (error) {
@@ -119,11 +124,13 @@ export default function TestApiPage() {
     addTestResult('直接Fetch测试', true, '开始直接Fetch测试...');
     
     try {
-      // 测试直接访问LeanCloud
-      const response = await fetch('/api/admin/leancloud-data', {
+      // 测试直接访问SQLPub
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/dashboard-data', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
       });
       
@@ -176,7 +183,7 @@ export default function TestApiPage() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-3xl font-bold text-black mb-2">API测试页面</h1>
-              <p className="text-gray-600">用于调试LeanCloud API连接问题</p>
+              <p className="text-gray-600">用于调试SQLPub API连接问题</p>
             </div>
             <button
               onClick={clearResults}
@@ -189,7 +196,7 @@ export default function TestApiPage() {
           {/* 测试按钮 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <button
-              onClick={testLeanCloudConfig}
+              onClick={testSQLPubConfig}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               测试环境变量

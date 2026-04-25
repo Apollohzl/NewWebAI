@@ -135,7 +135,7 @@ const ApiDetailPage = () => {
     try {
       // 使用从 /apis 端点获取的 requestUrl
       let url = currentApi.requestUrl;
-      let response;
+      let data;
 
       if (activeMethod === 'GET' || activeMethod === 'DELETE') {
         // GET和DELETE请求使用查询参数（不进行URL编码）
@@ -145,38 +145,59 @@ const ApiDetailPage = () => {
         if (params) {
           url += '?' + params;
         }
-        response = await fetch(url, {
-          method: activeMethod,
-          headers: {
-            'Content-Type': 'application/json',
-          }
+        
+        // 使用XMLHttpRequest避免浏览器自动URL编码
+        data = await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open(activeMethod, url, true);
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          
+          xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                resolve(JSON.parse(xhr.responseText));
+              } catch {
+                resolve({ 
+                  error: 'Invalid JSON response',
+                  response: xhr.responseText.substring(0, 500) + (xhr.responseText.length > 500 ? '...' : '')
+                });
+              }
+            } else {
+              reject(new Error(`HTTP error! status: ${xhr.status}`));
+            }
+          };
+          
+          xhr.onerror = function() {
+            reject(new Error('Network error'));
+          };
+          
+          xhr.send();
         });
       } else {
         // POST、PUT、PATCH请求使用请求体
-        response = await fetch(url, {
+        const response = await fetch(url, {
           method: activeMethod,
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(testParams)
         });
-      }
-      
-      // 检查响应是否为JSON
-      const contentType = response.headers.get('content-type');
-      let data;
-      
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        try {
-          data = JSON.parse(text);
-        } catch {
-          data = { 
-            error: 'Invalid JSON response',
-            response: text.substring(0, 500) + (text.length > 500 ? '...' : '')
-          };
+        
+        // 检查响应是否为JSON
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType && contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          const text = await response.text();
+          try {
+            data = JSON.parse(text);
+          } catch {
+            data = { 
+              error: 'Invalid JSON response',
+              response: text.substring(0, 500) + (text.length > 500 ? '...' : '')
+            };
+          }
         }
       }
       

@@ -207,11 +207,13 @@ const DrawCommandParser = ({ content }: { content: string }) => {
               onClick={() => {
                 if (imageData || imageUrl) {
                   const imageLink = imageData || imageUrl;
-                  navigator.clipboard.writeText(imageLink).then(() => {
-                    alert('图片链接已复制到剪贴板');
-                  }).catch(err => {
-                    console.error('复制失败:', err);
-                  });
+                  if (imageLink) {
+                    navigator.clipboard.writeText(imageLink).then(() => {
+                      alert('图片链接已复制到剪贴板');
+                    }).catch(err => {
+                      console.error('复制失败:', err);
+                    });
+                  }
                 }
               }}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"

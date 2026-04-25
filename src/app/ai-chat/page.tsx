@@ -6,6 +6,16 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import AdComponent from '@/components/AdComponent';
 
+// 生成哈希值的函数，支持非Latin1字符
+async function generateHash(str: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
 // DrawCommandParser 组件 - 用于解析和执行 <draw> 命令
 const DrawCommandParser = ({ content }: { content: string }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,70 +26,75 @@ const DrawCommandParser = ({ content }: { content: string }) => {
   
   // 解析 <draw> 命令
   useEffect(() => {
-    const drawMatch = content.match(/<draw>([\s\S]*?)<\/draw>/);
-    if (drawMatch) {
-      const drawCommand = drawMatch[1].trim();
-      
-      // 检查是否已经处理过这个命令（避免重复请求）
-      const commandHash = btoa(drawCommand);
-      if (window.sessionStorage.getItem(`draw_${commandHash}`)) {
-        return;
-      }
-      
-      // 标记命令已处理
-      window.sessionStorage.setItem(`draw_${commandHash}`, 'processed');
-      
-      // 解析命令参数
-      const params: any = {
-        seed: -1 // 默认 seed 值
-      };
-      
-      // 处理可能的参数格式问题
-      const lines = drawCommand.split(',');
-      lines.forEach(line => {
-        const trimmedLine = line.trim();
-        if (trimmedLine) {
-          const colonIndex = trimmedLine.indexOf(':');
-          if (colonIndex > 0) {
-            const key = trimmedLine.substring(0, colonIndex).trim();
-            let value = trimmedLine.substring(colonIndex + 1).trim();
-            
-            // 移除可能的引号
-            value = value.replace(/^["']|"'$/g, '');
-            // 移除末尾可能的多余字符
-            value = value.replace(/["']*$/, '');
-            
-            // 忽略 seed 参数，强制使用 -1
-            if (key !== 'seed') {
-              params[key] = value;
+    const processDrawCommand = async () => {
+      const drawMatch = content.match(/<draw>([\s\S]*?)<\/draw>/);
+      if (drawMatch) {
+        const drawCommand = drawMatch[1].trim();
+        
+        // 检查是否已经处理过这个命令（避免重复请求）
+        // 使用更可靠的哈希方法替代btoa，以支持非Latin1字符
+        const commandHash = await generateHash(drawCommand);
+        if (window.sessionStorage.getItem(`draw_${commandHash}`)) {
+          return;
+        }
+        
+        // 标记命令已处理
+        window.sessionStorage.setItem(`draw_${commandHash}`, 'processed');
+        
+        // 解析命令参数
+        const params: any = {
+          seed: -1 // 默认 seed 值
+        };
+        
+        // 处理可能的参数格式问题
+        const lines = drawCommand.split(',');
+        lines.forEach(line => {
+          const trimmedLine = line.trim();
+          if (trimmedLine) {
+            const colonIndex = trimmedLine.indexOf(':');
+            if (colonIndex > 0) {
+              const key = trimmedLine.substring(0, colonIndex).trim();
+              let value = trimmedLine.substring(colonIndex + 1).trim();
+              
+              // 移除可能的引号
+              value = value.replace(/^["']|["']$/g, '');
+              // 移除末尾可能的多余字符
+              value = value.replace(/["']*$/, '');
+              
+              // 忽略 seed 参数，强制使用 -1
+              if (key !== 'seed') {
+                params[key] = value;
+              }
             }
           }
+        });
+        
+        // 确保必要参数存在
+        if (!params.prompt) {
+          params.prompt = '';
         }
-      });
-      
-      // 确保必要参数存在
-      if (!params.prompt) {
-        params.prompt = '';
+        if (!params.model) {
+          params.model = 'zimage';
+        }
+        if (!params.style) {
+          params.style = '';
+        }
+        if (!params.width) {
+          params.width = '512';
+        }
+        if (!params.height) {
+          params.height = '512';
+        }
+        
+        // 强制设置 seed 为 -1
+        params.seed = -1;
+        
+        // 调用图像生成 API
+        generateImage(params);
       }
-      if (!params.model) {
-        params.model = 'zimage';
-      }
-      if (!params.style) {
-        params.style = '';
-      }
-      if (!params.width) {
-        params.width = '512';
-      }
-      if (!params.height) {
-        params.height = '512';
-      }
-      
-      // 强制设置 seed 为 -1
-      params.seed = -1;
-      
-      // 调用图像生成 API
-      generateImage(params);
-    }
+    };
+    
+    processDrawCommand();
   }, [content]);
   
   // 生成图像
@@ -97,7 +112,7 @@ const DrawCommandParser = ({ content }: { content: string }) => {
       url.searchParams.append('height', params.height || '512');
       url.searchParams.append('seed', '-1');
       
-
+      
       
       const response = await fetch(url.toString());
       const data = await response.json();
@@ -413,7 +428,7 @@ export default function AIChatPage() {
           model: currentModel,
           temperature: temperature,
           max_tokens: maxTokens,
-          system:`**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端聊天界面只会使用一条消息显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多条消息，更加人性化，模拟更真实的AI聊天，注意要合理分段。\n**AI绘画功能**：当用户要求你生成图片时，你需要在两个<N>之间使用以下格式命令：\n<draw>prompt:”画面提示词”,model:”zimage”,style:“风格",width:512,height:512</draw>\n其中：\n- prompt：画面提示词，描述你想生成的图像内容\n- model：固定为"zimage"，不要使用其他模型\n- style：图像风格，如"realistic"（写实）、"cartoon"（卡通）、"anime"（动漫）等\n- width和height：图像尺寸，建议使用512或1024\n例如：<draw>prompt:"一只可爱的小猫在花园里玩耍",model:"zimage",style:"cartoon",width:512,height:512</draw>`,
+          system:`**输出格式**：在用户没有强制规定下你必须使用标准的md形式回复。\n**新对话形式-多段式对话**：你的对话通常在客户端聊天界面只会使用一条消息显示你一大段的内容，所以你可以在一段话的结尾添加这个标识符<N>，这样就可以分成多条消息，更加人性化，模拟更真实的AI聊天，注意要合理分段。\n**AI绘画功能**：当用户要求你生成图片时，你需要在两个<N>之间使用以下格式命令：\n<draw>prompt:”画面提示词”,model:”zimage”,style:“风格",width:512,height:512</draw>\n其中：\n- prompt：画面提示词，描述你想生成的图像内容\n- model：固定为"zimage"，不要使用其他模型\n- style：图像风格，如"realistic"（写实）、"cartoon"（卡通）、"anime"（动漫）等\n- width和height：图像尺寸，建议使用512或1024\n例如：<draw>prompt:"一只可爱的小猫在花园里玩耍",model:"zimage",style:"cartoon",width:512,height:512</draw>',
           stream: true
         })
       });

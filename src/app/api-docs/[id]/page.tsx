@@ -138,12 +138,17 @@ const ApiDetailPage = () => {
       let data;
 
       if (activeMethod === 'GET' || activeMethod === 'DELETE') {
-        // GET和DELETE请求使用查询参数（不进行URL编码）
-        let params = Object.entries(testParams)
-          .map(([key, value]) => `${key}=${value}`)
-          .join('&');
-        if (params) {
-          url += '?' + params;
+        // GET和DELETE请求使用查询参数（不进行URL编码，数字类型保持数字格式）
+        const params: string[] = [];
+        Object.entries(testParams).forEach(([key, value]) => {
+          if (typeof value === 'number') {
+            params.push(`${key}=${value}`);
+          } else {
+            params.push(`${key}=${value}`);
+          }
+        });
+        if (params.length > 0) {
+          url += '?' + params.join('&');
         }
         
         // 使用XMLHttpRequest避免浏览器自动URL编码

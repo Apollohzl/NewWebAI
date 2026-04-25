@@ -488,7 +488,7 @@ const ApiDetailPage = () => {
                     {testResponse && (
                       <div className="mt-4">
                         <h4 className="text-md font-semibold mb-2">响应结果:</h4>
-                        {apiId === 'ai-image' && testResponse.data?.imageData ? (
+                        {(apiId === 'ai-image' || apiId === '695893af4243696c7294e43e') && testResponse.data?.imageData ? (
                           <div className="space-y-4">
                             <div className="flex justify-center">
                               <img 
@@ -497,6 +497,42 @@ const ApiDetailPage = () => {
                                 className="max-w-full h-auto rounded-lg shadow-lg"
                                 style={{ maxHeight: '500px' }}
                               />
+                            </div>
+                            <div className="flex justify-center space-x-4 mt-4">
+                              <button 
+                                onClick={() => {
+                                  if (testResponse.data.imageData) {
+                                    const prompt = testResponse.data.prompt || 'image';
+                                    const seed = testResponse.data.seed || Date.now();
+                                    const filename = `${prompt.substring(0, 10)}_${seed}`;
+                                    const link = document.createElement('a');
+                                    link.href = testResponse.data.imageData;
+                                    link.download = `${filename}.jpg`;
+                                    link.click();
+                                  }
+                                }}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                              >
+                                下载图片 (Base64)
+                              </button>
+                              {testResponse.data.imageUrl && (
+                                <button 
+                                  onClick={() => {
+                                    if (testResponse.data.imageUrl) {
+                                      const prompt = testResponse.data.prompt || 'image';
+                                      const seed = testResponse.data.seed || Date.now();
+                                      const filename = `${prompt.substring(0, 10)}_${seed}`;
+                                      const link = document.createElement('a');
+                                      link.href = testResponse.data.imageUrl;
+                                      link.download = `${filename}.jpg`;
+                                      link.click();
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                >
+                                  下载图片 (URL)
+                                </button>
+                              )}
                             </div>
                             {testResponse.data.translatedPrompt && testResponse.data.translatedPrompt !== testResponse.data.prompt && (
                               <div className="bg-blue-50 p-4 rounded-lg">

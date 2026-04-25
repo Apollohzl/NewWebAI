@@ -141,8 +141,10 @@ const ApiDetailPage = () => {
         // GET和DELETE请求使用查询参数（不进行URL编码，数字类型保持数字格式）
         const params: string[] = [];
         Object.entries(testParams).forEach(([key, value]) => {
-          if (typeof value === 'number') {
-            params.push(`${key}=${value}`);
+          if (key === 'temperature') {
+            params.push(`${key}=${parseFloat(value)}`);
+          } else if (key === 'max_tokens') {
+            params.push(`${key}=${parseInt(value, 10)}`);
           } else {
             params.push(`${key}=${value}`);
           }

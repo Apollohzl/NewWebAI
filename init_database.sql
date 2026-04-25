@@ -105,6 +105,14 @@ CREATE TABLE IF NOT EXISTS apis (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='API配置表';
 
 -- =====================================================
+-- API参数配置表 (api_config)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS api_config (
+  api_name VARCHAR(255) PRIMARY KEY COMMENT 'API名称',
+  params JSON COMMENT 'API参数配置'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='API参数配置表';
+
+-- =====================================================
 -- 产品表 (products)
 -- =====================================================
 CREATE TABLE IF NOT EXISTS products (

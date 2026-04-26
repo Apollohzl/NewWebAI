@@ -54,6 +54,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showFullImage, setShowFullImage] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const processDrawCommand = async () => {
@@ -108,6 +109,51 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
     processDrawCommand();
   }, [content]);
 
+  useEffect(() => {
+    if (contentRef.current && citations && citations.length > 0) {
+      console.log('开始检测[X]格式引用...');
+      const element = contentRef.current;
+      const text = element.textContent || '';
+      console.log('检测文本:', text);
+      console.log('可用引用:', citations);
+      
+      const parts = text.split(/(\[\d+\])/).filter(Boolean);
+      console.log('分割结果:', parts);
+      
+      let newHtml = '';
+      let foundCitations = 0;
+      
+      parts.forEach(part => {
+        const match = part.match(/\[(\d+)\]/);
+        if (match) {
+          const citationIndex = parseInt(match[1]) - 1;
+          console.log('找到引用:', part, '索引:', citationIndex);
+          if (citationIndex >= 0 && citationIndex < citations.length) {
+            let url = citations[citationIndex].trim().replace(/^[`'"\s]|[`'"\s]$/g, '');
+            console.log('引用URL:', url);
+            newHtml += `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium" title="${url}">${part}</a>`;
+            foundCitations++;
+          } else {
+            console.log('引用索引无效:', citationIndex);
+            newHtml += part;
+          }
+        } else {
+          newHtml += part;
+        }
+      });
+      
+      console.log('检测完成，找到', foundCitations, '个有效引用');
+      
+      if (newHtml !== text) {
+        console.log('更新DOM...');
+        element.innerHTML = newHtml;
+        console.log('DOM更新完成');
+      } else {
+        console.log('无需更新DOM');
+      }
+    }
+  }, [content, citations]);
+
   const generateImage = async (params: any) => {
     setIsLoading(true);
     setError(null);
@@ -156,7 +202,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
 
   if (!hasDrawCommand) {
     return (
-      <div className="markdown-content">
+      <div className="markdown-content" ref={contentRef}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
@@ -185,9 +231,6 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
             hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
             text: ({ children }) => {
               const text = String(children);
-              if (citations) {
-                return <CitationText text={text} citations={citations} />;
-              }
               return <span>{text}</span>;
             },
           }}

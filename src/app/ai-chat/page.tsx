@@ -225,8 +225,8 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
             pre: ({node, children, ...props}) => {
               // 检查是否包含 Mermaid 代码块
               if (children && typeof children === 'object' && 'props' in children && typeof (children as any).props === 'object' && (children as any).props.className && (children as any).props.className.includes('language-mermaid')) {
-                // 如果是 Mermaid 代码块，直接返回子元素（即 Mermaid 组件）
-                return children;
+                // 直接返回子元素，因为 code 组件已经处理了 Mermaid 渲染
+                return React.createElement('div', { className: 'my-4' }, children);
               }
               return <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props}>{children}</pre>;
             },
@@ -1090,8 +1090,8 @@ export default function AIChatPage() {
                                   pre: ({node, children, ...props}) => {
               // 检查是否包含 Mermaid 代码块
               if (children && typeof children === 'object' && 'props' in children && typeof (children as any).props === 'object' && (children as any).props.className && (children as any).props.className.includes('language-mermaid')) {
-                // 如果是 Mermaid 代码块，直接返回子元素（即 Mermaid 组件）
-                return children;
+                // 直接返回子元素，因为 code 组件已经处理了 Mermaid 渲染
+                return React.createElement('div', { className: 'my-4' }, children);
               }
               return <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props}>{children}</pre>;
             },
@@ -1150,8 +1150,8 @@ export default function AIChatPage() {
                                   pre: ({node, children, ...props}) => {
               // 检查是否包含 Mermaid 代码块
               if (children && typeof children === 'object' && 'props' in children && typeof (children as any).props === 'object' && (children as any).props.className && (children as any).props.className.includes('language-mermaid')) {
-                // 如果是 Mermaid 代码块，直接返回子元素（即 Mermaid 组件）
-                return children;
+                // 直接返回子元素，因为 code 组件已经处理了 Mermaid 渲染
+                return React.createElement('div', { className: 'my-4' }, children);
               }
               return <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props}>{children}</pre>;
             },

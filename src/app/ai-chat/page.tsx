@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import AdComponent from '@/components/AdComponent';
 
 async function generateHash(str: string): Promise<string> {
@@ -139,6 +140,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
       <div className="markdown-content">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
           components={{
             h1: ({node, ...props}) => <h1 className="text-2xl font-bold text-gray-900 mb-4 mt-6 first:mt-0" {...props} />,
             h2: ({node, ...props}) => <h2 className="text-xl font-bold text-gray-900 mb-3 mt-5 first:mt-0" {...props} />,
@@ -938,6 +940,7 @@ export default function AIChatPage() {
                               <div className="p-3 overflow-x-auto">
                                 <ReactMarkdown
                                   remarkPlugins={[remarkGfm]}
+                                  rehypePlugins={[rehypeRaw]}
                                   components={{
                                     h1: ({node, ...props}) => <h1 className="text-xl font-bold text-gray-900 mb-2 mt-2" {...props} />,
                                     h2: ({node, ...props}) => <h2 className="text-lg font-bold text-gray-900 mb-2 mt-2" {...props} />,
@@ -968,6 +971,7 @@ export default function AIChatPage() {
                             <div className="p-3 rounded-lg overflow-x-auto">
                               <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
+                                rehypePlugins={[rehypeRaw]}
                                 components={{
                                   h1: ({node, ...props}) => <h1 className="text-2xl font-bold text-gray-900 mb-4 mt-6 first:mt-0" {...props} />,
                                   h2: ({node, ...props}) => <h2 className="text-xl font-bold text-gray-900 mb-3 mt-5 first:mt-0" {...props} />,
@@ -1005,6 +1009,7 @@ export default function AIChatPage() {
                             ) : (
                               <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
+                                rehypePlugins={[rehypeRaw]}
                                 components={{
                                   h1: ({node, ...props}) => <h1 className="text-2xl font-bold text-gray-900 mb-4 mt-6 first:mt-0" {...props} />,
                                   h2: ({node, ...props}) => <h2 className="text-xl font-bold text-gray-900 mb-3 mt-5 first:mt-0" {...props} />,

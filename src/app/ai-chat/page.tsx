@@ -161,7 +161,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
             tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
             th: ({node, ...props}) => <th className="px-2 py-1 border border-gray-300 text-left font-semibold" {...props} />,
             td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
-            a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
+            a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer" {...props} />,
             hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
           }}
         >
@@ -962,7 +962,7 @@ export default function AIChatPage() {
                                   tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
                                   th: ({node, ...props}) => <th className="px-2 py-1 border border-gray-300 text-left font-semibold" {...props} />,
                                   td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
-                                  a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
+                                  a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer" {...props} />,
                                   hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
                                 }}
                               >
@@ -999,7 +999,7 @@ export default function AIChatPage() {
                                   tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
                                   th: ({node, ...props}) => <th className="px-2 py-1 border border-gray-300 text-left font-semibold" {...props} />,
                                   td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
-                                  a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
+                                  a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer" {...props} />,
                                   hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
                                 }}
                               >

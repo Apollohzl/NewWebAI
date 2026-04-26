@@ -220,11 +220,17 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
         if (!params.prompt) {
           params.prompt = '';
         }
-        if (!params.width) {
-          params.width = '1280';
+        if (!params.aspectRatio) {
+          params.aspectRatio = '16:9';
         }
-        if (!params.height) {
-          params.height = '720';
+        if (!params.duration) {
+          params.duration = '4';
+        }
+        if (!params.firstFrameImage) {
+          params.firstFrameImage = '';
+        }
+        if (!params.lastFrameImage) {
+          params.lastFrameImage = '';
         }
 
         params.seed = -1;
@@ -252,6 +258,18 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
       // 视频特定参数
       if (params.model === 'Itx-2') {
         url.searchParams.append('audio', 'true');
+        if (params.aspectRatio) {
+          url.searchParams.append('aspectRatio', params.aspectRatio);
+        }
+        if (params.duration) {
+          url.searchParams.append('duration', params.duration);
+        }
+        if (params.firstFrameImage) {
+          url.searchParams.append('image[0]', params.firstFrameImage);
+        }
+        if (params.lastFrameImage) {
+          url.searchParams.append('image[1]', params.lastFrameImage);
+        }
       }
 
       const response = await fetch(url.toString());

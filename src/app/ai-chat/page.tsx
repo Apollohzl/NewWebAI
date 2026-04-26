@@ -226,12 +226,6 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
         if (!params.duration) {
           params.duration = '4';
         }
-        if (!params.firstFrameImage) {
-          params.firstFrameImage = '';
-        }
-        if (!params.lastFrameImage) {
-          params.lastFrameImage = '';
-        }
 
         params.seed = -1;
         setIsVideo(true);
@@ -263,12 +257,6 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
         }
         if (params.duration) {
           url.searchParams.append('duration', params.duration);
-        }
-        if (params.firstFrameImage) {
-          url.searchParams.append('image[0]', params.firstFrameImage);
-        }
-        if (params.lastFrameImage) {
-          url.searchParams.append('image[1]', params.lastFrameImage);
         }
       }
 

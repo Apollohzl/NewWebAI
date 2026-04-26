@@ -271,6 +271,7 @@ interface Message {
     id: string;
     content: string;
   }>;
+  citations?: string[];
 }
 
 export default function AIChatPage() {
@@ -421,17 +422,18 @@ export default function AIChatPage() {
       let savedReasoningContent = '';
       let savedContent = '';
       let savedUsesReasoningField = false;
+      let savedCitations: string[] = [];
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
       if (reader) {
         const assistantMessageId = (Date.now() + 1).toString();
 
-        const updateMessage = (content: string, thinking?: string, segs?: Array<{id: string, content: string}>) => {
+        const updateMessage = (content: string, thinking?: string, segs?: Array<{id: string, content: string}>, citations?: string[]) => {
           setMessages(prev =>
             prev.map(msg =>
               msg.id === assistantMessageId
-                ? { ...msg, content, thinking, segments: segs }
+                ? { ...msg, content, thinking, segments: segs, citations }
                 : msg
             )
           );
@@ -471,6 +473,11 @@ export default function AIChatPage() {
             try {
                 const data = JSON.parse(dataStr);
 
+                // 提取citations
+                if (data.citations && Array.isArray(data.citations)) {
+                  savedCitations = [...new Set([...savedCitations, ...data.citations])];
+                }
+
                 if (data.choices && data.choices.length > 0) {
                   const delta = data.choices[0].delta;
 
@@ -481,7 +488,7 @@ export default function AIChatPage() {
                     savedReasoningContent += delta.reasoning_content;
 
                     addAssistantMessage();
-                    updateMessage('', thinkingContent, []);
+                    updateMessage('', thinkingContent, [], savedCitations);
                   }
 
                   if (delta && delta.content) {
@@ -540,14 +547,14 @@ export default function AIChatPage() {
                       }
 
                       addAssistantMessage();
-                      updateMessage('', thinkingContent, segments);
+                      updateMessage('', thinkingContent, segments, savedCitations);
 
                       sh = '';
                       shid = Date.now().toString();
                     } else {
                       if (hasStartedMainContent && sh) {
                         addAssistantMessage();
-                        updateMessage(sh, thinkingContent, []);
+                        updateMessage(sh, thinkingContent, [], savedCitations);
                       }
                     }
                   }
@@ -568,7 +575,7 @@ export default function AIChatPage() {
             content: sh.trim()
           });
           addAssistantMessage();
-          updateMessage('', thinkingContent, segments);
+          updateMessage('', thinkingContent, segments, savedCitations);
         }
 
         let reprocessFullContent = '';
@@ -627,7 +634,7 @@ export default function AIChatPage() {
           }
 
           addAssistantMessage();
-          updateMessage('', reprocessThinkingContent, reprocessSegments);
+          updateMessage('', reprocessThinkingContent, reprocessSegments, savedCitations);
         }
       }
 
@@ -739,6 +746,38 @@ export default function AIChatPage() {
                   if ((message.role === 'assistant' || message.role === 'system') && message.segments && message.segments.length > 0) {
                     return (
                       <React.Fragment key={message.id}>
+                        {message.citations && message.citations.length > 0 && (
+                          <div className="flex justify-start">
+                            <div className="max-w-[70%] rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3">
+                              <div className="text-xs text-blue-600 mb-2 font-semibold">参考资料</div>
+                              <div className="flex flex-wrap gap-2">
+                                {message.citations.map((citation, index) => {
+                                  let displayText = citation;
+                                  try {
+                                    const url = new URL(citation);
+                                    displayText = url.hostname + url.pathname;
+                                    if (displayText.length > 25) {
+                                      displayText = displayText.substring(0, 25) + '...';
+                                    }
+                                  } catch {}
+                                  return (
+                                    <a
+                                      key={index}
+                                      href={citation}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 px-2 py-1 bg-white rounded-md border border-blue-200 hover:bg-blue-100 transition-colors text-xs text-blue-700 max-w-[150px]"
+                                      title={citation}
+                                    >
+                                      <span className="w-4 h-4 flex items-center justify-center bg-blue-500 text-white rounded-full text-[10px] font-bold flex-shrink-0">{index + 1}</span>
+                                      <span className="truncate">{displayText}</span>
+                                    </a>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         {message.thinking && (
                           <div className="flex justify-start">
                             <div className="max-w-[70%] rounded-lg relative bg-white border border-gray-200">
@@ -819,6 +858,36 @@ export default function AIChatPage() {
                             : 'bg-white border border-gray-200'
                         )}
                       >
+                        {(message.role === 'assistant' || message.role === 'system') && message.citations && message.citations.length > 0 && (
+                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 p-3 rounded-t-lg">
+                            <div className="text-xs text-blue-600 mb-2 font-semibold">参考资料</div>
+                            <div className="flex flex-wrap gap-2">
+                              {message.citations.map((citation, index) => {
+                                let displayText = citation;
+                                try {
+                                  const url = new URL(citation);
+                                  displayText = url.hostname + url.pathname;
+                                  if (displayText.length > 25) {
+                                    displayText = displayText.substring(0, 25) + '...';
+                                  }
+                                } catch {}
+                                return (
+                                  <a
+                                    key={index}
+                                    href={citation}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 px-2 py-1 bg-white rounded-md border border-blue-200 hover:bg-blue-100 transition-colors text-xs text-blue-700 max-w-[150px]"
+                                    title={citation}
+                                  >
+                                    <span className="w-4 h-4 flex items-center justify-center bg-blue-500 text-white rounded-full text-[10px] font-bold flex-shrink-0">{index + 1}</span>
+                                    <span className="truncate">{displayText}</span>
+                                  </a>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                         {(message.role === 'assistant' || message.role === 'system') && message.thinking ? (
                           <>
                             <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg overflow-x-auto">

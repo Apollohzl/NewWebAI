@@ -185,7 +185,10 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
             hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
             text: ({ children }) => {
               const text = String(children);
-              return <CitationText text={text} citations={citations} />;
+              if (citations) {
+                return <CitationText text={text} citations={citations} />;
+              }
+              return <span>{text}</span>;
             },
           }}
         >
@@ -849,7 +852,10 @@ export default function AIChatPage() {
                                     hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
                                     text: ({ children }) => {
                                       const text = String(children);
-                                      return <CitationText text={text} citations={message.citations} />;
+                                      if (message.citations) {
+                                        return <CitationText text={text} citations={message.citations} />;
+                                      }
+                                      return <span>{text}</span>;
                                     },
                                   }}
                                 >
@@ -962,7 +968,10 @@ export default function AIChatPage() {
                                   hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
                                   text: ({ children }) => {
                                     const text = String(children);
-                                    return <CitationText text={text} citations={message.citations} />;
+                                    if (message.citations) {
+                                      return <CitationText text={text} citations={message.citations} />;
+                                    }
+                                    return <span>{text}</span>;
                                   },
                                 }}
                               >
@@ -998,7 +1007,10 @@ export default function AIChatPage() {
                                   hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
                                   text: ({ children }) => {
                                     const text = String(children);
-                                    return <CitationText text={text} citations={message.citations} />;
+                                    if (message.citations) {
+                                      return <CitationText text={text} citations={message.citations} />;
+                                    }
+                                    return <span>{text}</span>;
                                   },
                                 }}
                               >
@@ -1039,7 +1051,10 @@ export default function AIChatPage() {
                                   hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
                                   text: ({ children }) => {
                                     const text = String(children);
-                                    return <CitationText text={text} citations={message.citations} />;
+                                    if (message.citations) {
+                                      return <CitationText text={text} citations={message.citations} />;
+                                    }
+                                    return <span>{text}</span>;
                                   },
                                 }}
                               >

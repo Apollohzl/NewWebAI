@@ -207,7 +207,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
 
         const params: any = {
           seed: -1,
-          model: 'Itx-2',
+          model: 'ltx-2',
           audio: true
         };
 

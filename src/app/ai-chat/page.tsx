@@ -17,7 +17,10 @@ async function generateHash(str: string): Promise<string> {
 
 const CitationText = ({ text, citations }: { text: string, citations?: string[] }) => {
   console.log('CitationText被调用:', { text, citations });
-  if (!citations) return <span>{text}</span>;
+  if (!citations || citations.length === 0) {
+    console.log('citations为空或undefined，直接返回文本');
+    return <span>{text}</span>;
+  }
   
   const parts = text.split(/(\[\d+\])/).filter(Boolean);
   console.log('分割结果:', parts);
@@ -55,6 +58,7 @@ const CitationText = ({ text, citations }: { text: string, citations?: string[] 
 };
 
 const DrawCommandParser = ({ content, citations }: { content: string, citations?: string[] }) => {
+  console.log('DrawCommandParser渲染:', { content, citations });
   const [isLoading, setIsLoading] = useState(false);
   const [imageData, setImageData] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -117,7 +121,10 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
   const ProcessedText = ({ children }: { children: React.ReactNode }) => {
     const text = String(children);
     console.log('ProcessedText被调用:', { text, citations });
-    if (!citations || !text) return <span>{text}</span>;
+    if (!citations || citations.length === 0 || !text) {
+      console.log('citations为空或text为空，直接返回文本');
+      return <span>{text}</span>;
+    }
     
     const parts = text.split(/(\[\d+\])/).filter(Boolean);
     console.log('分割结果:', parts);

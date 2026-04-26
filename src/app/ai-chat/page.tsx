@@ -139,10 +139,13 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showFullImage, setShowFullImage] = useState(false);
+  const [isVideo, setIsVideo] = useState(false);
 
   useEffect(() => {
     const processDrawCommand = async () => {
       const drawMatch = content.match(/<draw>([\s\S]*?)<\/draw>/);
+      const videoMatch = content.match(/<video>([\s\S]*?)<\/video>/);
+      
       if (drawMatch) {
         const drawCommand = drawMatch[1].trim();
         const commandHash = await generateHash(drawCommand);
@@ -185,15 +188,55 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
         }
 
         params.seed = -1;
+        setIsVideo(false);
+        await generateMedia(params);
+      } else if (videoMatch) {
+        const videoCommand = videoMatch[1].trim();
+        const commandHash = await generateHash(videoCommand);
 
-        await generateImage(params);
+        const params: any = {
+          seed: -1,
+          model: 'Itx-2',
+          audio: true
+        };
+
+        const lines = videoCommand.split(',');
+        lines.forEach(line => {
+          const trimmedLine = line.trim();
+          if (trimmedLine) {
+            const colonIndex = trimmedLine.indexOf(':');
+            if (colonIndex > 0) {
+              const key = trimmedLine.substring(0, colonIndex).trim();
+              let value = trimmedLine.substring(colonIndex + 1).trim();
+              value = value.replace(/^["']|["']$/g, '');
+              value = value.replace(/["']*$/, '');
+              if (key !== 'seed' && key !== 'model' && key !== 'audio') {
+                params[key] = value;
+              }
+            }
+          }
+        });
+
+        if (!params.prompt) {
+          params.prompt = '';
+        }
+        if (!params.width) {
+          params.width = '1280';
+        }
+        if (!params.height) {
+          params.height = '720';
+        }
+
+        params.seed = -1;
+        setIsVideo(true);
+        await generateMedia(params);
       }
     };
 
     processDrawCommand();
   }, [content]);
 
-  const generateImage = async (params: any) => {
+  const generateMedia = async (params: any) => {
     setIsLoading(true);
     setError(null);
 
@@ -205,6 +248,11 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
       url.searchParams.append('width', params.width || '512');
       url.searchParams.append('height', params.height || '512');
       url.searchParams.append('seed', '-1');
+      
+      // 视频特定参数
+      if (params.model === 'Itx-2') {
+        url.searchParams.append('audio', 'true');
+      }
 
       const response = await fetch(url.toString());
       const data = await response.json();
@@ -213,33 +261,34 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
         setImageData(data.data.imageData || null);
         setImageUrl(data.data.imageUrl || null);
       } else {
-        setError('图像生成失败: ' + (data.error?.message || '未知错误'));
+        setError((isVideo ? '视频' : '图像') + '生成失败: ' + (data.error?.message || '未知错误'));
       }
     } catch (err) {
-      console.error('图像生成失败:', err);
-      setError('图像生成失败: 网络错误');
+      console.error((isVideo ? '视频' : '图像') + '生成失败:', err);
+      setError((isVideo ? '视频' : '图像') + '生成失败: 网络错误');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const downloadImage = () => {
+  const downloadMedia = () => {
     if (imageData) {
       const link = document.createElement('a');
       link.href = imageData;
-      link.download = 'image_' + Date.now() + '.jpg';
+      link.download = (isVideo ? 'video' : 'image') + '_' + Date.now() + (isVideo ? '.mp4' : '.jpg');
       link.click();
     } else if (imageUrl) {
       const link = document.createElement('a');
       link.href = imageUrl;
-      link.download = 'image_' + Date.now() + '.jpg';
+      link.download = (isVideo ? 'video' : 'image') + '_' + Date.now() + (isVideo ? '.mp4' : '.jpg');
       link.click();
     }
   };
 
   const hasDrawCommand = content.includes('<draw>');
+  const hasVideoCommand = content.includes('<video>');
 
-  if (!hasDrawCommand) {
+  if (!hasDrawCommand && !hasVideoCommand) {
     return (
       <div className="markdown-content">
         <ReactMarkdown
@@ -300,7 +349,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 via-red-500 via-orange-500 via-yellow-500 via-green-500 via-cyan-500 via-blue-500 to-purple-500 animate-liquid"></div>
           </div>
           <div className="text-sm text-gray-600 relative">
-            <span className="animate-pulse">正在生成图片</span>
+            <span className="animate-pulse">正在生成{isVideo ? '视频' : '图片'}</span>
             <span className="animate-bounce inline-block ml-1">...</span>
           </div>
         </div>
@@ -319,27 +368,39 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
               className="cursor-pointer"
               onClick={() => setShowFullImage(true)}
             >
-              <img
-                src={imageData || imageUrl || ''}
-                alt="AI生成的图像"
-                className="max-w-full h-auto rounded-lg shadow-md"
-                style={{ maxHeight: '300px' }}
-              />
+              {isVideo ? (
+                <video
+                  src={imageData || imageUrl || ''}
+                  controls
+                  className="max-w-full h-auto rounded-lg shadow-md"
+                  style={{ maxHeight: '300px' }}
+                  autoPlay={false}
+                >
+                  您的浏览器不支持视频播放。
+                </video>
+              ) : (
+                <img
+                  src={imageData || imageUrl || ''}
+                  alt="AI生成的图像"
+                  className="max-w-full h-auto rounded-lg shadow-md"
+                  style={{ maxHeight: '300px' }}
+                />
+              )}
             </div>
           </div>
 
           <div className="flex justify-center space-x-4">
             <button
-              onClick={downloadImage}
+              onClick={downloadMedia}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              下载图片
+              下载{isVideo ? '视频' : '图片'}
             </button>
             <button
               onClick={() => {
                 if (imageUrl) {
                   navigator.clipboard.writeText(imageUrl).then(() => {
-                    alert('图片链接已复制到剪贴板');
+                    alert((isVideo ? '视频' : '图片') + '链接已复制到剪贴板');
                   }).catch(() => {
                   });
                 }
@@ -351,7 +412,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
           </div>
 
           <div className="text-center">
-            <p className="text-xs text-gray-500">生成图片会消耗右上角的余额</p>
+            <p className="text-xs text-gray-500">生成{isVideo ? '视频' : '图片'}会消耗右上角的余额</p>
           </div>
 
           {showFullImage && (
@@ -363,25 +424,36 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
                 X
               </button>
               <div className="relative max-w-full max-h-full">
-                <img
-                  src={imageData || imageUrl || ''}
-                  alt="AI生成的图像"
-                  className="max-w-full max-h-[90vh] object-contain"
-                  style={{
-                    cursor: 'zoom-in',
-                    touchAction: 'manipulation'
-                  }}
-                  onWheel={(e) => {
-                    e.preventDefault();
-                    const img = e.currentTarget;
-                    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-                    const newWidth = img.width * delta;
-                    const newHeight = img.height * delta;
+                {isVideo ? (
+                  <video
+                    src={imageData || imageUrl || ''}
+                    controls
+                    className="max-w-full max-h-[90vh] object-contain"
+                    autoPlay={false}
+                  >
+                    您的浏览器不支持视频播放。
+                  </video>
+                ) : (
+                  <img
+                    src={imageData || imageUrl || ''}
+                    alt="AI生成的图像"
+                    className="max-w-full max-h-[90vh] object-contain"
+                    style={{
+                      cursor: 'zoom-in',
+                      touchAction: 'manipulation'
+                    }}
+                    onWheel={(e) => {
+                      e.preventDefault();
+                      const img = e.currentTarget;
+                      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                      const newWidth = img.width * delta;
+                      const newHeight = img.height * delta;
 
-                    img.style.width = newWidth + 'px';
-                    img.style.height = newHeight + 'px';
-                  }}
-                />
+                      img.style.width = newWidth + 'px';
+                      img.style.height = newHeight + 'px';
+                    }}
+                  />
+                )}
               </div>
             </div>
           )}

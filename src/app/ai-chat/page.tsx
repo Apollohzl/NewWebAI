@@ -559,9 +559,9 @@ export default function AIChatPage() {
 <video>prompt:"画面提示词",aspectRatio:"16:9",duration:"4"</video>
 其中：
 - prompt：视频画面描述，描述你想生成的视频内容
-- aspectRatio：视频宽高比，支持"16:9"（横向）或"9:16"（竖向），默认16:9
-- duration：视频时长，支持"4"秒或"10"秒，默认4秒
-- model：固定为"Itx-2"，seed固定为-1，audio固定为true，无需在命令中写明
+- aspectRatio：视频宽高比，支持"16:9"（横向）或"9:16"（竖向），默认1:1（正方形）
+- duration：视频时长，支持"4"秒至"10"秒，默认4秒
+- model：固定为"ltx-2"，seed固定为-1，audio固定为true，无需在命令中写明
 例如：<video>prompt:"一只猫在花园里玩耍，阳光洒在草地上",aspectRatio:"16:9",duration:"4"</video>`,
       timestamp: new Date(),
       model: currentModel

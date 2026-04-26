@@ -98,6 +98,7 @@ const DrawCommandParser = ({ content }: { content: string }) => {
         setError('图像生成失败: ' + (data.error?.message || '未知错误'));
       }
     } catch (err) {
+      console.error('图像生成失败:', err);
       setError('图像生成失败: 网络错误');
     } finally {
       setIsLoading(false);
@@ -539,6 +540,7 @@ export default function AIChatPage() {
                   }
                 }
               } catch (e) {
+                console.error('解析流式数据失败:', e, '原始数据:', dataStr);
               }
             }
           }

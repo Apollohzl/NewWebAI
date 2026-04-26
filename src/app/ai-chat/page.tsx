@@ -39,11 +39,21 @@ const Mermaid = ({ value }: { value: string }) => {
             theme: 'default'
           });
           
+          // 先用 parse 校验语法
+          try {
+            await mermaid.parse(value);
+          } catch (parseErr) {
+            console.error('Mermaid语法错误:', parseErr);
+            setHasError(true);
+            return;
+          }
+          
+          // 语法校验通过后再渲染
           const result = await mermaid.render(`mermaid-${Date.now()}`, value);
           
           // 检查返回的SVG是否包含错误信息
           if (result.svg.includes('error-icon') || result.svg.includes('Syntax error')) {
-            throw new Error('Mermaid语法错误');
+            throw new Error('Mermaid渲染错误');
           }
           
           // 只有在没有错误时才设置innerHTML
@@ -62,7 +72,7 @@ const Mermaid = ({ value }: { value: string }) => {
     };
     
     renderMermaid();
-  }, [value]); // 移除hasError依赖，避免无限循环
+  }, [value]);
   
   // 渲染失败时显示源码
   if (hasError) {

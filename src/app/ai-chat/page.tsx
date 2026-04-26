@@ -33,7 +33,12 @@ const Mermaid = ({ value }: { value: string }) => {
             ref.current.innerHTML = '';
           }
           
-          mermaid.initialize({ startOnLoad: false });
+          mermaid.initialize({ 
+            startOnLoad: false,
+            securityLevel: 'loose',
+            theme: 'default'
+          });
+          
           const result = await mermaid.render(`mermaid-${Date.now()}`, value);
           
           // 检查返回的SVG是否包含错误信息
@@ -59,9 +64,13 @@ const Mermaid = ({ value }: { value: string }) => {
     renderMermaid();
   }, [value]); // 移除hasError依赖，避免无限循环
   
-  // 渲染失败时不显示任何内容
+  // 渲染失败时显示友好的错误提示
   if (hasError) {
-    return null;
+    return (
+      <div className="my-4 p-4 bg-red-50 border border-red-200 rounded-md">
+        <p className="text-sm text-red-600">Mermaid 图表渲染失败，请检查语法是否正确</p>
+      </div>
+    );
   }
   
   return <div ref={ref} className="mermaid my-4" />;
@@ -213,7 +222,14 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
               }
               return <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props}>{children}</code>;
             },
-            pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props} />,
+            pre: ({node, children, ...props}) => {
+              // 检查是否包含 Mermaid 代码块
+              if (children && typeof children === 'object' && 'props' in children && typeof (children as any).props === 'object' && (children as any).props.className && (children as any).props.className.includes('language-mermaid')) {
+                // 如果是 Mermaid 代码块，直接返回子元素（即 Mermaid 组件）
+                return children;
+              }
+              return <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props}>{children}</pre>;
+            },
             table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-4 text-xs" {...props} />,
             thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
             tbody: ({node, ...props}) => <tbody {...props} />,
@@ -898,7 +914,14 @@ export default function AIChatPage() {
                                         }
                                         return <code className="bg-gray-200 px-0.5 rounded text-xs" {...props}>{children}</code>;
                                       },
-                                      pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-2 rounded text-xs my-1" {...props} />,
+                                      pre: ({node, children, ...props}) => {
+                                        // 检查是否包含 Mermaid 代码块
+                                        if (children && typeof children === 'object' && 'props' in children && typeof (children as any).props === 'object' && (children as any).props.className && (children as any).props.className.includes('language-mermaid')) {
+                                          // 如果是 Mermaid 代码块，直接返回子元素（即 Mermaid 组件）
+                                          return children;
+                                        }
+                                        return <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-2 rounded text-xs my-1" {...props}>{children}</pre>;
+                                      },
                                       table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-1 text-xs" {...props} />,
                                       thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
                                       tbody: ({node, ...props}) => <tbody {...props} />,
@@ -1064,7 +1087,14 @@ export default function AIChatPage() {
               }
               return <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props}>{children}</code>;
             },
-                                  pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props} />,
+                                  pre: ({node, children, ...props}) => {
+              // 检查是否包含 Mermaid 代码块
+              if (children && typeof children === 'object' && 'props' in children && typeof (children as any).props === 'object' && (children as any).props.className && (children as any).props.className.includes('language-mermaid')) {
+                // 如果是 Mermaid 代码块，直接返回子元素（即 Mermaid 组件）
+                return children;
+              }
+              return <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props}>{children}</pre>;
+            },
                                   table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-4 text-xs" {...props} />,
                                   thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
                                   tbody: ({node, ...props}) => <tbody {...props} />,
@@ -1117,7 +1147,14 @@ export default function AIChatPage() {
               }
               return <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props}>{children}</code>;
             },
-                                  pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props} />,
+                                  pre: ({node, children, ...props}) => {
+              // 检查是否包含 Mermaid 代码块
+              if (children && typeof children === 'object' && 'props' in children && typeof (children as any).props === 'object' && (children as any).props.className && (children as any).props.className.includes('language-mermaid')) {
+                // 如果是 Mermaid 代码块，直接返回子元素（即 Mermaid 组件）
+                return children;
+              }
+              return <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props}>{children}</pre>;
+            },
                                   table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-4 text-xs" {...props} />,
                                   thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
                                   tbody: ({node, ...props}) => <tbody {...props} />,

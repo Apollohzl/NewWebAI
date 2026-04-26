@@ -256,12 +256,14 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
       url.searchParams.append('prompt', params.prompt || '');
       url.searchParams.append('model', params.model || 'zimage');
       url.searchParams.append('style', params.style || '');
-      url.searchParams.append('width', params.width || '512');
-      url.searchParams.append('height', params.height || '512');
+      if (params.model === 'zimage') {
+        url.searchParams.append('width', params.width || '512');
+        url.searchParams.append('height', params.height || '512');
+      }
       url.searchParams.append('seed', '-1');
       
       // 视频特定参数
-      if (params.model === 'Itx-2') {
+      if (params.model === 'ltx-2') {
         url.searchParams.append('audio', 'true');
         if (params.aspectRatio) {
           url.searchParams.append('aspectRatio', params.aspectRatio);

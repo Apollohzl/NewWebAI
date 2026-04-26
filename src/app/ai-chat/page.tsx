@@ -121,67 +121,60 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
 
   const hasDrawCommand = content.includes('<draw>');
 
+  const processCitations = (text: string) => {
+    if (!citations) return text;
+    return text.replace(/\[(\d+)\]/g, (match, num) => {
+      const index = parseInt(num) - 1;
+      if (index >= 0 && index < citations.length) {
+        const url = citations[index];
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${url}">${match}</a>`;
+      }
+      return match;
+    });
+  };
+
+  const processedContent = processCitations(content);
+
   if (!hasDrawCommand) {
     return (
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          h1: ({node, ...props}) => <h1 className="text-2xl font-bold text-gray-900 mb-4 mt-6 first:mt-0" {...props} />,
-          h2: ({node, ...props}) => <h2 className="text-xl font-bold text-gray-900 mb-3 mt-5 first:mt-0" {...props} />,
-          h3: ({node, ...props}) => <h3 className="text-lg font-bold text-gray-900 mb-2 mt-4 first:mt-0" {...props} />,
-          h4: ({node, ...props}) => <h4 className="text-base font-bold text-gray-900 mb-2 mt-3 first:mt-0" {...props} />,
-          h5: ({node, ...props}) => <h5 className="text-sm font-bold text-gray-900 mb-1 mt-2 first:mt-0" {...props} />,
-          h6: ({node, ...props}) => <h6 className="text-xs font-bold text-gray-900 mb-1 mt-1 first:mt-0" {...props} />,
-          p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2 break-words leading-relaxed" {...props} />,
-          strong: ({node, ...props}) => <strong className="font-bold text-gray-900" {...props} />,
-          em: ({node, ...props}) => <em className="italic" {...props} />,
-          ul: ({node, ...props}) => <ul className="list-disc list-inside mb-2 space-y-1" {...props} />,
-          ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-2 space-y-1" {...props} />,
-          li: ({node, ...props}) => <li className="text-sm text-gray-700 break-words" {...props} />,
-          blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 pl-4 py-2 my-2 bg-gray-50 italic text-gray-600" {...props} />,
-          code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props} />,
-          pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-900 text-gray-100 p-4 rounded-lg my-2 text-xs" {...props} />,
-          table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-4 text-xs" {...props} />,
-          thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
-          tbody: ({node, ...props}) => <tbody {...props} />,
-          tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
-          th: ({node, ...props}) => <th className="px-2 py-1 border border-gray-300 text-left font-semibold" {...props} />,
-          td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
-          a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
-          hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
-          text: ({ children }) => {
-            const value = children as string;
-            const parts = value.split(/(\[\d+\])/).filter(Boolean);
-            return (
-              <span>
-                {parts.map((part, index) => {
-                  const match = part.match(/\[(\d+)\]/);
-                  if (match && citations) {
-                    const citationIndex = parseInt(match[1]) - 1;
-                    if (citationIndex >= 0 && citationIndex < citations.length) {
-                      return (
-                        <a
-                          key={index}
-                          href={citations[citationIndex]}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline font-medium"
-                          title={citations[citationIndex]}
-                        >
-                          {part}
-                        </a>
-                      );
-                    }
-                  }
-                  return part;
-                })}
-              </span>
-            );
-          },
-        }}
-      >
-        {content}
-      </ReactMarkdown>
+      <div className="markdown-content">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            h1: ({node, ...props}) => <h1 className="text-2xl font-bold text-gray-900 mb-4 mt-6 first:mt-0" {...props} />,
+            h2: ({node, ...props}) => <h2 className="text-xl font-bold text-gray-900 mb-3 mt-5 first:mt-0" {...props} />,
+            h3: ({node, ...props}) => <h3 className="text-lg font-bold text-gray-900 mb-2 mt-4 first:mt-0" {...props} />,
+            h4: ({node, ...props}) => <h4 className="text-base font-bold text-gray-900 mb-2 mt-3 first:mt-0" {...props} />,
+            h5: ({node, ...props}) => <h5 className="text-sm font-bold text-gray-900 mb-1 mt-2 first:mt-0" {...props} />,
+            h6: ({node, ...props}) => <h6 className="text-xs font-bold text-gray-900 mb-1 mt-1 first:mt-0" {...props} />,
+            p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2 break-words leading-relaxed" {...props} />,
+            strong: ({node, ...props}) => <strong className="font-bold text-gray-900" {...props} />,
+            em: ({node, ...props}) => <em className="italic" {...props} />,
+            ul: ({node, ...props}) => <ul className="list-disc list-inside mb-2 space-y-1" {...props} />,
+            ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-2 space-y-1" {...props} />,
+            li: ({node, ...props}) => <li className="text-sm text-gray-700 break-words" {...props} />,
+            blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 pl-4 py-2 my-2 bg-gray-50 italic text-gray-600" {...props} />,
+            code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props} />,
+            pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-900 text-gray-100 p-4 rounded-lg my-2 text-xs" {...props} />,
+            table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-4 text-xs" {...props} />,
+            thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
+            tbody: ({node, ...props}) => <tbody {...props} />,
+            tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
+            th: ({node, ...props}) => <th className="px-2 py-1 border border-gray-300 text-left font-semibold" {...props} />,
+            td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
+            a: ({node, ...props}) => {
+              const newProps = props as { href?: string; className?: string };
+              if (newProps.className === 'citation-link') {
+                return <a {...props} className="text-blue-600 hover:underline font-medium" />;
+              }
+              return <a {...props} className="text-blue-600 hover:text-blue-800 underline" />;
+            },
+            hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
+          }}
+        >
+          {processedContent}
+        </ReactMarkdown>
+      </div>
     );
   }
 
@@ -833,40 +826,28 @@ export default function AIChatPage() {
                                     tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
                                     th: ({node, ...props}) => <th className="px-1 py-0.5 border border-gray-300 text-left text-xs font-semibold" {...props} />,
                                     td: ({node, ...props}) => <td className="px-1 py-0.5 border border-gray-300 text-xs" {...props} />,
-                                    a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline text-xs" {...props} />,
-                                    hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
-                                    text: ({ children }) => {
-                                      const value = children as string;
-                                      const parts = value.split(/(\[\d+\])/).filter(Boolean);
-                                      return (
-                                        <span>
-                                          {parts.map((part, index) => {
-                                            const match = part.match(/\[(\d+)\]/);
-                                            if (match && message.citations) {
-                                              const citationIndex = parseInt(match[1]) - 1;
-                                              if (citationIndex >= 0 && citationIndex < message.citations.length) {
-                                                return (
-                                                  <a
-                                                    key={index}
-                                                    href={message.citations[citationIndex]}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-blue-600 hover:underline font-medium text-xs"
-                                                    title={message.citations[citationIndex]}
-                                                  >
-                                                    {part}
-                                                  </a>
-                                                );
-                                              }
-                                            }
-                                            return part;
-                                          })}
-                                        </span>
-                                      );
+                                    a: ({node, ...props}) => {
+                                      const newProps = props as { href?: string; className?: string };
+                                      if (newProps.className === 'citation-link') {
+                                        return <a {...props} className="text-blue-600 hover:underline font-medium text-xs" />;
+                                      }
+                                      return <a {...props} className="text-blue-600 hover:text-blue-800 underline text-xs" />;
                                     },
+                                    hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
                                   }}
                                 >
-                                  {message.thinking}
+                                  {message.citations && message.citations.length > 0
+                                    ? (() => {
+                                        const cites = message.citations;
+                                        return message.thinking.replace(/\[(\d+)\]/g, (match, num) => {
+                                          const index = parseInt(num) - 1;
+                                          if (index >= 0 && index < cites.length) {
+                                            return `<a href="${cites[index]}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${cites[index]}">${match}</a>`;
+                                          }
+                                          return match;
+                                        });
+                                      })()
+                                    : message.thinking}
                                 </ReactMarkdown>
                               </div>
                             </div>
@@ -971,40 +952,28 @@ export default function AIChatPage() {
                                   tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
                                   th: ({node, ...props}) => <th className="px-1 py-0.5 border border-gray-300 text-left text-xs font-semibold" {...props} />,
                                   td: ({node, ...props}) => <td className="px-1 py-0.5 border border-gray-300 text-xs" {...props} />,
-                                  a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline text-xs" {...props} />,
-                                  hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
-                                  text: ({ children }) => {
-                                    const value = children as string;
-                                    const parts = value.split(/(\[\d+\])/).filter(Boolean);
-                                    return (
-                                      <span>
-                                        {parts.map((part, index) => {
-                                          const match = part.match(/\[(\d+)\]/);
-                                          if (match && message.citations) {
-                                            const citationIndex = parseInt(match[1]) - 1;
-                                            if (citationIndex >= 0 && citationIndex < message.citations.length) {
-                                              return (
-                                                <a
-                                                  key={index}
-                                                  href={message.citations[citationIndex]}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-blue-600 hover:underline font-medium text-xs"
-                                                  title={message.citations[citationIndex]}
-                                                >
-                                                  {part}
-                                                </a>
-                                              );
-                                            }
-                                          }
-                                          return part;
-                                        })}
-                                      </span>
-                                    );
+                                  a: ({node, ...props}) => {
+                                    const newProps = props as { href?: string; className?: string };
+                                    if (newProps.className === 'citation-link') {
+                                      return <a {...props} className="text-blue-600 hover:underline font-medium text-xs" />;
+                                    }
+                                    return <a {...props} className="text-blue-600 hover:text-blue-800 underline text-xs" />;
                                   },
+                                  hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
                                 }}
                               >
-                                {message.thinking}
+                                {message.citations && message.citations.length > 0
+                                  ? (() => {
+                                      const cites = message.citations;
+                                      return message.thinking.replace(/\[(\d+)\]/g, (match, num) => {
+                                        const index = parseInt(num) - 1;
+                                        if (index >= 0 && index < cites.length) {
+                                          return `<a href="${cites[index]}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${cites[index]}">${match}</a>`;
+                                        }
+                                        return match;
+                                      });
+                                    })()
+                                  : message.thinking}
                               </ReactMarkdown>
                             </div>
                             <div className="p-3 rounded-lg overflow-x-auto">
@@ -1032,40 +1001,28 @@ export default function AIChatPage() {
                                   tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
                                   th: ({node, ...props}) => <th className="px-2 py-1 border border-gray-300 text-left font-semibold" {...props} />,
                                   td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
-                                  a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
-                                  hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
-                                  text: ({ children }) => {
-                                    const value = children as string;
-                                    const parts = value.split(/(\[\d+\])/).filter(Boolean);
-                                    return (
-                                      <span>
-                                        {parts.map((part, index) => {
-                                          const match = part.match(/\[(\d+)\]/);
-                                          if (match && message.citations) {
-                                            const citationIndex = parseInt(match[1]) - 1;
-                                            if (citationIndex >= 0 && citationIndex < message.citations.length) {
-                                              return (
-                                                <a
-                                                  key={index}
-                                                  href={message.citations[citationIndex]}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-blue-600 hover:underline font-medium"
-                                                  title={message.citations[citationIndex]}
-                                                >
-                                                  {part}
-                                                </a>
-                                              );
-                                            }
-                                          }
-                                          return part;
-                                        })}
-                                      </span>
-                                    );
+                                  a: ({node, ...props}) => {
+                                    const newProps = props as { href?: string; className?: string };
+                                    if (newProps.className === 'citation-link') {
+                                      return <a {...props} className="text-blue-600 hover:underline font-medium" />;
+                                    }
+                                    return <a {...props} className="text-blue-600 hover:text-blue-800 underline" />;
                                   },
+                                  hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
                                 }}
                               >
-                                {message.content}
+                                {message.citations && message.citations.length > 0
+                                  ? (() => {
+                                      const cites = message.citations;
+                                      return message.content.replace(/\[(\d+)\]/g, (match, num) => {
+                                        const index = parseInt(num) - 1;
+                                        if (index >= 0 && index < cites.length) {
+                                          return `<a href="${cites[index]}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${cites[index]}">${match}</a>`;
+                                        }
+                                        return match;
+                                      });
+                                    })()
+                                  : message.content}
                               </ReactMarkdown>
 
                               <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">

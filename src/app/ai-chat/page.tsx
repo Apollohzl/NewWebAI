@@ -20,6 +20,7 @@ async function generateHash(str: string): Promise<string> {
 const Mermaid = ({ value }: { value: string }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [hasError, setHasError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [isComplete, setIsComplete] = useState(false);
   
   useEffect(() => {
@@ -37,6 +38,7 @@ const Mermaid = ({ value }: { value: string }) => {
         try {
           // 重置错误状态
           setHasError(false);
+          setErrorMsg('');
           
           // 清除之前的内容
           if (ref.current) {
@@ -49,21 +51,15 @@ const Mermaid = ({ value }: { value: string }) => {
             theme: 'default'
           });
           
-          // 先用 parse 校验语法
-          try {
-            await mermaid.parse(value);
-          } catch (parseErr) {
-            console.error('Mermaid语法错误:', parseErr);
-            setHasError(true);
-            return;
-          }
-          
-          // 语法校验通过后再渲染
+          // 直接渲染，Mermaid 会在内部进行语法校验
           const result = await mermaid.render(`mermaid-${Date.now()}`, value);
           
           // 检查返回的SVG是否包含错误信息
           if (result.svg.includes('error-icon') || result.svg.includes('Syntax error')) {
-            throw new Error('Mermaid渲染错误');
+            const errorMatch = result.svg.match(/<text[^>]*class="error-text"[^>]*>([^<]*)<\/text>/);
+            const errorText = errorMatch ? errorMatch[1] : '语法错误';
+            setErrorMsg(errorText);
+            throw new Error('Mermaid渲染错误: ' + errorText);
           }
           
           // 只有在没有错误时才设置innerHTML
@@ -73,6 +69,9 @@ const Mermaid = ({ value }: { value: string }) => {
         } catch (error) {
           console.error('Mermaid渲染失败:', error);
           setHasError(true);
+          if (error instanceof Error) {
+            setErrorMsg(error.message);
+          }
           // 确保清除错误的SVG内容
           if (ref.current) {
             ref.current.innerHTML = '';
@@ -89,8 +88,11 @@ const Mermaid = ({ value }: { value: string }) => {
   // 渲染失败时显示源码
   if (hasError) {
     return (
-      <div className="my-4 p-4 bg-gray-100 border border-gray-300 rounded-md overflow-x-auto">
-        <pre className="text-xs text-gray-800 whitespace-pre-wrap">{value}</pre>
+      <div className="my-4">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-md mb-2">
+          <p className="text-sm text-red-600">{errorMsg}</p>
+        </div>
+        <pre className="p-4 bg-gray-100 border border-gray-300 rounded-md overflow-x-auto text-xs text-gray-800 whitespace-pre-wrap">{value}</pre>
       </div>
     );
   }

@@ -811,7 +811,7 @@ export default function AIChatPage() {
                       <React.Fragment key={message.id}>
                         {message.citations && message.citations.length > 0 && (
                           <div className="flex justify-start">
-                            <div className="max-w-[70%] rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3">
+                            <div className="max-w-[78%] rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3">
                               <div className="text-xs text-blue-600 mb-2 font-semibold">参考资料</div>
                               <div className="flex flex-wrap gap-2">
                                 {message.citations.map((citation, index) => {
@@ -843,7 +843,7 @@ export default function AIChatPage() {
                         )}
                         {message.thinking && (
                           <div className="flex justify-start">
-                            <div className="max-w-[70%] rounded-lg relative bg-white border border-gray-200">
+                            <div className="max-w-[78%] rounded-lg relative bg-white border border-gray-200">
                               <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg overflow-x-auto flex justify-between items-center">
                                 <div className="text-xs text-gray-500 font-semibold">思考过程</div>
                                 <button 
@@ -895,7 +895,7 @@ export default function AIChatPage() {
                         )}
                         {message.segments.map((segment, index) => (
                           <div key={segment.id} className="flex justify-start">
-                            <div className="max-w-[70%] rounded-lg relative bg-white border border-gray-200">
+                            <div className="max-w-[78%] rounded-lg relative bg-white border border-gray-200">
                               <div className="p-3 rounded-lg overflow-x-auto">
                                 <DrawCommandParser content={segment.content} citations={message.citations} />
 
@@ -931,7 +931,7 @@ export default function AIChatPage() {
                       className={'flex ' + (message.role === 'user' ? 'justify-end' : 'justify-start')}
                     >
                       <div
-                        className={'max-w-[70%] rounded-lg relative ' + (
+                        className={'max-w-[78%] rounded-lg relative ' + (
                           message.role === 'user'
                             ? 'bg-blue-600 text-white'
                             : 'bg-white border border-gray-200'

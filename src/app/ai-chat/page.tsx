@@ -126,8 +126,10 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
     return text.replace(/\[(\d+)\]/g, (match, num) => {
       const index = parseInt(num) - 1;
       if (index >= 0 && index < citations.length) {
-        const url = citations[index];
-        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${url}">${match}</a>`;
+        let url = citations[index].trim();
+        url = url.replace(/^[`'"]|[`'"]$/g, '');
+        const safeUrl = url.replace(/"/g, '%22');
+        return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${safeUrl}">${match}</a>`;
       }
       return match;
     });
@@ -842,7 +844,9 @@ export default function AIChatPage() {
                                         return message.thinking.replace(/\[(\d+)\]/g, (match, num) => {
                                           const index = parseInt(num) - 1;
                                           if (index >= 0 && index < cites.length) {
-                                            return `<a href="${cites[index]}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${cites[index]}">${match}</a>`;
+                                            let url = cites[index].trim().replace(/^[`'"]|[`'"]$/g, '');
+                                            const safeUrl = url.replace(/"/g, '%22');
+                                            return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${safeUrl}">${match}</a>`;
                                           }
                                           return match;
                                         });
@@ -968,7 +972,9 @@ export default function AIChatPage() {
                                       return message.thinking.replace(/\[(\d+)\]/g, (match, num) => {
                                         const index = parseInt(num) - 1;
                                         if (index >= 0 && index < cites.length) {
-                                          return `<a href="${cites[index]}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${cites[index]}">${match}</a>`;
+                                          let url = cites[index].trim().replace(/^[`'"]|[`'"]$/g, '');
+                                          const safeUrl = url.replace(/"/g, '%22');
+                                          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${safeUrl}">${match}</a>`;
                                         }
                                         return match;
                                       });
@@ -1017,7 +1023,9 @@ export default function AIChatPage() {
                                       return message.content.replace(/\[(\d+)\]/g, (match, num) => {
                                         const index = parseInt(num) - 1;
                                         if (index >= 0 && index < cites.length) {
-                                          return `<a href="${cites[index]}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${cites[index]}">${match}</a>`;
+                                          let url = cites[index].trim().replace(/^[`'"]|[`'"]$/g, '');
+                                          const safeUrl = url.replace(/"/g, '%22');
+                                          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${safeUrl}">${match}</a>`;
                                         }
                                         return match;
                                       });

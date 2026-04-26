@@ -15,50 +15,20 @@ async function generateHash(str: string): Promise<string> {
   return hashHex;
 }
 
-const CitationText = ({ text, citations }: { text: string, citations?: string[] }) => {
-  console.log('CitationText被调用:', { text, citations });
-  if (!citations || citations.length === 0) {
-    console.log('citations为空或undefined，直接返回文本');
-    return <span>{text}</span>;
-  }
+const processContentWithCitations = (content: string, citations?: string[]): string => {
+  if (!citations || citations.length === 0 || !content) return content;
   
-  const parts = text.split(/(\[\d+\])/).filter(Boolean);
-  console.log('分割结果:', parts);
-  
-  return (
-    <span>
-      {parts.map((part, index) => {
-        const match = part.match(/\[(\d+)\]/);
-        if (match) {
-          const citationIndex = parseInt(match[1]) - 1;
-          console.log('找到引用:', part, '索引:', citationIndex);
-          if (citationIndex >= 0 && citationIndex < citations.length) {
-            let url = citations[citationIndex].trim().replace(/^[`'"\s]|[`'"\s]$/g, '');
-            console.log('引用URL:', url);
-            return (
-              <a
-                key={index}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline font-medium"
-                title={url}
-              >
-                {part}
-              </a>
-            );
-          } else {
-            console.log('引用索引无效:', citationIndex);
-          }
-        }
-        return part;
-      })}
-    </span>
-  );
+  return content.replace(/\[(\d+)\]/g, (match, num) => {
+    const citationIndex = parseInt(num) - 1;
+    if (citationIndex >= 0 && citationIndex < citations.length) {
+      const url = citations[citationIndex].trim().replace(/^[`'"\s]|[`'"\s]$/g, '');
+      return `[${num}](${url})`;
+    }
+    return match;
+  });
 };
 
 const DrawCommandParser = ({ content, citations }: { content: string, citations?: string[] }) => {
-  console.log('DrawCommandParser渲染:', { content, citations });
   const [isLoading, setIsLoading] = useState(false);
   const [imageData, setImageData] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -117,49 +87,6 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
 
     processDrawCommand();
   }, [content]);
-
-  const ProcessedText = ({ children }: { children: React.ReactNode }) => {
-    const text = String(children);
-    console.log('ProcessedText被调用:', { text, citations });
-    if (!citations || citations.length === 0 || !text) {
-      console.log('citations为空或text为空，直接返回文本');
-      return <span>{text}</span>;
-    }
-    
-    const parts = text.split(/(\[\d+\])/).filter(Boolean);
-    console.log('分割结果:', parts);
-    
-    return (
-      <span>
-        {parts.map((part, index) => {
-          const match = part.match(/\[(\d+)\]/);
-          if (match) {
-            const citationIndex = parseInt(match[1]) - 1;
-            console.log('找到引用:', part, '索引:', citationIndex);
-            if (citationIndex >= 0 && citationIndex < citations.length) {
-              let url = citations[citationIndex].trim().replace(/^[`'"\s]|[`'"\s]$/g, '');
-              console.log('引用URL:', url);
-              return (
-                <a
-                  key={index}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline font-medium"
-                  title={url}
-                >
-                  {part}
-                </a>
-              );
-            } else {
-              console.log('引用索引无效:', citationIndex);
-            }
-          }
-          return <span key={index}>{part}</span>;
-        })}
-      </span>
-    );
-  };
 
   const generateImage = async (params: any) => {
     setIsLoading(true);
@@ -236,10 +163,9 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
             td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
             a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
             hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
-            text: ({ children }) => <ProcessedText children={children} />,
           }}
         >
-          {content}
+          {processContentWithCitations(content, citations)}
         </ReactMarkdown>
       </div>
     );
@@ -897,16 +823,9 @@ export default function AIChatPage() {
                                     td: ({node, ...props}) => <td className="px-1 py-0.5 border border-gray-300 text-xs" {...props} />,
                                     a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline text-xs" {...props} />,
                                     hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
-                                    text: ({ children }) => {
-                                      const text = String(children);
-                                      if (message.citations) {
-                                        return <CitationText text={text} citations={message.citations} />;
-                                      }
-                                      return <span>{text}</span>;
-                                    },
                                   }}
                                 >
-                                  {message.thinking}
+                                  {processContentWithCitations(message.thinking, message.citations)}
                                 </ReactMarkdown>
                               </div>
                             </div>
@@ -1013,16 +932,9 @@ export default function AIChatPage() {
                                   td: ({node, ...props}) => <td className="px-1 py-0.5 border border-gray-300 text-xs" {...props} />,
                                   a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline text-xs" {...props} />,
                                   hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
-                                  text: ({ children }) => {
-                                    const text = String(children);
-                                    if (message.citations) {
-                                      return <CitationText text={text} citations={message.citations} />;
-                                    }
-                                    return <span>{text}</span>;
-                                  },
                                 }}
                               >
-                                {message.thinking}
+                                {processContentWithCitations(message.thinking, message.citations)}
                               </ReactMarkdown>
                             </div>
                             <div className="p-3 rounded-lg overflow-x-auto">
@@ -1052,16 +964,9 @@ export default function AIChatPage() {
                                   td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
                                   a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
                                   hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
-                                  text: ({ children }) => {
-                                    const text = String(children);
-                                    if (message.citations) {
-                                      return <CitationText text={text} citations={message.citations} />;
-                                    }
-                                    return <span>{text}</span>;
-                                  },
                                 }}
                               >
-                                {message.content}
+                                {processContentWithCitations(message.content, message.citations)}
                               </ReactMarkdown>
                             </div>
                           </>
@@ -1096,16 +1001,9 @@ export default function AIChatPage() {
                                   td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
                                   a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
                                   hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
-                                  text: ({ children }) => {
-                                    const text = String(children);
-                                    if (message.citations) {
-                                      return <CitationText text={text} citations={message.citations} />;
-                                    }
-                                    return <span>{text}</span>;
-                                  },
                                 }}
                               >
-                                {message.content}
+                                {processContentWithCitations(message.content, message.citations)}
                               </ReactMarkdown>
                             )}
                             <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200 opacity-70">

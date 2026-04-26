@@ -25,7 +25,14 @@ const Mermaid = ({ value }: { value: string }) => {
     const renderMermaid = async () => {
       if (ref.current && value) {
         try {
+          // 重置错误状态
           setHasError(false);
+          
+          // 清除之前的内容
+          if (ref.current) {
+            ref.current.innerHTML = '';
+          }
+          
           mermaid.initialize({ startOnLoad: false });
           const result = await mermaid.render(`mermaid-${Date.now()}`, value);
           
@@ -34,18 +41,23 @@ const Mermaid = ({ value }: { value: string }) => {
             throw new Error('Mermaid语法错误');
           }
           
-          if (ref.current && !hasError) {
+          // 只有在没有错误时才设置innerHTML
+          if (ref.current) {
             ref.current.innerHTML = result.svg;
           }
         } catch (error) {
           console.error('Mermaid渲染失败:', error);
           setHasError(true);
+          // 确保清除错误的SVG内容
+          if (ref.current) {
+            ref.current.innerHTML = '';
+          }
         }
       }
     };
     
     renderMermaid();
-  }, [value, hasError]);
+  }, [value]); // 移除hasError依赖，避免无限循环
   
   // 渲染失败时不显示任何内容
   if (hasError) {

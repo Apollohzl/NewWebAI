@@ -909,6 +909,7 @@ export default function AIChatPage() {
                           <div key={segment.id} className="flex justify-start">
                             <div className="max-w-[70%] rounded-lg relative bg-white border border-gray-200">
                               <div className="p-3 rounded-lg overflow-x-auto">
+                                {console.log('渲染segments:', { segment: segment.content, citations: message.citations })}
                                 <DrawCommandParser content={segment.content} citations={message.citations} />
 
                                 {index === (message.segments?.length || 0) - 1 && (
@@ -1019,6 +1020,7 @@ export default function AIChatPage() {
                               </ReactMarkdown>
                             </div>
                             <div className="p-3 rounded-lg overflow-x-auto">
+                              {console.log('渲染消息内容:', { content: message.content, citations: message.citations })}
                               <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
                                 components={{

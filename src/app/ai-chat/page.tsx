@@ -64,11 +64,11 @@ const Mermaid = ({ value }: { value: string }) => {
     renderMermaid();
   }, [value]); // 移除hasError依赖，避免无限循环
   
-  // 渲染失败时显示友好的错误提示
+  // 渲染失败时显示源码
   if (hasError) {
     return (
-      <div className="my-4 p-4 bg-red-50 border border-red-200 rounded-md">
-        <p className="text-sm text-red-600">Mermaid 图表渲染失败，请检查语法是否正确</p>
+      <div className="my-4 p-4 bg-gray-100 border border-gray-300 rounded-md overflow-x-auto">
+        <pre className="text-xs text-gray-800 whitespace-pre-wrap">{value}</pre>
       </div>
     );
   }

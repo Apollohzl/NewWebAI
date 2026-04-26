@@ -140,6 +140,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
   const [error, setError] = useState<string | null>(null);
   const [showFullImage, setShowFullImage] = useState(false);
   const [isVideo, setIsVideo] = useState(false);
+  const processedHashesRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const processDrawCommand = async () => {
@@ -149,6 +150,11 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
       if (drawMatch) {
         const drawCommand = drawMatch[1].trim();
         const commandHash = await generateHash(drawCommand);
+        
+        if (processedHashesRef.current.has(commandHash)) {
+          return;
+        }
+        processedHashesRef.current.add(commandHash);
 
         const params: any = {
           seed: -1
@@ -193,6 +199,11 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
       } else if (videoMatch) {
         const videoCommand = videoMatch[1].trim();
         const commandHash = await generateHash(videoCommand);
+        
+        if (processedHashesRef.current.has(commandHash)) {
+          return;
+        }
+        processedHashesRef.current.add(commandHash);
 
         const params: any = {
           seed: -1,

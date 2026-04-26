@@ -28,6 +28,12 @@ const Mermaid = ({ value }: { value: string }) => {
           setHasError(false);
           mermaid.initialize({ startOnLoad: false });
           const result = await mermaid.render(`mermaid-${Date.now()}`, value);
+          
+          // 检查返回的SVG是否包含错误信息
+          if (result.svg.includes('error-icon') || result.svg.includes('Syntax error')) {
+            throw new Error('Mermaid语法错误');
+          }
+          
           if (ref.current && !hasError) {
             ref.current.innerHTML = result.svg;
           }
@@ -41,13 +47,9 @@ const Mermaid = ({ value }: { value: string }) => {
     renderMermaid();
   }, [value, hasError]);
   
+  // 渲染失败时不显示任何内容
   if (hasError) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 my-4 text-red-600 text-sm">
-        <p className="font-semibold">流程图渲染失败</p>
-        <p className="text-xs mt-1">请检查Mermaid语法是否正确</p>
-      </div>
-    );
+    return null;
   }
   
   return <div ref={ref} className="mermaid my-4" />;
@@ -820,7 +822,7 @@ export default function AIChatPage() {
                       <React.Fragment key={message.id}>
                         {message.citations && message.citations.length > 0 && (
                           <div className="flex justify-start">
-                            <div className="max-w-[78%] rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3">
+                            <div className="w-[78%] rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3">
                               <div className="text-xs text-blue-600 mb-2 font-semibold">参考资料</div>
                               <div className="flex flex-wrap gap-2">
                                 {message.citations.map((citation, index) => {
@@ -852,7 +854,7 @@ export default function AIChatPage() {
                         )}
                         {message.thinking && (
                           <div className="flex justify-start">
-                            <div className="max-w-[78%] rounded-lg relative bg-white border border-gray-200">
+                            <div className="w-[78%] rounded-lg relative bg-white border border-gray-200">
                               <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg overflow-x-auto flex justify-between items-center">
                                 <div className="text-xs text-gray-500 font-semibold">思考过程</div>
                                 <button 
@@ -904,7 +906,7 @@ export default function AIChatPage() {
                         )}
                         {message.segments.map((segment, index) => (
                           <div key={segment.id} className="flex justify-start">
-                            <div className="max-w-[78%] rounded-lg relative bg-white border border-gray-200">
+                            <div className="w-[78%] rounded-lg relative bg-white border border-gray-200">
                               <div className="p-3 rounded-lg overflow-x-auto">
                                 <DrawCommandParser content={segment.content} citations={message.citations} />
 
@@ -940,7 +942,7 @@ export default function AIChatPage() {
                       className={'flex ' + (message.role === 'user' ? 'justify-end' : 'justify-start')}
                     >
                       <div
-                        className={'max-w-[78%] rounded-lg relative ' + (
+                        className={'w-[78%] rounded-lg relative ' + (
                           message.role === 'user'
                             ? 'bg-blue-600 text-white'
                             : 'bg-white border border-gray-200'

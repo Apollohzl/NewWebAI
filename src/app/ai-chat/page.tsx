@@ -1069,6 +1069,7 @@ export default function AIChatPage() {
                     </div>
                   );
                 })}
+                <div ref={messagesEndRef} />
               </div>
             </div>
           )}

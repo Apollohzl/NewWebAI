@@ -22,7 +22,7 @@ const processContentWithCitations = (content: string, citations?: string[]): str
     const citationIndex = parseInt(num) - 1;
     if (citationIndex >= 0 && citationIndex < citations.length) {
       const url = citations[citationIndex].trim().replace(/^[`'"\s]|[`'"\s]$/g, '');
-      return `[${num}](${url})`;
+      return `[[${num}]](${url})`;
     }
     return match;
   });

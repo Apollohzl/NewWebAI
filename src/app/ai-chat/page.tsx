@@ -20,10 +20,20 @@ async function generateHash(str: string): Promise<string> {
 const Mermaid = ({ value }: { value: string }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [hasError, setHasError] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+  
+  useEffect(() => {
+    // 延迟执行，确保是完整的代码
+    const timer = setTimeout(() => {
+      setIsComplete(true);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [value]);
   
   useEffect(() => {
     const renderMermaid = async () => {
-      if (ref.current && value) {
+      if (ref.current && value && isComplete) {
         try {
           // 重置错误状态
           setHasError(false);
@@ -71,11 +81,22 @@ const Mermaid = ({ value }: { value: string }) => {
       }
     };
     
-    renderMermaid();
-  }, [value]);
+    if (isComplete) {
+      renderMermaid();
+    }
+  }, [value, isComplete]);
   
   // 渲染失败时显示源码
   if (hasError) {
+    return (
+      <div className="my-4 p-4 bg-gray-100 border border-gray-300 rounded-md overflow-x-auto">
+        <pre className="text-xs text-gray-800 whitespace-pre-wrap">{value}</pre>
+      </div>
+    );
+  }
+  
+  // 未完成时显示代码
+  if (!isComplete) {
     return (
       <div className="my-4 p-4 bg-gray-100 border border-gray-300 rounded-md overflow-x-auto">
         <pre className="text-xs text-gray-800 whitespace-pre-wrap">{value}</pre>

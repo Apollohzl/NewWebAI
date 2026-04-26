@@ -212,7 +212,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
 
         const params: any = {
           seed: -1,
-          model: 'Itx-2',
+          model: 'ltx-2',
           audio: true
         };
 
@@ -268,7 +268,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
       url.searchParams.append('seed', '-1');
       
       // 视频特定参数
-      if (params.model === 'Itx-2') {
+      if (params.model === 'ltx-2') {
         url.searchParams.append('audio', 'true');
         if (params.aspectRatio) {
           url.searchParams.append('aspectRatio', params.aspectRatio);

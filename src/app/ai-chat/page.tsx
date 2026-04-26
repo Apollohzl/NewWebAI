@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import mermaid from 'mermaid';
 import AdComponent from '@/components/AdComponent';
 
 async function generateHash(str: string): Promise<string> {
@@ -15,6 +16,33 @@ async function generateHash(str: string): Promise<string> {
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   return hashHex;
 }
+
+const Mermaid = ({ value }: { value: string }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const renderMermaid = async () => {
+      if (ref.current && value) {
+        try {
+          mermaid.initialize({ startOnLoad: false });
+          const result = await mermaid.render(`mermaid-${Date.now()}`, value);
+          if (ref.current) {
+            ref.current.innerHTML = result.svg;
+          }
+        } catch (error) {
+          console.error('Mermaid渲染失败:', error);
+          if (ref.current) {
+            ref.current.innerHTML = `<div className="text-red-500">Mermaid渲染失败: ${error instanceof Error ? error.message : '未知错误'}</div>`;
+          }
+        }
+      }
+    };
+    
+    renderMermaid();
+  }, [value]);
+  
+  return <div ref={ref} className="mermaid my-4" />;
+};
 
 const processContentWithCitations = (content: string, citations?: string[]): string => {
   if (!citations || citations.length === 0 || !content) return content;
@@ -155,7 +183,13 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
             ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-2 space-y-1" {...props} />,
             li: ({node, ...props}) => <li className="text-sm text-gray-700 break-words" {...props} />,
             blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 pl-4 py-2 my-2 bg-gray-50 italic text-gray-600" {...props} />,
-            code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props} />,
+            code: ({node, className, children, ...props}) => {
+              const match = /language-(\w+)/.exec(className || '');
+              if (match && match[1] === 'mermaid') {
+                return <Mermaid value={String(children).replace(/^\n|\n$/g, '')} />;
+              }
+              return <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props}>{children}</code>;
+            },
             pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props} />,
             table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-4 text-xs" {...props} />,
             thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
@@ -834,7 +868,13 @@ export default function AIChatPage() {
                                       ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-1 space-y-0.5" {...props} />,
                                       li: ({node, ...props}) => <li className="text-xs text-gray-700" {...props} />,
                                       blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-300 pl-2 my-1 bg-gray-50 italic text-gray-600 text-xs" {...props} />,
-                                      code: ({node, ...props}) => <code className="bg-gray-200 px-0.5 rounded text-xs" {...props} />,
+                                      code: ({node, className, children, ...props}) => {
+                                        const match = /language-(\w+)/.exec(className || '');
+                                        if (match && match[1] === 'mermaid') {
+                                          return <Mermaid value={String(children).replace(/^\n|\n$/g, '')} />;
+                                        }
+                                        return <code className="bg-gray-200 px-0.5 rounded text-xs" {...props}>{children}</code>;
+                                      },
                                       pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-2 rounded text-xs my-1" {...props} />,
                                       table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-1 text-xs" {...props} />,
                                       thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
@@ -954,7 +994,13 @@ export default function AIChatPage() {
                                     ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-1 space-y-0.5" {...props} />,
                                     li: ({node, ...props}) => <li className="text-xs text-gray-700" {...props} />,
                                     blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-300 pl-2 my-1 bg-gray-50 italic text-gray-600 text-xs" {...props} />,
-                                    code: ({node, ...props}) => <code className="bg-gray-200 px-0.5 rounded text-xs" {...props} />,
+                                    code: ({node, className, children, ...props}) => {
+                                      const match = /language-(\w+)/.exec(className || '');
+                                      if (match && match[1] === 'mermaid') {
+                                        return <Mermaid value={String(children).replace(/^\n|\n$/g, '')} />;
+                                      }
+                                      return <code className="bg-gray-200 px-0.5 rounded text-xs" {...props}>{children}</code>;
+                                    },
                                     pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-2 rounded text-xs my-1" {...props} />,
                                     table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-1 text-xs" {...props} />,
                                     thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
@@ -988,7 +1034,13 @@ export default function AIChatPage() {
                                   ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-2 space-y-1" {...props} />,
                                   li: ({node, ...props}) => <li className="text-sm text-gray-700 break-words" {...props} />,
                                   blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 pl-4 py-2 my-2 bg-gray-50 italic text-gray-600" {...props} />,
-                                  code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props} />,
+                                  code: ({node, className, children, ...props}) => {
+              const match = /language-(\w+)/.exec(className || '');
+              if (match && match[1] === 'mermaid') {
+                return <Mermaid value={String(children).replace(/^\n|\n$/g, '')} />;
+              }
+              return <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props}>{children}</code>;
+            },
                                   pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props} />,
                                   table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-4 text-xs" {...props} />,
                                   thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
@@ -1035,7 +1087,13 @@ export default function AIChatPage() {
                                   ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-2 space-y-1" {...props} />,
                                   li: ({node, ...props}) => <li className="text-sm text-gray-700 break-words" {...props} />,
                                   blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 pl-4 py-2 my-2 bg-gray-50 italic text-gray-600" {...props} />,
-                                  code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props} />,
+                                  code: ({node, className, children, ...props}) => {
+              const match = /language-(\w+)/.exec(className || '');
+              if (match && match[1] === 'mermaid') {
+                return <Mermaid value={String(children).replace(/^\n|\n$/g, '')} />;
+              }
+              return <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props}>{children}</code>;
+            },
                                   pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props} />,
                                   table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-4 text-xs" {...props} />,
                                   thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,

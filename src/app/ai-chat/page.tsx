@@ -144,6 +144,11 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
 
   useEffect(() => {
     const processDrawCommand = async () => {
+      // 防止重复请求：如果已经在加载中，不处理新的命令
+      if (isLoading) {
+        return;
+      }
+      
       const drawMatch = content.match(/<draw>([\s\S]*?)<\/draw>/);
       const videoMatch = content.match(/<video>([\s\S]*?)<\/video>/);
       
@@ -207,7 +212,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
 
         const params: any = {
           seed: -1,
-          model: 'ltx-2',
+          model: 'Itx-2',
           audio: true
         };
 
@@ -245,7 +250,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
     };
 
     processDrawCommand();
-  }, [content]);
+  }, [content, isLoading]);
 
   const generateMedia = async (params: any) => {
     setIsLoading(true);
@@ -263,7 +268,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
       url.searchParams.append('seed', '-1');
       
       // 视频特定参数
-      if (params.model === 'ltx-2') {
+      if (params.model === 'Itx-2') {
         url.searchParams.append('audio', 'true');
         if (params.aspectRatio) {
           url.searchParams.append('aspectRatio', params.aspectRatio);

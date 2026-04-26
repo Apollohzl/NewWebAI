@@ -19,27 +19,36 @@ async function generateHash(str: string): Promise<string> {
 
 const Mermaid = ({ value }: { value: string }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const [hasError, setHasError] = useState(false);
   
   useEffect(() => {
     const renderMermaid = async () => {
       if (ref.current && value) {
         try {
+          setHasError(false);
           mermaid.initialize({ startOnLoad: false });
           const result = await mermaid.render(`mermaid-${Date.now()}`, value);
-          if (ref.current) {
+          if (ref.current && !hasError) {
             ref.current.innerHTML = result.svg;
           }
         } catch (error) {
           console.error('Mermaid渲染失败:', error);
-          if (ref.current) {
-            ref.current.innerHTML = `<div className="text-red-500">Mermaid渲染失败: ${error instanceof Error ? error.message : '未知错误'}</div>`;
-          }
+          setHasError(true);
         }
       }
     };
     
     renderMermaid();
-  }, [value]);
+  }, [value, hasError]);
+  
+  if (hasError) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 my-4 text-red-600 text-sm">
+        <p className="font-semibold">流程图渲染失败</p>
+        <p className="text-xs mt-1">请检查Mermaid语法是否正确</p>
+      </div>
+    );
+  }
   
   return <div ref={ref} className="mermaid my-4" />;
 };

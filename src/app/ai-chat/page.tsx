@@ -141,11 +141,12 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
   const [showFullImage, setShowFullImage] = useState(false);
   const [isVideo, setIsVideo] = useState(false);
   const processedHashesRef = useRef<Set<string>>(new Set());
+  const isProcessingRef = useRef<boolean>(false);
 
   useEffect(() => {
     const processDrawCommand = async () => {
-      // 防止重复请求：如果已经在加载中，不处理新的命令
-      if (isLoading) {
+      // 防止重复请求：如果已经在处理中，不处理新的命令
+      if (isProcessingRef.current) {
         return;
       }
       
@@ -160,6 +161,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
           return;
         }
         processedHashesRef.current.add(commandHash);
+        isProcessingRef.current = true;
 
         const params: any = {
           seed: -1
@@ -201,6 +203,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
         params.seed = -1;
         setIsVideo(false);
         await generateMedia(params);
+        isProcessingRef.current = false;
       } else if (videoMatch) {
         const videoCommand = videoMatch[1].trim();
         const commandHash = await generateHash(videoCommand);
@@ -209,6 +212,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
           return;
         }
         processedHashesRef.current.add(commandHash);
+        isProcessingRef.current = true;
 
         const params: any = {
           seed: -1,
@@ -249,11 +253,12 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
         params.seed = -1;
         setIsVideo(true);
         await generateMedia(params);
+        isProcessingRef.current = false;
       }
     };
 
     processDrawCommand();
-  }, [content, isLoading]);
+  }, [content]);
 
   const generateMedia = async (params: any) => {
     setIsLoading(true);
@@ -294,6 +299,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
       setError((isVideo ? '视频' : '图像') + '生成失败: 网络错误');
     } finally {
       setIsLoading(false);
+      isProcessingRef.current = false;
     }
   };
 

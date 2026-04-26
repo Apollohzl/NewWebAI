@@ -56,8 +56,19 @@ const Mermaid = ({ value }: { value: string }) => {
           
           // 检查返回的SVG是否包含错误信息
           if (result.svg.includes('error-icon') || result.svg.includes('Syntax error')) {
-            const errorMatch = result.svg.match(/<text[^>]*class="error-text"[^>]*>([^<]*)<\/text>/);
-            const errorText = errorMatch ? errorMatch[1] : '语法错误';
+            // 提取错误信息
+            const errorMatch = result.svg.match(/<text[^>]*class="error-text"[^>]*>([^<]*)<\/text>/g);
+            let errorText = '语法错误';
+            if (errorMatch && errorMatch.length > 0) {
+              // 提取所有错误文本
+              const errorTexts = errorMatch.map(match => {
+                const textMatch = match.match(/<text[^>]*class="error-text"[^>]*>([^<]*)<\/text>/);
+                return textMatch ? textMatch[1] : '';
+              }).filter(text => text.trim());
+              if (errorTexts.length > 0) {
+                errorText = errorTexts.join(' - ');
+              }
+            }
             setErrorMsg(errorText);
             throw new Error('Mermaid渲染错误: ' + errorText);
           }

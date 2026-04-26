@@ -15,7 +15,7 @@ async function generateHash(str: string): Promise<string> {
   return hashHex;
 }
 
-const DrawCommandParser = ({ content }: { content: string }) => {
+const DrawCommandParser = ({ content, citations }: { content: string, citations?: string[] }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [imageData, setImageData] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -149,6 +149,35 @@ const DrawCommandParser = ({ content }: { content: string }) => {
           td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
           a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
           hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
+          text: ({ children }) => {
+            const value = children as string;
+            const parts = value.split(/(\[\d+\])/).filter(Boolean);
+            return (
+              <span>
+                {parts.map((part, index) => {
+                  const match = part.match(/\[(\d+)\]/);
+                  if (match && citations) {
+                    const citationIndex = parseInt(match[1]) - 1;
+                    if (citationIndex >= 0 && citationIndex < citations.length) {
+                      return (
+                        <a
+                          key={index}
+                          href={citations[citationIndex]}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline font-medium"
+                          title={citations[citationIndex]}
+                        >
+                          {part}
+                        </a>
+                      );
+                    }
+                  }
+                  return part;
+                })}
+              </span>
+            );
+          },
         }}
       >
         {content}
@@ -806,6 +835,35 @@ export default function AIChatPage() {
                                     td: ({node, ...props}) => <td className="px-1 py-0.5 border border-gray-300 text-xs" {...props} />,
                                     a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline text-xs" {...props} />,
                                     hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
+                                    text: ({ children }) => {
+                                      const value = children as string;
+                                      const parts = value.split(/(\[\d+\])/).filter(Boolean);
+                                      return (
+                                        <span>
+                                          {parts.map((part, index) => {
+                                            const match = part.match(/\[(\d+)\]/);
+                                            if (match && message.citations) {
+                                              const citationIndex = parseInt(match[1]) - 1;
+                                              if (citationIndex >= 0 && citationIndex < message.citations.length) {
+                                                return (
+                                                  <a
+                                                    key={index}
+                                                    href={message.citations[citationIndex]}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-600 hover:underline font-medium text-xs"
+                                                    title={message.citations[citationIndex]}
+                                                  >
+                                                    {part}
+                                                  </a>
+                                                );
+                                              }
+                                            }
+                                            return part;
+                                          })}
+                                        </span>
+                                      );
+                                    },
                                   }}
                                 >
                                   {message.thinking}
@@ -818,7 +876,7 @@ export default function AIChatPage() {
                           <div key={segment.id} className="flex justify-start">
                             <div className="max-w-[70%] rounded-lg relative bg-white border border-gray-200">
                               <div className="p-3 rounded-lg overflow-x-auto">
-                                <DrawCommandParser content={segment.content} />
+                                <DrawCommandParser content={segment.content} citations={message.citations} />
 
                                 {index === (message.segments?.length || 0) - 1 && (
                                   <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
@@ -915,6 +973,35 @@ export default function AIChatPage() {
                                   td: ({node, ...props}) => <td className="px-1 py-0.5 border border-gray-300 text-xs" {...props} />,
                                   a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline text-xs" {...props} />,
                                   hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
+                                  text: ({ children }) => {
+                                    const value = children as string;
+                                    const parts = value.split(/(\[\d+\])/).filter(Boolean);
+                                    return (
+                                      <span>
+                                        {parts.map((part, index) => {
+                                          const match = part.match(/\[(\d+)\]/);
+                                          if (match && message.citations) {
+                                            const citationIndex = parseInt(match[1]) - 1;
+                                            if (citationIndex >= 0 && citationIndex < message.citations.length) {
+                                              return (
+                                                <a
+                                                  key={index}
+                                                  href={message.citations[citationIndex]}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-blue-600 hover:underline font-medium text-xs"
+                                                  title={message.citations[citationIndex]}
+                                                >
+                                                  {part}
+                                                </a>
+                                              );
+                                            }
+                                          }
+                                          return part;
+                                        })}
+                                      </span>
+                                    );
+                                  },
                                 }}
                               >
                                 {message.thinking}
@@ -947,6 +1034,35 @@ export default function AIChatPage() {
                                   td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
                                   a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
                                   hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
+                                  text: ({ children }) => {
+                                    const value = children as string;
+                                    const parts = value.split(/(\[\d+\])/).filter(Boolean);
+                                    return (
+                                      <span>
+                                        {parts.map((part, index) => {
+                                          const match = part.match(/\[(\d+)\]/);
+                                          if (match && message.citations) {
+                                            const citationIndex = parseInt(match[1]) - 1;
+                                            if (citationIndex >= 0 && citationIndex < message.citations.length) {
+                                              return (
+                                                <a
+                                                  key={index}
+                                                  href={message.citations[citationIndex]}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-blue-600 hover:underline font-medium"
+                                                  title={message.citations[citationIndex]}
+                                                >
+                                                  {part}
+                                                </a>
+                                              );
+                                            }
+                                          }
+                                          return part;
+                                        })}
+                                      </span>
+                                    );
+                                  },
                                 }}
                               >
                                 {message.content}

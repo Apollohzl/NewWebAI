@@ -154,7 +154,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
             li: ({node, ...props}) => <li className="text-sm text-gray-700 break-words" {...props} />,
             blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 pl-4 py-2 my-2 bg-gray-50 italic text-gray-600" {...props} />,
             code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props} />,
-            pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-900 text-gray-100 p-4 rounded-lg my-2 text-xs" {...props} />,
+            pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props} />,
             table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-4 text-xs" {...props} />,
             thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
             tbody: ({node, ...props}) => <tbody {...props} />,
@@ -298,8 +298,16 @@ export default function AIChatPage() {
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(1000);
   const [balance, setBalance] = useState<number>(0);
+  const [expandedMessages, setExpandedMessages] = useState<Record<string, boolean>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  const toggleThinking = (messageId: string) => {
+    setExpandedMessages(prev => ({
+      ...prev,
+      [messageId]: !prev[messageId]
+    }));
+  };
 
   const fetchBalance = async () => {
     try {
@@ -798,36 +806,46 @@ export default function AIChatPage() {
                         {message.thinking && (
                           <div className="flex justify-start">
                             <div className="max-w-[70%] rounded-lg relative bg-white border border-gray-200">
-                              <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg overflow-x-auto">
-                                <div className="text-xs text-gray-500 mb-2 font-semibold">思考过程</div>
-                                <ReactMarkdown
-                                  remarkPlugins={[remarkGfm]}
-                                  components={{
-                                    h1: ({node, ...props}) => <h1 className="text-xl font-bold text-gray-900 mb-2 mt-2" {...props} />,
-                                    h2: ({node, ...props}) => <h2 className="text-lg font-bold text-gray-900 mb-2 mt-2" {...props} />,
-                                    h3: ({node, ...props}) => <h3 className="text-base font-bold text-gray-900 mb-1 mt-2" {...props} />,
-                                    p: ({node, ...props}) => <p className="text-xs text-gray-700 mb-1 leading-relaxed" {...props} />,
-                                    strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                                    em: ({node, ...props}) => <em className="italic" {...props} />,
-                                    ul: ({node, ...props}) => <ul className="list-disc list-inside mb-1 space-y-0.5" {...props} />,
-                                    ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-1 space-y-0.5" {...props} />,
-                                    li: ({node, ...props}) => <li className="text-xs text-gray-700" {...props} />,
-                                    blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-300 pl-2 my-1 bg-gray-50 italic text-gray-600 text-xs" {...props} />,
-                                    code: ({node, ...props}) => <code className="bg-gray-200 px-0.5 rounded text-xs" {...props} />,
-                                    pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-900 text-gray-100 p-2 rounded text-xs my-1" {...props} />,
-                                    table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-1 text-xs" {...props} />,
-                                    thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
-                                    tbody: ({node, ...props}) => <tbody {...props} />,
-                                    tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
-                                    th: ({node, ...props}) => <th className="px-1 py-0.5 border border-gray-300 text-left text-xs font-semibold" {...props} />,
-                                    td: ({node, ...props}) => <td className="px-1 py-0.5 border border-gray-300 text-xs" {...props} />,
-                                    a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline text-xs" {...props} />,
-                                    hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
-                                  }}
+                              <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg overflow-x-auto flex justify-between items-center">
+                                <div className="text-xs text-gray-500 font-semibold">思考过程</div>
+                                <button 
+                                  className="text-gray-500 hover:text-gray-700 text-xs"
+                                  onClick={() => toggleThinking(message.id)}
                                 >
-                                  {processContentWithCitations(message.thinking, message.citations)}
-                                </ReactMarkdown>
+                                  {expandedMessages[message.id] !== false ? '∨' : '∧'}
+                                </button>
                               </div>
+                              {expandedMessages[message.id] !== false && (
+                                <div className="p-3 overflow-x-auto">
+                                  <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                      h1: ({node, ...props}) => <h1 className="text-xl font-bold text-gray-900 mb-2 mt-2" {...props} />,
+                                      h2: ({node, ...props}) => <h2 className="text-lg font-bold text-gray-900 mb-2 mt-2" {...props} />,
+                                      h3: ({node, ...props}) => <h3 className="text-base font-bold text-gray-900 mb-1 mt-2" {...props} />,
+                                      p: ({node, ...props}) => <p className="text-xs text-gray-700 mb-1 leading-relaxed" {...props} />,
+                                      strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                      em: ({node, ...props}) => <em className="italic" {...props} />,
+                                      ul: ({node, ...props}) => <ul className="list-disc list-inside mb-1 space-y-0.5" {...props} />,
+                                      ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-1 space-y-0.5" {...props} />,
+                                      li: ({node, ...props}) => <li className="text-xs text-gray-700" {...props} />,
+                                      blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-300 pl-2 my-1 bg-gray-50 italic text-gray-600 text-xs" {...props} />,
+                                      code: ({node, ...props}) => <code className="bg-gray-200 px-0.5 rounded text-xs" {...props} />,
+                                      pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-2 rounded text-xs my-1" {...props} />,
+                                      table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-1 text-xs" {...props} />,
+                                      thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
+                                      tbody: ({node, ...props}) => <tbody {...props} />,
+                                      tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
+                                      th: ({node, ...props}) => <th className="px-1 py-0.5 border border-gray-300 text-left text-xs font-semibold" {...props} />,
+                                      td: ({node, ...props}) => <td className="px-1 py-0.5 border border-gray-300 text-xs" {...props} />,
+                                      a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline text-xs" {...props} />,
+                                      hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
+                                    }}
+                                  >
+                                    {processContentWithCitations(message.thinking, message.citations)}
+                                  </ReactMarkdown>
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
@@ -907,36 +925,46 @@ export default function AIChatPage() {
                         )}
                         {(message.role === 'assistant' || message.role === 'system') && message.thinking ? (
                           <>
-                            <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg overflow-x-auto">
-                              <div className="text-xs text-gray-500 mb-2 font-semibold">思考过程</div>
-                              <ReactMarkdown
-                                remarkPlugins={[remarkGfm]}
-                                components={{
-                                  h1: ({node, ...props}) => <h1 className="text-xl font-bold text-gray-900 mb-2 mt-2" {...props} />,
-                                  h2: ({node, ...props}) => <h2 className="text-lg font-bold text-gray-900 mb-2 mt-2" {...props} />,
-                                  h3: ({node, ...props}) => <h3 className="text-base font-bold text-gray-900 mb-1 mt-2" {...props} />,
-                                  p: ({node, ...props}) => <p className="text-xs text-gray-700 mb-1 leading-relaxed" {...props} />,
-                                  strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                                  em: ({node, ...props}) => <em className="italic" {...props} />,
-                                  ul: ({node, ...props}) => <ul className="list-disc list-inside mb-1 space-y-0.5" {...props} />,
-                                  ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-1 space-y-0.5" {...props} />,
-                                  li: ({node, ...props}) => <li className="text-xs text-gray-700" {...props} />,
-                                  blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-300 pl-2 my-1 bg-gray-50 italic text-gray-600 text-xs" {...props} />,
-                                  code: ({node, ...props}) => <code className="bg-gray-200 px-0.5 rounded text-xs" {...props} />,
-                                  pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-900 text-gray-100 p-2 rounded text-xs my-1" {...props} />,
-                                  table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-1 text-xs" {...props} />,
-                                  thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
-                                  tbody: ({node, ...props}) => <tbody {...props} />,
-                                  tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
-                                  th: ({node, ...props}) => <th className="px-1 py-0.5 border border-gray-300 text-left text-xs font-semibold" {...props} />,
-                                  td: ({node, ...props}) => <td className="px-1 py-0.5 border border-gray-300 text-xs" {...props} />,
-                                  a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline text-xs" {...props} />,
-                                  hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
-                                }}
+                            <div className="bg-gray-100 border-b border-gray-200 p-3 rounded-t-lg overflow-x-auto flex justify-between items-center">
+                              <div className="text-xs text-gray-500 font-semibold">思考过程</div>
+                              <button 
+                                className="text-gray-500 hover:text-gray-700 text-xs"
+                                onClick={() => toggleThinking(message.id)}
                               >
-                                {processContentWithCitations(message.thinking, message.citations)}
-                              </ReactMarkdown>
+                                {expandedMessages[message.id] !== false ? '∨' : '∧'}
+                              </button>
                             </div>
+                            {expandedMessages[message.id] !== false && (
+                              <div className="p-3 overflow-x-auto">
+                                <ReactMarkdown
+                                  remarkPlugins={[remarkGfm]}
+                                  components={{
+                                    h1: ({node, ...props}) => <h1 className="text-xl font-bold text-gray-900 mb-2 mt-2" {...props} />,
+                                    h2: ({node, ...props}) => <h2 className="text-lg font-bold text-gray-900 mb-2 mt-2" {...props} />,
+                                    h3: ({node, ...props}) => <h3 className="text-base font-bold text-gray-900 mb-1 mt-2" {...props} />,
+                                    p: ({node, ...props}) => <p className="text-xs text-gray-700 mb-1 leading-relaxed" {...props} />,
+                                    strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                    em: ({node, ...props}) => <em className="italic" {...props} />,
+                                    ul: ({node, ...props}) => <ul className="list-disc list-inside mb-1 space-y-0.5" {...props} />,
+                                    ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-1 space-y-0.5" {...props} />,
+                                    li: ({node, ...props}) => <li className="text-xs text-gray-700" {...props} />,
+                                    blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-300 pl-2 my-1 bg-gray-50 italic text-gray-600 text-xs" {...props} />,
+                                    code: ({node, ...props}) => <code className="bg-gray-200 px-0.5 rounded text-xs" {...props} />,
+                                    pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-2 rounded text-xs my-1" {...props} />,
+                                    table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-1 text-xs" {...props} />,
+                                    thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
+                                    tbody: ({node, ...props}) => <tbody {...props} />,
+                                    tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
+                                    th: ({node, ...props}) => <th className="px-1 py-0.5 border border-gray-300 text-left text-xs font-semibold" {...props} />,
+                                    td: ({node, ...props}) => <td className="px-1 py-0.5 border border-gray-300 text-xs" {...props} />,
+                                    a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline text-xs" {...props} />,
+                                    hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
+                                  }}
+                                >
+                                  {processContentWithCitations(message.thinking, message.citations)}
+                                </ReactMarkdown>
+                              </div>
+                            )}
                             <div className="p-3 rounded-lg overflow-x-auto">
                               <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
@@ -955,7 +983,7 @@ export default function AIChatPage() {
                                   li: ({node, ...props}) => <li className="text-sm text-gray-700 break-words" {...props} />,
                                   blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 pl-4 py-2 my-2 bg-gray-50 italic text-gray-600" {...props} />,
                                   code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props} />,
-                                  pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-900 text-gray-100 p-4 rounded-lg my-2 text-xs" {...props} />,
+                                  pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props} />,
                                   table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-4 text-xs" {...props} />,
                                   thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
                                   tbody: ({node, ...props}) => <tbody {...props} />,
@@ -992,7 +1020,7 @@ export default function AIChatPage() {
                                   li: ({node, ...props}) => <li className="text-sm text-gray-700 break-words" {...props} />,
                                   blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 pl-4 py-2 my-2 bg-gray-50 italic text-gray-600" {...props} />,
                                   code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props} />,
-                                  pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-900 text-gray-100 p-4 rounded-lg my-2 text-xs" {...props} />,
+                                  pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-200 text-gray-900 p-4 rounded-lg my-2 text-xs" {...props} />,
                                   table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-4 text-xs" {...props} />,
                                   thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
                                   tbody: ({node, ...props}) => <tbody {...props} />,

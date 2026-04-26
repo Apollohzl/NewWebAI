@@ -493,119 +493,121 @@ export default function AIChatPage() {
           }
         };
 
+        let buffer = '';
+
         while (true) {
           const { done, value } = await reader.read();
 
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-          
-          // 使用正则表达式匹配所有 data: {...} 模式，支持跨行JSON
-          const dataPattern = /data:\s*(\{[\s\S]*?\})(?:$|\n)/g;
-          let match;
-          
-          while ((match = dataPattern.exec(chunk)) !== null) {
-            const dataStr = match[1];
+          buffer += chunk;
 
-            if (!dataStr || dataStr === '[DONE]') continue;
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+
+            const jsonStr = line.slice(6).trim();
+            if (!jsonStr || jsonStr === '[DONE]') continue;
 
             try {
-                const data = JSON.parse(dataStr);
+              const data = JSON.parse(jsonStr);
 
-                // 提取citations
-                if (data.citations && Array.isArray(data.citations)) {
-                  savedCitations = [...new Set([...savedCitations, ...data.citations])];
+              if (data.citations && Array.isArray(data.citations)) {
+                savedCitations = [...new Set([...savedCitations, ...data.citations])];
+              }
+
+              if (data.choices && data.choices.length > 0) {
+                const delta = data.choices[0].delta;
+
+                if (delta && delta.reasoning_content) {
+                  usesReasoningField = true;
+                  savedUsesReasoningField = true;
+                  thinkingContent += delta.reasoning_content;
+                  savedReasoningContent += delta.reasoning_content;
+
+                  addAssistantMessage();
+                  updateMessage('', thinkingContent, [], savedCitations);
                 }
 
-                if (data.choices && data.choices.length > 0) {
-                  const delta = data.choices[0].delta;
+                if (delta && delta.content) {
+                  savedContent += delta.content;
 
-                  if (delta && delta.reasoning_content) {
-                    usesReasoningField = true;
-                    savedUsesReasoningField = true;
-                    thinkingContent += delta.reasoning_content;
-                    savedReasoningContent += delta.reasoning_content;
+                  if (usesReasoningField) {
+                    if (!hasStartedMainContent) {
+                      hasStartedMainContent = true;
+                      shid = Date.now().toString();
+                      sh = '';
+                    }
+                    sh += delta.content;
+                  } else {
+                    fullContent += delta.content;
 
-                    addAssistantMessage();
-                    updateMessage('', thinkingContent, [], savedCitations);
-                  }
+                    const startIndex = fullContent.indexOf(THINKING_START_MARKER);
+                    const endIndex = fullContent.indexOf(THINKING_END_MARKER);
 
-                  if (delta && delta.content) {
-                    savedContent += delta.content;
+                    if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+                      thinkingContent = fullContent.substring(
+                        startIndex + THINKING_START_MARKER.length,
+                        endIndex
+                      ).trim();
+                      sh = fullContent.substring(endIndex + THINKING_END_MARKER.length).trim();
 
-                    if (usesReasoningField) {
-                      if (!hasStartedMainContent) {
+                      if (!hasStartedMainContent && sh) {
                         hasStartedMainContent = true;
                         shid = Date.now().toString();
-                        sh = '';
                       }
-                      sh += delta.content;
-                    } else {
-                      fullContent += delta.content;
-
-                      const startIndex = fullContent.indexOf(THINKING_START_MARKER);
-                      const endIndex = fullContent.indexOf(THINKING_END_MARKER);
-
-                      if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-                        thinkingContent = fullContent.substring(
-                          startIndex + THINKING_START_MARKER.length,
-                          endIndex
-                        ).trim();
-                        sh = fullContent.substring(endIndex + THINKING_END_MARKER.length).trim();
-
-                        if (!hasStartedMainContent && sh) {
-                          hasStartedMainContent = true;
-                          shid = Date.now().toString();
-                        }
-                      } else if (startIndex !== -1) {
-                        thinkingContent = fullContent.substring(startIndex + THINKING_START_MARKER.length).trim();
-                        sh = '';
-                      } else {
-                        thinkingContent = '';
-                        sh = fullContent.trim();
-
-                        if (!hasStartedMainContent && sh) {
-                          hasStartedMainContent = true;
-                          shid = Date.now().toString();
-                        }
-                      }
-                    }
-
-                    if (sh.includes('<N>')) {
-                      const parts = sh.split('<N>');
-                      segments = [];
-
-                      for (const part of parts) {
-                        const trimmedPart = part.trim();
-                        if (trimmedPart) {
-                          segments.push({
-                            id: Date.now().toString() + Math.random(),
-                            content: trimmedPart
-                          });
-                        }
-                      }
-
-                      addAssistantMessage();
-                      updateMessage('', thinkingContent, segments, savedCitations);
-
+                    } else if (startIndex !== -1) {
+                      thinkingContent = fullContent.substring(startIndex + THINKING_START_MARKER.length).trim();
                       sh = '';
-                      shid = Date.now().toString();
                     } else {
-                      if (hasStartedMainContent && sh) {
-                        addAssistantMessage();
-                        updateMessage(sh, thinkingContent, [], savedCitations);
+                      thinkingContent = '';
+                      sh = fullContent.trim();
+
+                      if (!hasStartedMainContent && sh) {
+                        hasStartedMainContent = true;
+                        shid = Date.now().toString();
                       }
                     }
                   }
 
-                  if (data.choices[0].finish_reason) {
-                    break;
+                  if (sh.includes('<N>')) {
+                    const parts = sh.split('<N>');
+                    segments = [];
+
+                    for (const part of parts) {
+                      const trimmedPart = part.trim();
+                      if (trimmedPart) {
+                        segments.push({
+                          id: Date.now().toString() + Math.random(),
+                          content: trimmedPart
+                        });
+                      }
+                    }
+
+                    addAssistantMessage();
+                    updateMessage('', thinkingContent, segments, savedCitations);
+
+                    sh = '';
+                    shid = Date.now().toString();
+                  } else {
+                    if (hasStartedMainContent && sh) {
+                      addAssistantMessage();
+                      updateMessage(sh, thinkingContent, [], savedCitations);
+                    }
                   }
                 }
-              } catch (e) {
-                console.error('解析流式数据失败:', e, '原始数据:', dataStr);
+
+                if (data.choices[0].finish_reason) {
+                  break;
+                }
               }
+            } catch (e) {
+              console.error('解析流式数据失败:', e, '原始数据:', jsonStr);
             }
+          }
         }
 
         if (hasStartedMainContent && sh && !sh.includes('<N>') && segments.length === 0) {

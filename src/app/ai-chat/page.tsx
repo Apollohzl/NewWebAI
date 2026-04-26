@@ -54,7 +54,6 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showFullImage, setShowFullImage] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const processDrawCommand = async () => {
@@ -109,59 +108,39 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
     processDrawCommand();
   }, [content]);
 
-  useEffect(() => {
-    if (!contentRef.current || !citations || citations.length === 0) return;
-
-    const processNode = (node: Node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent || '';
-        const citationPattern = /\[\d+\]/g;
-        
-        if (!citationPattern.test(text)) return;
-        
-        citationPattern.lastIndex = 0;
-        const parts = text.split(/(\[\d+\])/).filter(Boolean);
-        const fragment = document.createDocumentFragment();
-        
-        parts.forEach(part => {
+  const CitationText = ({ children }: { children: React.ReactNode }) => {
+    const text = String(children);
+    if (!citations || !text) return <span>{text}</span>;
+    
+    const parts = text.split(/(\[\d+\])/).filter(Boolean);
+    
+    return (
+      <span>
+        {parts.map((part, index) => {
           const match = part.match(/\[(\d+)\]/);
           if (match) {
             const citationIndex = parseInt(match[1]) - 1;
             if (citationIndex >= 0 && citationIndex < citations.length) {
-              const link = document.createElement('a');
-              link.href = citations[citationIndex].trim().replace(/^[`'"\s]|[`'"\s]$/g, '');
-              link.target = '_blank';
-              link.rel = 'noopener noreferrer';
-              link.className = 'text-blue-600 hover:underline font-medium';
-              link.title = citations[citationIndex].trim().replace(/^[`'"\s]|[`'"\s]$/g, '');
-              link.textContent = part;
-              fragment.appendChild(link);
-            } else {
-              fragment.appendChild(document.createTextNode(part));
+              let url = citations[citationIndex].trim().replace(/^[`'"\s]|[`'"\s]$/g, '');
+              return (
+                <a
+                  key={index}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline font-medium"
+                  title={url}
+                >
+                  {part}
+                </a>
+              );
             }
-          } else {
-            fragment.appendChild(document.createTextNode(part));
           }
-        });
-        
-        node.parentNode?.replaceChild(fragment, node);
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        const element = node as HTMLElement;
-        if (element.tagName === 'A' || element.tagName === 'SCRIPT' || element.tagName === 'STYLE') {
-          return;
-        }
-        Array.from(element.childNodes).forEach(child => processNode(child));
-      }
-    };
-
-    const timeoutId = setTimeout(() => {
-      if (contentRef.current) {
-        Array.from(contentRef.current.childNodes).forEach(child => processNode(child));
-      }
-    }, 100);
-
-    return () => clearTimeout(timeoutId);
-  }, [citations]);
+          return <span key={index}>{part}</span>;
+        })}
+      </span>
+    );
+  };
 
   const generateImage = async (params: any) => {
     setIsLoading(true);
@@ -211,7 +190,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
 
   if (!hasDrawCommand) {
     return (
-      <div className="markdown-content" ref={contentRef}>
+      <div className="markdown-content">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
@@ -238,6 +217,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
             td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
             a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
             hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
+            text: ({ children }) => <CitationText children={children} />,
           }}
         >
           {content}

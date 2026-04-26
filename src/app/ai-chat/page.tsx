@@ -16,9 +16,11 @@ async function generateHash(str: string): Promise<string> {
 }
 
 const CitationText = ({ text, citations }: { text: string, citations?: string[] }) => {
+  console.log('CitationText被调用:', { text, citations });
   if (!citations) return <span>{text}</span>;
   
   const parts = text.split(/(\[\d+\])/).filter(Boolean);
+  console.log('分割结果:', parts);
   
   return (
     <span>
@@ -26,8 +28,10 @@ const CitationText = ({ text, citations }: { text: string, citations?: string[] 
         const match = part.match(/\[(\d+)\]/);
         if (match) {
           const citationIndex = parseInt(match[1]) - 1;
+          console.log('找到引用:', part, '索引:', citationIndex);
           if (citationIndex >= 0 && citationIndex < citations.length) {
             let url = citations[citationIndex].trim().replace(/^[`'"\s]|[`'"\s]$/g, '');
+            console.log('引用URL:', url);
             return (
               <a
                 key={index}
@@ -40,6 +44,8 @@ const CitationText = ({ text, citations }: { text: string, citations?: string[] 
                 {part}
               </a>
             );
+          } else {
+            console.log('引用索引无效:', citationIndex);
           }
         }
         return part;
@@ -108,11 +114,13 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
     processDrawCommand();
   }, [content]);
 
-  const CitationText = ({ children }: { children: React.ReactNode }) => {
+  const ProcessedText = ({ children }: { children: React.ReactNode }) => {
     const text = String(children);
+    console.log('ProcessedText被调用:', { text, citations });
     if (!citations || !text) return <span>{text}</span>;
     
     const parts = text.split(/(\[\d+\])/).filter(Boolean);
+    console.log('分割结果:', parts);
     
     return (
       <span>
@@ -120,8 +128,10 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
           const match = part.match(/\[(\d+)\]/);
           if (match) {
             const citationIndex = parseInt(match[1]) - 1;
+            console.log('找到引用:', part, '索引:', citationIndex);
             if (citationIndex >= 0 && citationIndex < citations.length) {
               let url = citations[citationIndex].trim().replace(/^[`'"\s]|[`'"\s]$/g, '');
+              console.log('引用URL:', url);
               return (
                 <a
                   key={index}
@@ -134,6 +144,8 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
                   {part}
                 </a>
               );
+            } else {
+              console.log('引用索引无效:', citationIndex);
             }
           }
           return <span key={index}>{part}</span>;
@@ -217,7 +229,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
             td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
             a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
             hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
-            text: ({ children }) => <CitationText children={children} />,
+            text: ({ children }) => <ProcessedText children={children} />,
           }}
         >
           {content}

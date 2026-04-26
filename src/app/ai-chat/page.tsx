@@ -15,6 +15,39 @@ async function generateHash(str: string): Promise<string> {
   return hashHex;
 }
 
+const CitationText = ({ text, citations }: { text: string, citations?: string[] }) => {
+  if (!citations) return <span>{text}</span>;
+  
+  const parts = text.split(/(\[\d+\])/).filter(Boolean);
+  
+  return (
+    <span>
+      {parts.map((part, index) => {
+        const match = part.match(/\[(\d+)\]/);
+        if (match) {
+          const citationIndex = parseInt(match[1]) - 1;
+          if (citationIndex >= 0 && citationIndex < citations.length) {
+            let url = citations[citationIndex].trim().replace(/^[`'"\s]|[`'"\s]$/g, '');
+            return (
+              <a
+                key={index}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline font-medium"
+                title={url}
+              >
+                {part}
+              </a>
+            );
+          }
+        }
+        return part;
+      })}
+    </span>
+  );
+};
+
 const DrawCommandParser = ({ content, citations }: { content: string, citations?: string[] }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [imageData, setImageData] = useState<string | null>(null);
@@ -121,22 +154,6 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
 
   const hasDrawCommand = content.includes('<draw>');
 
-  const processCitations = (text: string) => {
-    if (!citations) return text;
-    return text.replace(/\[(\d+)\]/g, (match, num) => {
-      const index = parseInt(num) - 1;
-      if (index >= 0 && index < citations.length) {
-        let url = citations[index].trim();
-        url = url.replace(/^[`'"]|[`'"]$/g, '');
-        const safeUrl = url.replace(/"/g, '%22');
-        return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${safeUrl}">${match}</a>`;
-      }
-      return match;
-    });
-  };
-
-  const processedContent = processCitations(content);
-
   if (!hasDrawCommand) {
     return (
       <div className="markdown-content">
@@ -164,17 +181,15 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
             tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
             th: ({node, ...props}) => <th className="px-2 py-1 border border-gray-300 text-left font-semibold" {...props} />,
             td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
-            a: ({node, ...props}) => {
-              const newProps = props as { href?: string; className?: string };
-              if (newProps.className === 'citation-link') {
-                return <a {...props} className="text-blue-600 hover:underline font-medium" />;
-              }
-              return <a {...props} className="text-blue-600 hover:text-blue-800 underline" />;
-            },
+            a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
             hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
+            text: ({ children }) => {
+              const text = String(children);
+              return <CitationText text={text} citations={citations} />;
+            },
           }}
         >
-          {processedContent}
+          {content}
         </ReactMarkdown>
       </div>
     );
@@ -828,30 +843,15 @@ export default function AIChatPage() {
                                     tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
                                     th: ({node, ...props}) => <th className="px-1 py-0.5 border border-gray-300 text-left text-xs font-semibold" {...props} />,
                                     td: ({node, ...props}) => <td className="px-1 py-0.5 border border-gray-300 text-xs" {...props} />,
-                                    a: ({node, ...props}) => {
-                                      const newProps = props as { href?: string; className?: string };
-                                      if (newProps.className === 'citation-link') {
-                                        return <a {...props} className="text-blue-600 hover:underline font-medium text-xs" />;
-                                      }
-                                      return <a {...props} className="text-blue-600 hover:text-blue-800 underline text-xs" />;
-                                    },
+                                    a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline text-xs" {...props} />,
                                     hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
+                                    text: ({ children }) => {
+                                      const text = String(children);
+                                      return <CitationText text={text} citations={message.citations} />;
+                                    },
                                   }}
                                 >
-                                  {message.citations && message.citations.length > 0
-                                    ? (() => {
-                                        const cites = message.citations;
-                                        return message.thinking.replace(/\[(\d+)\]/g, (match, num) => {
-                                          const index = parseInt(num) - 1;
-                                          if (index >= 0 && index < cites.length) {
-                                            let url = cites[index].trim().replace(/^[`'"]|[`'"]$/g, '');
-                                            const safeUrl = url.replace(/"/g, '%22');
-                                            return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${safeUrl}">${match}</a>`;
-                                          }
-                                          return match;
-                                        });
-                                      })()
-                                    : message.thinking}
+                                  {message.thinking}
                                 </ReactMarkdown>
                               </div>
                             </div>
@@ -956,30 +956,15 @@ export default function AIChatPage() {
                                   tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
                                   th: ({node, ...props}) => <th className="px-1 py-0.5 border border-gray-300 text-left text-xs font-semibold" {...props} />,
                                   td: ({node, ...props}) => <td className="px-1 py-0.5 border border-gray-300 text-xs" {...props} />,
-                                  a: ({node, ...props}) => {
-                                    const newProps = props as { href?: string; className?: string };
-                                    if (newProps.className === 'citation-link') {
-                                      return <a {...props} className="text-blue-600 hover:underline font-medium text-xs" />;
-                                    }
-                                    return <a {...props} className="text-blue-600 hover:text-blue-800 underline text-xs" />;
-                                  },
+                                  a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline text-xs" {...props} />,
                                   hr: ({node, ...props}) => <hr className="border-gray-300 my-2" {...props} />,
+                                  text: ({ children }) => {
+                                    const text = String(children);
+                                    return <CitationText text={text} citations={message.citations} />;
+                                  },
                                 }}
                               >
-                                {message.citations && message.citations.length > 0
-                                  ? (() => {
-                                      const cites = message.citations;
-                                      return message.thinking.replace(/\[(\d+)\]/g, (match, num) => {
-                                        const index = parseInt(num) - 1;
-                                        if (index >= 0 && index < cites.length) {
-                                          let url = cites[index].trim().replace(/^[`'"]|[`'"]$/g, '');
-                                          const safeUrl = url.replace(/"/g, '%22');
-                                          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${safeUrl}">${match}</a>`;
-                                        }
-                                        return match;
-                                      });
-                                    })()
-                                  : message.thinking}
+                                {message.thinking}
                               </ReactMarkdown>
                             </div>
                             <div className="p-3 rounded-lg overflow-x-auto">
@@ -1007,121 +992,133 @@ export default function AIChatPage() {
                                   tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
                                   th: ({node, ...props}) => <th className="px-2 py-1 border border-gray-300 text-left font-semibold" {...props} />,
                                   td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
-                                  a: ({node, ...props}) => {
-                                    const newProps = props as { href?: string; className?: string };
-                                    if (newProps.className === 'citation-link') {
-                                      return <a {...props} className="text-blue-600 hover:underline font-medium" />;
-                                    }
-                                    return <a {...props} className="text-blue-600 hover:text-blue-800 underline" />;
-                                  },
+                                  a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
                                   hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
+                                  text: ({ children }) => {
+                                    const text = String(children);
+                                    return <CitationText text={text} citations={message.citations} />;
+                                  },
                                 }}
                               >
-                                {message.citations && message.citations.length > 0
-                                  ? (() => {
-                                      const cites = message.citations;
-                                      return message.content.replace(/\[(\d+)\]/g, (match, num) => {
-                                        const index = parseInt(num) - 1;
-                                        if (index >= 0 && index < cites.length) {
-                                          let url = cites[index].trim().replace(/^[`'"]|[`'"]$/g, '');
-                                          const safeUrl = url.replace(/"/g, '%22');
-                                          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="citation-link" title="${safeUrl}">${match}</a>`;
-                                        }
-                                        return match;
-                                      });
-                                    })()
-                                  : message.content}
+                                {message.content}
                               </ReactMarkdown>
-
-                              <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
-                                <p className="text-xs opacity-70">
-                                  {message.timestamp.toLocaleTimeString()}
-                                  {message.model && ' - ' + message.model}
-                                </p>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="p-3 rounded-lg overflow-x-auto">
+                            {message.role === 'user' ? (
+                              <p className="text-sm break-words">{message.content}</p>
+                            ) : (
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  h1: ({node, ...props}) => <h1 className="text-2xl font-bold text-gray-900 mb-4 mt-6 first:mt-0" {...props} />,
+                                  h2: ({node, ...props}) => <h2 className="text-xl font-bold text-gray-900 mb-3 mt-5 first:mt-0" {...props} />,
+                                  h3: ({node, ...props}) => <h3 className="text-lg font-bold text-gray-900 mb-2 mt-4 first:mt-0" {...props} />,
+                                  h4: ({node, ...props}) => <h4 className="text-base font-bold text-gray-900 mb-2 mt-3 first:mt-0" {...props} />,
+                                  h5: ({node, ...props}) => <h5 className="text-sm font-bold text-gray-900 mb-1 mt-2 first:mt-0" {...props} />,
+                                  h6: ({node, ...props}) => <h6 className="text-xs font-bold text-gray-900 mb-1 mt-1 first:mt-0" {...props} />,
+                                  p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2 break-words leading-relaxed" {...props} />,
+                                  strong: ({node, ...props}) => <strong className="font-bold text-gray-900" {...props} />,
+                                  em: ({node, ...props}) => <em className="italic" {...props} />,
+                                  ul: ({node, ...props}) => <ul className="list-disc list-inside mb-2 space-y-1" {...props} />,
+                                  ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-2 space-y-1" {...props} />,
+                                  li: ({node, ...props}) => <li className="text-sm text-gray-700 break-words" {...props} />,
+                                  blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 pl-4 py-2 my-2 bg-gray-50 italic text-gray-600" {...props} />,
+                                  code: ({node, ...props}) => <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono break-all" {...props} />,
+                                  pre: ({node, ...props}) => <pre className="overflow-x-auto bg-gray-900 text-gray-100 p-4 rounded-lg my-2 text-xs" {...props} />,
+                                  table: ({node, ...props}) => <table className="min-w-full border border-gray-300 my-4 text-xs" {...props} />,
+                                  thead: ({node, ...props}) => <thead className="bg-gray-100" {...props} />,
+                                  tbody: ({node, ...props}) => <tbody {...props} />,
+                                  tr: ({node, ...props}) => <tr className="border-b border-gray-200" {...props} />,
+                                  th: ({node, ...props}) => <th className="px-2 py-1 border border-gray-300 text-left font-semibold" {...props} />,
+                                  td: ({node, ...props}) => <td className="px-2 py-1 border border-gray-300 break-words" {...props} />,
+                                  a: ({node, ...props}) => <a className="text-blue-600 hover:text-blue-800 underline" {...props} />,
+                                  hr: ({node, ...props}) => <hr className="border-gray-300 my-4" {...props} />,
+                                  text: ({ children }) => {
+                                    const text = String(children);
+                                    return <CitationText text={text} citations={message.citations} />;
+                                  },
+                                }}
+                              >
+                                {message.content}
+                              </ReactMarkdown>
+                            )}
+                            <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200 opacity-70">
+                              <p className="text-xs">
+                                {message.timestamp.toLocaleTimeString()}
+                                {message.model && ' - ' + message.model}
+                              </p>
+                              {message.role !== 'user' && (
                                 <button
-                                  onClick={() => copyToClipboard(message.content)}
-                                  className="text-xs opacity-50 hover:opacity-100"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(message.content);
+                                  }}
+                                  className="text-xs"
                                   title="复制内容"
                                 >
                                   复制
                                 </button>
-                              </div>
+                              )}
                             </div>
-                          </>
-                        ) : (
-                          <div className="p-3 overflow-x-auto">
-                            <p className="text-sm break-words">{message.content}</p>
                           </div>
                         )}
                       </div>
                     </div>
                   );
                 })}
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 text-black p-3 rounded-lg">
-                      <p className="text-sm">AI正在思考...</p>
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <div className="bg-white border-t border-gray-200 p-4 fixed bottom-0 left-0 right-0 w-full">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-end space-x-2 mb-2">
-            <div className="flex-1">
-              <label className="text-xs text-gray-600">创造性 (0-2):</label>
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-md z-10">
+        <div className="max-w-4xl mx-auto p-4">
+          <div className="flex flex-col space-y-2">
+            <div className="flex space-x-2">
               <input
                 type="number"
                 min="0"
                 max="2"
                 step="0.1"
                 value={temperature}
-                onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                onChange={(e) => setTemperature(parseFloat(e.target.value) || 0)}
+                className="w-20 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="温度"
               />
-            </div>
-            <div className="flex-1">
-              <label className="text-xs text-gray-600">最大长度:</label>
               <input
                 type="number"
                 min="100"
                 max="4000"
                 step="100"
                 value={maxTokens}
-                onChange={(e) => setMaxTokens(parseInt(e.target.value))}
-                className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                onChange={(e) => setMaxTokens(parseInt(e.target.value) || 1000)}
+                className="w-28 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="最大长度"
               />
             </div>
-          </div>
-          <div className="flex space-x-2">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  sendMessage();
-                }
-              }}
-              placeholder="输入消息...（Shift+Enter换行）"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-              disabled={isLoading}
-              rows={2}
-              style={{ minHeight: '40px', maxHeight: '200px' }}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={isLoading || !input.trim()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed self-end"
-            >
-              发送
-            </button>
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="输入消息..."
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                onClick={sendMessage}
+                disabled={isLoading || !input.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors flex items-center"
+              >
+                {isLoading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  '发送'
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

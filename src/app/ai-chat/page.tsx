@@ -311,6 +311,17 @@ export default function AIChatPage() {
     }));
   };
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        // 可以添加一个复制成功的提示
+        console.log('复制成功');
+      })
+      .catch(err => {
+        console.error('复制失败:', err);
+      });
+  };
+
   const fetchBalance = async () => {
     try {
       const response = await fetch('https://hzliflow.ken520.top/api/account/balance');
@@ -692,15 +703,6 @@ export default function AIChatPage() {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(
-      () => {
-      },
-      () => {
-      }
-    );
-  };
-
   const handleModelChange = (model: string) => {
     setCurrentModel(model);
   };
@@ -1005,7 +1007,16 @@ export default function AIChatPage() {
                         ) : (
                           <div className="p-3 rounded-lg overflow-x-auto">
                             {message.role === 'user' ? (
-                              <p className="text-sm break-words">{message.content}</p>
+                              <div className="relative">
+                                <p className="text-sm break-words">{message.content}</p>
+                                <button 
+                                  className="absolute bottom-0 right-0 text-gray-400 hover:text-gray-600 text-xs p-1"
+                                  onClick={() => copyToClipboard(message.content)}
+                                  title="复制文本"
+                                >
+                                  复制
+                                </button>
+                              </div>
                             ) : (
                               <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}

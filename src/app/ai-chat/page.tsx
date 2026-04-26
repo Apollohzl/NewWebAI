@@ -442,16 +442,17 @@ export default function AIChatPage() {
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
+          
+          // 使用正则表达式匹配所有 data: {...} 模式，支持跨行JSON
+          const dataPattern = /data:\s*(\{[\s\S]*?\})(?:$|\n)/g;
+          let match;
+          
+          while ((match = dataPattern.exec(chunk)) !== null) {
+            const dataStr = match[1];
 
-          for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (trimmedLine.startsWith('data: ')) {
-              const dataStr = trimmedLine.slice(6);
+            if (!dataStr || dataStr === '[DONE]') continue;
 
-              if (!dataStr || dataStr === '[DONE]') continue;
-
-              try {
+            try {
                 const data = JSON.parse(dataStr);
 
                 if (data.choices && data.choices.length > 0) {
@@ -543,7 +544,6 @@ export default function AIChatPage() {
                 console.error('解析流式数据失败:', e, '原始数据:', dataStr);
               }
             }
-          }
         }
 
         if (hasStartedMainContent && sh && !sh.includes('<N>') && segments.length === 0) {

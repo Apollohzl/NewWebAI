@@ -151,7 +151,7 @@ const DrawCommandParser = ({ content, citations }: { content: string, citations?
       }
       
       const drawMatch = content.match(/<draw>([\s\S]*?)<\/draw>/);
-      const videoMatch = content.match(/<video>([\s\S]*?)<\/video>/);
+      const videoMatch = content.match(/<v>([\s\S]*?)<\/v>/);
       
       if (drawMatch) {
         const drawCommand = drawMatch[1].trim();
@@ -571,21 +571,21 @@ export default function AIChatPage() {
 - width和height：图像尺寸，建议使用512或1024
 例如：<draw>prompt:"一只可爱的小猫在花园里玩耍",model:"zimage",style:"cartoon",width:512,height:512</draw>
 **AI视频生成功能**：当用户要求你生成视频时，你需要在两个<N>之间使用以下格式命令：
-<video>prompt:"画面提示词",width:1280,height:720,duration:"4"</video>
+<v>prompt:"画面提示词",width:1280,height:720,duration:"4"</v>
 其中：
 - prompt：视频画面描述，描述你想生成的视频内容
 - width：视频宽度（像素），建议1280
 - height：视频高度（像素），建议720
 - duration：视频时长，支持"4"秒或"10"秒，默认4秒
 - model：固定为"ltx-2"，seed固定为-1，audio固定为true，无需在命令中写明
-例如：<video>prompt:"一只猫在花园里玩耍，阳光洒在草地上",width:1280,height:720,duration:"4"</video>`,
+例如：<v>prompt:"一只猫在花园里玩耍，阳光洒在草地上",width:1280,height:720,duration:"4"</v>`,
       timestamp: new Date(),
       model: currentModel
     };
     const systemMessage: Message = {
       id: 'system-init',
       role: 'system',
-      content: `好的，我会根据你的配置进行回复<N>比如这样：<N>你好，我是一个智能AI助手！<N>如果你想让我生成图片我会这么做<N>我将会在2个分段之间直接执行绘图命令，不会输入任何文本<N><draw>prompt:"一个小男孩跑在海边的沙滩上，时间为傍晚时刻，远处的天际线处还能看见半个夕阳，小男孩背着光跑向画面右侧",model:"zimage",style:"realistic",width:1280,height:720</draw><N>上面就是我绘画的内容了!<N>如果你想让我生成视频我会这么做<N>我将会在分段之间直接执行视频生成命令<N><video>prompt:"一只猫在花园里玩耍，阳光洒在草地上，微风吹动树叶",width:1280,height:720,duration:"4"</video><N>上面就是我生成的视频内容了!你看看还要怎么要求没有？<N>有的话可以发送给我哦`,
+      content: `好的，我会根据你的配置进行回复<N>比如这样：<N>你好，我是一个智能AI助手！<N>如果你想让我生成图片我会这么做<N>我将会在2个分段之间直接执行绘图命令，不会输入任何文本<N><draw>prompt:"一个小男孩跑在海边的沙滩上，时间为傍晚时刻，远处的天际线处还能看见半个夕阳，小男孩背着光跑向画面右侧",model:"zimage",style:"realistic",width:1280,height:720</draw><N>上面就是我绘画的内容了!<N>如果你想让我生成视频我会这么做<N>我将会在分段之间直接执行视频生成命令<N><v>prompt:"一只猫在花园里玩耍，阳光洒在草地上，微风吹动树叶",width:1280,height:720,duration:"4"</v><N>上面就是我生成的视频内容了!你看看还要怎么要求没有？<N>有的话可以发送给我哦`,
       timestamp: new Date(),
       model: currentModel
     };
